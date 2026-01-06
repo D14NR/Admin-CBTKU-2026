@@ -1,38 +1,189 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <title>Portal Admin CBTKU 2026</title>
     <meta charset="UTF-8">
-    
-    <!-- Favicon untuk icon education -->
-    <link rel="icon" href="https://raw.githubusercontent.com/D14NR/ICON/refs/heads/main/removebg-preview.png" type="image/x-icon">
-    
-    <!-- Viewport untuk mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal Admin CBTKU 2026</title>
+    
+    <!-- Favicon profesional untuk sistem CBT -->
+    <link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/96/000000/test-partial-filled.png">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/96/000000/test-partial-filled.png">
     
     <!-- Untuk iOS Safari -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Admin CBTKU 2026">
     
     <!-- Untuk Android -->
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2c3e50">
+    
+    <!-- Font untuk loading -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* Hapus highlight biru di mobile */
+            -webkit-tap-highlight-color: transparent;
         }
         
         body, html {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            position: fixed; /* Penting untuk mobile */
-            touch-action: manipulation; /* Mencegah zoom dengan double-tap */
+            position: fixed;
+            touch-action: manipulation;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
         }
         
+        /* Loading screen profesional */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-container {
+            text-align: center;
+            max-width: 500px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo-container {
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .logo svg {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .loading-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+        
+        .loading-subtitle {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+        
+        /* Progress bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: #ecf0f1;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db 0%, #2ecc71 100%);
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        /* Status loading */
+        .loading-status {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 20px;
+            min-height: 20px;
+            font-weight: 500;
+        }
+        
+        .loading-status span {
+            color: #3498db;
+            font-weight: 600;
+        }
+        
+        /* Spinner modern */
+        .spinner {
+            width: 60px;
+            height: 60px;
+            position: relative;
+            margin: 20px auto;
+        }
+        
+        .spinner-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #3498db;
+            border-radius: 50%;
+            animation: spin 1.2s linear infinite;
+        }
+        
+        .spinner-dot:nth-child(1) { top: 0; left: 50%; transform: translateX(-50%); }
+        .spinner-dot:nth-child(2) { top: 10px; right: 10px; animation-delay: 0.1s; }
+        .spinner-dot:nth-child(3) { top: 50%; right: 0; transform: translateY(-50%); animation-delay: 0.2s; }
+        .spinner-dot:nth-child(4) { bottom: 10px; right: 10px; animation-delay: 0.3s; }
+        .spinner-dot:nth-child(5) { bottom: 0; left: 50%; transform: translateX(-50%); animation-delay: 0.4s; }
+        .spinner-dot:nth-child(6) { bottom: 10px; left: 10px; animation-delay: 0.5s; }
+        .spinner-dot:nth-child(7) { top: 50%; left: 0; transform: translateY(-50%); animation-delay: 0.6s; }
+        .spinner-dot:nth-child(8) { top: 10px; left: 10px; animation-delay: 0.7s; }
+        
+        @keyframes spin {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* Konten iframe */
         iframe {
             position: fixed;
             top: 0;
@@ -40,50 +191,94 @@
             width: 100%;
             height: 100%;
             border: none;
-            /* Untuk beberapa browser mobile */
+            opacity: 0;
+            transition: opacity 0.5s ease;
             -webkit-overflow-scrolling: touch;
         }
         
-        /* Indikator loading untuk mobile */
-        .loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 18px;
-            color: #333;
-            z-index: 999;
-            background: rgba(255,255,255,0.9);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .iframe-loaded {
+            opacity: 1;
         }
         
-        /* Animasi loading */
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
-            border-top: 4px solid #007bff;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+        /* Footer loading */
+        .loading-footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #95a5a6;
+            border-top: 1px solid #ecf0f1;
+            padding-top: 15px;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* Responsif untuk mobile */
+        @media (max-width: 768px) {
+            .loading-container {
+                padding: 30px 20px;
+                margin: 0 20px;
+                border-radius: 15px;
+            }
+            
+            .logo {
+                width: 80px;
+                height: 80px;
+                font-size: 32px;
+            }
+            
+            .logo svg {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .loading-title {
+                font-size: 22px;
+            }
+            
+            .loading-subtitle {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Indikator loading -->
-    <div class="loading" id="loading">
-        <div class="spinner"></div>
-        Memuat konten CBT...
+    <!-- Loading screen profesional -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-container">
+            <div class="logo-container">
+                <div class="logo">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <h1 class="loading-title">Portal Admin CBTKU 2026</h1>
+            <p class="loading-subtitle">Sistem Manajemen Ujian Berbasis Komputer</p>
+            
+            <div class="spinner">
+                <div class="spinner-dot"></div>
+                <div class="spinner-dot"></div>
+                <div class="spinner-dot"></div>
+                <div class="spinner-dot"></div>
+                <div class="spinner-dot"></div>
+                <div class="spinner-dot"></div>
+                <div class="spinner-dot"></div>
+                <div class="spinner-dot"></div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="loading-status" id="loadingStatus">
+                <span>Menginisialisasi sistem...</span>
+            </div>
+            
+            <div class="loading-footer">
+                &copy; 2026 CBTKU Admin Portal • Loading...
+            </div>
+        </div>
     </div>
     
+    <!-- Konten iframe -->
     <iframe 
         id="contentFrame"
         src="https://script.google.com/a/~/macros/s/AKfycbwvHvpTeE8r7lImigHrlSxQMk6Wgk-KF66eHgWx4Zh6BaBpqhuPp3iF8siHgcj59QYEDA/exec"
@@ -93,27 +288,119 @@
     </iframe>
     
     <script>
+        // Status loading yang realistis
+        const loadingSteps = [
+            "Menginisialisasi sistem...",
+            "Memuat modul administrasi...",
+            "Menyiapkan database...",
+            "Memverifikasi koneksi...",
+            "Menyiapkan antarmuka pengguna...",
+            "Hampir selesai..."
+        ];
+        
+        // Elemen DOM
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const progressBar = document.getElementById('progressBar');
+        const loadingStatus = document.getElementById('loadingStatus');
+        const contentFrame = document.getElementById('contentFrame');
+        
+        // Simulasi loading dengan progress
+        let currentStep = 0;
+        const totalSteps = loadingSteps.length;
+        
+        function updateLoadingProgress() {
+            if (currentStep < totalSteps) {
+                // Update status teks
+                loadingStatus.innerHTML = `<span>${loadingSteps[currentStep]}</span>`;
+                
+                // Update progress bar
+                const progress = ((currentStep + 1) / totalSteps) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                currentStep++;
+                
+                // Jadwalkan langkah berikutnya
+                const delay = currentStep === totalSteps ? 800 : 500 + Math.random() * 300;
+                setTimeout(updateLoadingProgress, delay);
+            }
+        }
+        
+        // Mulai progress loading
+        setTimeout(updateLoadingProgress, 300);
+        
         // Sembunyikan loading setelah iframe dimuat
-        document.getElementById('contentFrame').onload = function() {
-            document.getElementById('loading').style.display = 'none';
+        contentFrame.onload = function() {
+            // Tunggu sebentar untuk efek transisi
+            setTimeout(() => {
+                // Selesaikan progress bar
+                progressBar.style.width = '100%';
+                loadingStatus.innerHTML = '<span>Sistem siap! Mengalihkan...</span>';
+                
+                // Tunggu 0.5 detik sebelum menyembunyikan loading
+                setTimeout(() => {
+                    loadingOverlay.style.opacity = '0';
+                    
+                    // Setelah animasi fade out, sembunyikan elemen
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                        contentFrame.classList.add('iframe-loaded');
+                    }, 500);
+                }, 500);
+            }, 300);
         };
         
-        // Fallback: sembunyikan loading setelah 5 detik
+        // Fallback: sembunyikan loading setelah 8 detik
         setTimeout(function() {
-            document.getElementById('loading').style.display = 'none';
-        }, 5000);
+            if (loadingOverlay.style.display !== 'none') {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                    contentFrame.classList.add('iframe-loaded');
+                }, 500);
+            }
+        }, 8000);
         
-        // Fungsi untuk layar penuh masih tersedia jika diperlukan
+        // Mencegah perilaku default di mobile
+        document.addEventListener('touchmove', function(e) {
+            if (e.scale !== 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // Deteksi perangkat mobile
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Penyesuaian untuk mobile
+        if (isMobile()) {
+            document.body.classList.add('mobile-device');
+            
+            // Pesan untuk orientasi landscape (opsional)
+            window.addEventListener("orientationchange", function() {
+                if (window.orientation === 90 || window.orientation === -90) {
+                    console.log("Mode landscape - cocok untuk tampilan CBT");
+                }
+            });
+        }
+        
+        // Tambahkan keyboard shortcut F11 untuk layar penuh (opsional)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F11') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+        });
+        
+        // Fungsi untuk layar penuh
         function toggleFullscreen() {
             const iframe = document.getElementById('contentFrame');
             
-            // Periksa apakah sudah di layar penuh
             if (document.fullscreenElement || 
-                document.webkitFullscreenElement ||  // Safari
-                document.mozFullScreenElement ||     // Firefox
-                document.msFullscreenElement) {      // IE/Edge
+                document.webkitFullscreenElement || 
+                document.mozFullScreenElement || 
+                document.msFullscreenElement) {
                 
-                // Keluar dari layar penuh
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
                 } else if (document.webkitExitFullscreen) {
@@ -124,7 +411,6 @@
                     document.msExitFullscreen();
                 }
             } else {
-                // Masuk ke layar penuh
                 const element = iframe;
                 
                 if (element.requestFullscreen) {
@@ -138,45 +424,6 @@
                 }
             }
         }
-        
-        // Mencegah perilaku default di mobile
-        document.addEventListener('touchmove', function(e) {
-            if (e.scale !== 1) {
-                e.preventDefault(); // Mencegah zoom
-            }
-        }, { passive: false });
-        
-        // Deteksi perangkat mobile
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-        
-        // Penyesuaian untuk mobile
-        if (isMobile()) {
-            // Tambahkan kelas mobile ke body
-            document.body.classList.add('mobile-device');
-            
-            // Pesan untuk orientasi landscape (opsional)
-            window.addEventListener("orientationchange", function() {
-                if (window.orientation === 90 || window.orientation === -90) {
-                    console.log("Mode landscape - cocok untuk tampilan CBT");
-                } else {
-                    console.log("Mode portrait");
-                }
-            });
-            
-            // Tambahkan event untuk masuk ke layar penuh secara otomatis di mobile
-            // Hapus komentar di bawah jika ingin layar penuh otomatis
-            // setTimeout(toggleFullscreen, 1000);
-        }
-        
-        // Tambahkan keyboard shortcut F11 untuk layar penuh (opsional)
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F11') {
-                e.preventDefault();
-                toggleFullscreen();
-            }
-        });
     </script>
 </body>
 </html>
