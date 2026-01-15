@@ -1077,6 +1077,114 @@
       .preview-container {
         margin-top: 8px;
       }
+
+      /* Checkbox Grid untuk Mapel */
+.mapel-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.mapel-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mapel-checkbox-item:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.mapel-checkbox-item input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.mapel-checkbox-label {
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  flex: 1;
+}
+
+.mapel-checkbox-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--surface-alt);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+/* Tabel Jawaban Permapel */
+.jawaban-permapel-table {
+  font-size: 12px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.jawaban-permapel-table th {
+  background: #f1f5f9;
+  font-weight: 600;
+  color: var(--text);
+  padding: 8px 6px;
+  border: 1px solid var(--border);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.jawaban-permapel-table td {
+  padding: 6px 5px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.jawaban-permapel-table tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.jawaban-permapel-table tr:hover {
+  background: #e0f2fe;
+}
+
+/* Header yang sticky */
+.jawaban-table-container {
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-top: 10px;
+}
+
+.jawaban-table-container table {
+  margin-bottom: 0;
+}
+
+/* Warna untuk jawaban */
+.jawaban-benar {
+  background-color: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+}
+
+.jawaban-salah {
+  background-color: #fee2e2;
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.jawaban-kosong {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  font-style: italic;
+}
     </style>
   </head>
   <body class="login-page">
@@ -1134,6 +1242,9 @@
         </button>
         <button id="tab-btn-jawaban" class="tab-button" onclick="showTab('jawaban')">
           Jawaban Siswa
+        </button>
+        <button id="tab-btn-cekjawabanmapel" class="tab-button" onclick="showTab('cekjawabanmapel')">
+          Cek Jawaban Permapel
         </button>
         <button id="tab-btn-cetakkartu" class="tab-button" onclick="showTab('cetakkartu')">
           Cetak Kartu
@@ -1347,6 +1458,46 @@
           </div>
         </div>
       </div>
+      <!-- TAB CEK JAWABAN PERMAPEL -->
+<div id="tab-cekjawabanmapel" class="tab-content" style="display:none;">
+  <div class="section-header">
+    <h2>Cek Jawaban Permapel</h2>
+    <p class="section-subtitle">Lihat jawaban siswa per mata pelajaran untuk agenda tertentu.</p>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
+    <div style="flex: 1; min-width: 250px;">
+      <label>
+        Pilih Agenda Ujian:
+        <select id="CekJawaban_Agenda_Select" onchange="onChangeAgendaCekJawaban()">
+          <option value="">-- Pilih Agenda Ujian --</option>
+        </select>
+      </label>
+    </div>
+    
+    <div style="flex: 2; min-width: 300px;">
+      <div style="margin-bottom: 6px; font-size: 13px; font-weight: 500;">Pilih Mata Pelajaran:</div>
+      <div id="mapelCheckboxContainer" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-alt);">
+        <!-- Checkbox akan diisi oleh JavaScript -->
+        <div style="font-size: 12px; color: var(--text-muted);">Pilih agenda ujian terlebih dahulu</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin: 8px 0 16px; display: flex; gap: 8px;">
+    <button type="button" onclick="loadJawabanPermapel()">Tampilkan Jawaban</button>
+    <button type="button" onclick="exportJawabanPermapelToExcel()">Export ke Excel</button>
+    <button type="button" onclick="clearJawabanPermapel()">Clear</button>
+  </div>
+
+  <div id="cekJawabanMapelTableContainer">
+    <!-- Tabel akan ditampilkan di sini -->
+    <div style="text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px;">
+      <div>📋</div>
+      <div>Pilih agenda ujian dan mata pelajaran, lalu klik "Tampilkan Jawaban"</div>
+    </div>
+  </div>
+</div>
 
       <!-- TAB JAWABAN SISWA -->
       <div id="tab-jawaban" class="tab-content" style="display:none;">
@@ -1925,6 +2076,8 @@
       let currentAgendaForBank = '';
       let importBankSoalMapelMap = {};
       let currentMapelForBank = '';
+      let selectedMapelsForJawaban = [];
+      let jawabanPermapelData = [];
       let currentAgendaForKartu = '';
       let kartuPesertaList = [];
       let agendaCache = {};
@@ -2209,6 +2362,7 @@ async function uploadToGoogleDrive(file, context) {
         loadAgendaListForBankSoalDropdown();
         loadAgendaListForCetakKartuDropdown();
         loadMonitoring();
+        loadAgendaListForCekJawaban();
         loadJawaban();
         showTab('peserta');
       }
@@ -2227,13 +2381,18 @@ async function uploadToGoogleDrive(file, context) {
 
       // ====== TAB FUNCTIONS ======
       function showTab(tab) {
-        const tabs = ['peserta', 'agenda', 'mapel', 'banksoal', 'monitoring', 'jawaban', 'cetakkartu'];
-        tabs.forEach(name => {
-          document.getElementById('tab-' + name).style.display =
-            (tab === name) ? 'block' : 'none';
-          document.getElementById('tab-btn-' + name).classList.toggle('active', tab === name);
-        });
-      }
+  const tabs = ['peserta', 'agenda', 'mapel', 'banksoal', 'monitoring', 'jawaban', 'cekjawabanmapel', 'cetakkartu'];
+  tabs.forEach(name => {
+    document.getElementById('tab-' + name).style.display =
+      (tab === name) ? 'block' : 'none';
+    document.getElementById('tab-btn-' + name).classList.toggle('active', tab === name);
+  });
+  
+  // Jika pindah ke tab cek jawaban permapel, load data agenda
+  if (tab === 'cekjawabanmapel') {
+    loadAgendaListForCekJawaban();
+  }
+}
 
       // ====== PESERTA FUNCTIONS ======
       function generateNISFromNoWA(noWa) {
@@ -3563,6 +3722,485 @@ function editSoal(firebaseSoalId) {
         );
       }
 
+      function loadAgendaListForCekJawaban() {
+  const select = document.getElementById('CekJawaban_Agenda_Select');
+  if (!agendaRef) return;
+  
+  agendaRef.on('value', snapshot => {
+    const currentValue = select.value;
+    select.innerHTML = '<option value="">-- Pilih Agenda Ujian --</option>';
+    
+    snapshot.forEach(childSnap => {
+      const id = childSnap.key;
+      const ag = childSnap.val();
+      const opt = document.createElement('option');
+      opt.value = id;
+      let label = ag.Agenda_Ujian || id;
+      if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+      opt.textContent = label;
+      select.appendChild(opt);
+    });
+    
+    if (currentValue) select.value = currentValue;
+  });
+}
+
+function onChangeAgendaCekJawaban() {
+  const agendaId = document.getElementById('CekJawaban_Agenda_Select').value;
+  selectedMapelsForJawaban = [];
+  jawabanPermapelData = [];
+  document.getElementById('cekJawabanMapelTableContainer').innerHTML = `
+    <div style="text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px;">
+      <div>📋</div>
+      <div>Pilih agenda ujian dan mata pelajaran, lalu klik "Tampilkan Jawaban"</div>
+    </div>
+  `;
+  
+  if (!agendaId) {
+    document.getElementById('mapelCheckboxContainer').innerHTML = 
+      '<div style="font-size: 12px; color: var(--text-muted);">Pilih agenda ujian terlebih dahulu</div>';
+    return;
+  }
+  
+  loadMapelCheckboxes(agendaId);
+}
+
+async function loadMapelCheckboxes(agendaId) {
+  const container = document.getElementById('mapelCheckboxContainer');
+  container.innerHTML = '<div style="font-size: 12px; color: var(--text-muted);">Memuat mata pelajaran...</div>';
+  
+  try {
+    // Ambil data mapel
+    const mapelSnapshot = await mapelRef.orderByChild('ID_Agenda').equalTo(agendaId).once('value');
+    const mapels = [];
+    
+    mapelSnapshot.forEach(childSnap => {
+      const data = childSnap.val();
+      mapels.push({
+        id: childSnap.key,
+        name: data.Nama_Mata_Pelajaran || '',
+        jumlahSoal: data.Jumlah_Soal || 0,
+        status: data.Status_Mapel || 'Draft'
+      });
+    });
+    
+    if (mapels.length === 0) {
+      container.innerHTML = '<div style="font-size: 12px; color: var(--text-muted);">Tidak ada mata pelajaran untuk agenda ini</div>';
+      return;
+    }
+    
+    // Ambil data bank soal untuk menghitung jumlah soal per mapel
+    const bankSoalSnapshot = await bankSoalRef.orderByChild('ID_Agenda').equalTo(agendaId).once('value');
+    const soalCountByMapel = {};
+    
+    bankSoalSnapshot.forEach(childSnap => {
+      const data = childSnap.val();
+      const mapelId = data.ID_Mapel;
+      if (mapelId) {
+        soalCountByMapel[mapelId] = (soalCountByMapel[mapelId] || 0) + 1;
+      }
+    });
+    
+    // Render checkbox
+    let html = '<div class="mapel-checkbox-grid">';
+    mapels.forEach(mapel => {
+      const soalCount = soalCountByMapel[mapel.id] || 0;
+      const isSiap = mapel.status === 'Siap';
+      
+      html += `
+        <div class="mapel-checkbox-item">
+          <input type="checkbox" 
+                 id="mapel_${mapel.id}" 
+                 value="${mapel.id}" 
+                 data-name="${mapel.name}"
+                 ${isSiap ? '' : 'disabled'}
+                 onchange="handleMapelCheckboxChange(this)">
+          <label for="mapel_${mapel.id}" class="mapel-checkbox-label">
+            ${mapel.name}
+            <span class="mapel-checkbox-count">${soalCount} soal</span>
+            ${!isSiap ? '<span style="color:#f59e0b; font-size:10px;">(Draft)</span>' : ''}
+          </label>
+        </div>
+      `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+    
+  } catch (error) {
+    console.error('Error loading mapel checkboxes:', error);
+    container.innerHTML = '<div style="font-size: 12px; color: var(--danger);">Gagal memuat mata pelajaran</div>';
+  }
+}
+
+function handleMapelCheckboxChange(checkbox) {
+  const mapelId = checkbox.value;
+  const mapelName = checkbox.getAttribute('data-name');
+  
+  if (checkbox.checked) {
+    selectedMapelsForJawaban.push({ id: mapelId, name: mapelName });
+  } else {
+    selectedMapelsForJawaban = selectedMapelsForJawaban.filter(m => m.id !== mapelId);
+  }
+  
+  // Update UI
+  const count = selectedMapelsForJawaban.length;
+  const infoText = count > 0 
+    ? `${count} mapel dipilih` 
+    : 'Pilih mata pelajaran';
+  
+  const infoEl = document.createElement('div');
+  infoEl.style.cssText = 'font-size: 12px; margin-top: 8px; padding: 6px; background: #f0f9ff; border-radius: 4px;';
+  infoEl.textContent = infoText;
+  
+  const existingInfo = container.querySelector('.selection-info');
+  if (existingInfo) existingInfo.remove();
+  
+  container.appendChild(infoEl);
+  infoEl.className = 'selection-info';
+}
+
+async function loadJawabanPermapel() {
+  const agendaId = document.getElementById('CekJawaban_Agenda_Select').value;
+  
+  if (!agendaId) {
+    showNotification('error', 'Error', 'Pilih agenda ujian terlebih dahulu');
+    return;
+  }
+  
+  if (selectedMapelsForJawaban.length === 0) {
+    showNotification('error', 'Error', 'Pilih minimal satu mata pelajaran');
+    return;
+  }
+  
+  showNotification('info', 'Memuat Data', 'Sedang mengambil data jawaban...', 0);
+  
+  try {
+    // Ambil data jawaban untuk agenda ini
+    const jawabanSnapshot = await jawabanRef.orderByChild('ID_Agenda').equalTo(agendaId).once('value');
+    jawabanPermapelData = [];
+    
+    // Ambil data peserta untuk mapping nama
+    const pesertaSnapshot = await pesertaRef.once('value');
+    const pesertaMap = {};
+    pesertaSnapshot.forEach(child => {
+      const data = child.val();
+      if (data.NIS_Username) {
+        pesertaMap[data.NIS_Username] = data.Nama_Peserta || data.NIS_Username;
+      }
+    });
+    
+    // Proses setiap jawaban
+    jawabanSnapshot.forEach(childSnap => {
+      const data = childSnap.val();
+      const mapelName = data.Mata_Pelajaran || '';
+      
+      // Cek apakah mapel ini dipilih
+      const selectedMapel = selectedMapelsForJawaban.find(m => 
+        m.name === mapelName || m.id === data.ID_Mapel
+      );
+      
+      if (selectedMapel) {
+        const siswaName = pesertaMap[data.NIS_Username] || data.NIS_Username;
+        
+        // Kumpulkan jawaban per nomor soal
+        const jawabanPerSoal = {};
+        for (let i = 1; i <= 100; i++) {
+          const key = `Jwb${i}`;
+          if (data[key] !== undefined) {
+            jawabanPerSoal[i] = data[key];
+          }
+        }
+        
+        jawabanPermapelData.push({
+          namaSiswa: siswaName,
+          mapel: mapelName,
+          jawaban: jawabanPerSoal,
+          nis: data.NIS_Username || '',
+          status: data.Status || '',
+          tglMulai: data.TglJam_Mulai || ''
+        });
+      }
+    });
+    
+    // Ambil data bank soal untuk header (nomor soal)
+    const bankSoalMap = {};
+    for (const mapel of selectedMapelsForJawaban) {
+      const soalSnapshot = await bankSoalRef
+        .orderByChild('ID_Mapel')
+        .equalTo(mapel.id)
+        .once('value');
+      
+      const soalNumbers = [];
+      soalSnapshot.forEach(child => {
+        const soalData = child.val();
+        const noSoal = parseInt(soalData.No_Soal) || 0;
+        if (noSoal > 0) {
+          soalNumbers.push(noSoal);
+        }
+      });
+      
+      soalNumbers.sort((a, b) => a - b);
+      bankSoalMap[mapel.name] = soalNumbers;
+    }
+    
+    // Render tabel
+    renderJawabanPermapelTable(bankSoalMap);
+    
+    hideAllNotifications();
+    showNotification('success', 'Berhasil', `Menampilkan ${jawabanPermapelData.length} data jawaban`);
+    
+  } catch (error) {
+    hideAllNotifications();
+    console.error('Error loading jawaban permapel:', error);
+    showNotification('error', 'Gagal', 'Gagal memuat data jawaban: ' + error.message);
+  }
+}
+
+function renderJawabanPermapelTable(bankSoalMap) {
+  const container = document.getElementById('cekJawabanMapelTableContainer');
+  
+  if (jawabanPermapelData.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+        <div>📭</div>
+        <div>Tidak ada data jawaban untuk mata pelajaran yang dipilih</div>
+      </div>
+    `;
+    return;
+  }
+  
+  // Gabungkan semua nomor soal dari mapel yang dipilih
+  const allSoalNumbers = new Set();
+  Object.values(bankSoalMap).forEach(numbers => {
+    numbers.forEach(num => allSoalNumbers.add(num));
+  });
+  
+  const sortedSoalNumbers = Array.from(allSoalNumbers).sort((a, b) => a - b);
+  
+  // Buat HTML tabel
+  let html = `
+    <div class="section-header" style="margin-top: 20px;">
+      <h3>Hasil Jawaban</h3>
+      <p class="section-subtitle">${jawabanPermapelData.length} data jawaban ditemukan</p>
+    </div>
+    
+    <div class="jawaban-table-container">
+      <table class="jawaban-permapel-table">
+        <thead>
+          <tr>
+            <th style="width: 40px;">Aksi</th>
+            <th style="min-width: 150px;">Nama Siswa</th>
+            <th style="min-width: 120px;">Mata Pelajaran</th>
+  `;
+  
+  // Header nomor soal
+  sortedSoalNumbers.forEach(no => {
+    html += `<th style="min-width: 40px;">${no}</th>`;
+  });
+  
+  html += `
+            <th style="min-width: 80px;">Status</th>
+            <th style="min-width: 120px;">Waktu Mulai</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  
+  // Data baris
+  jawabanPermapelData.forEach((item, index) => {
+    html += `
+      <tr>
+        <td>
+          <button onclick="detailJawabanSiswa('${item.nis}', '${item.mapel}')" 
+                  style="padding: 3px 8px; font-size: 11px;">Detail</button>
+        </td>
+        <td style="text-align: left; padding-left: 10px;">${item.namaSiswa}</td>
+        <td>${item.mapel}</td>
+    `;
+    
+    // Jawaban per nomor soal
+    sortedSoalNumbers.forEach(no => {
+      const jawaban = item.jawaban[no] || '';
+      let cellClass = 'jawaban-kosong';
+      let displayText = jawaban || '-';
+      
+      if (jawaban) {
+        cellClass = jawaban.length > 0 ? 'jawaban-benar' : 'jawaban-kosong';
+      }
+      
+      html += `<td class="${cellClass}">${displayText}</td>`;
+    });
+    
+    html += `
+        <td>${item.status}</td>
+        <td>${item.tglMulai || '-'}</td>
+      </tr>
+    `;
+  });
+  
+  html += `
+        </tbody>
+      </table>
+    </div>
+    
+    <div style="margin-top: 15px; font-size: 12px; color: var(--text-muted); display: flex; justify-content: space-between;">
+      <div>
+        <span class="jawaban-benar" style="padding: 2px 6px; border-radius: 3px;">●</span> Terisi
+        <span class="jawaban-kosong" style="padding: 2px 6px; border-radius: 3px; margin-left: 10px;">●</span> Kosong
+      </div>
+      <div>Total: ${jawabanPermapelData.length} siswa</div>
+    </div>
+  `;
+  
+  container.innerHTML = html;
+}
+
+function detailJawabanSiswa(nis, mapel) {
+  // Cari data lengkap siswa
+  const siswaData = jawabanPermapelData.find(item => 
+    item.nis === nis && item.mapel === mapel
+  );
+  
+  if (!siswaData) {
+    showNotification('error', 'Error', 'Data siswa tidak ditemukan');
+    return;
+  }
+  
+  // Tampilkan modal dengan detail lengkap
+  const detailHtml = `
+    <div style="padding: 15px;">
+      <h3 style="margin-top: 0; color: var(--text);">Detail Jawaban</h3>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div><strong>Nama Siswa:</strong> ${siswaData.namaSiswa}</div>
+        <div><strong>NIS:</strong> ${nis}</div>
+        <div><strong>Mata Pelajaran:</strong> ${mapel}</div>
+        <div><strong>Status:</strong> ${siswaData.status}</div>
+        <div><strong>Waktu Mulai:</strong> ${siswaData.tglMulai || '-'}</div>
+      </div>
+      
+      <h4 style="margin-bottom: 10px;">Jawaban Detail:</h4>
+      <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; padding: 10px;">
+        <table style="width: 100%; font-size: 12px;">
+          <thead>
+            <tr>
+              <th style="padding: 6px; background: var(--surface-alt);">No Soal</th>
+              <th style="padding: 6px; background: var(--surface-alt);">Jawaban</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${Object.entries(siswaData.jawaban).map(([no, jawab]) => `
+              <tr>
+                <td style="padding: 6px; border-bottom: 1px solid var(--border); text-align: center; font-weight: 600;">${no}</td>
+                <td style="padding: 6px; border-bottom: 1px solid var(--border); text-align: center; ${jawab ? 'background: #dcfce7;' : 'background: #f3f4f6;'}">
+                  ${jawab || '<em style="color: #6b7280;">Kosong</em>'}
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  
+  // Tampilkan modal custom
+  const modalId = 'modal-detail-jawaban';
+  let modal = document.getElementById(modalId);
+  
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = modalId;
+    modal.className = 'modal-backdrop';
+    modal.innerHTML = `
+      <div class="modal" style="max-width: 700px;">
+        <div class="modal-header">
+          <div class="modal-title">Detail Jawaban Siswa</div>
+          <button type="button" class="modal-close-btn" onclick="hideModal('${modalId}')">&times;</button>
+        </div>
+        <div class="modal-body" id="${modalId}-body"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  
+  document.getElementById(`${modalId}-body`).innerHTML = detailHtml;
+  showModal(modalId);
+}
+
+function exportJawabanPermapelToExcel() {
+  if (jawabanPermapelData.length === 0) {
+    showNotification('error', 'Error', 'Tidak ada data untuk di-export');
+    return;
+  }
+  
+  try {
+    // Kumpulkan semua nomor soal
+    const allSoalNumbers = new Set();
+    jawabanPermapelData.forEach(item => {
+      Object.keys(item.jawaban).forEach(no => allSoalNumbers.add(parseInt(no)));
+    });
+    
+    const sortedSoalNumbers = Array.from(allSoalNumbers).sort((a, b) => a - b);
+    
+    // Buat CSV
+    let csv = 'Nama Siswa,Mata Pelajaran,NIS,Status,Waktu Mulai';
+    
+    // Header untuk nomor soal
+    sortedSoalNumbers.forEach(no => {
+      csv += `,Soal ${no}`;
+    });
+    
+    csv += '\n';
+    
+    // Data
+    jawabanPermapelData.forEach(item => {
+      const row = [
+        `"${item.namaSiswa}"`,
+        `"${item.mapel}"`,
+        `"${item.nis}"`,
+        `"${item.status}"`,
+        `"${item.tglMulai || ''}"`
+      ];
+      
+      sortedSoalNumbers.forEach(no => {
+        const jawaban = item.jawaban[no] || '';
+        row.push(`"${jawaban}"`);
+      });
+      
+      csv += row.join(',') + '\n';
+    });
+    
+    // Download file
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `jawaban_permapel_${new Date().toISOString().slice(0,10)}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showNotification('success', 'Berhasil', 'Data berhasil di-export ke CSV');
+    
+  } catch (error) {
+    console.error('Error exporting to CSV:', error);
+    showNotification('error', 'Gagal', 'Gagal mengexport data: ' + error.message);
+  }
+}
+
+function clearJawabanPermapel() {
+  jawabanPermapelData = [];
+  document.getElementById('cekJawabanMapelTableContainer').innerHTML = `
+    <div style="text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 14px;">
+      <div>📋</div>
+      <div>Pilih agenda ujian dan mata pelajaran, lalu klik "Tampilkan Jawaban"</div>
+    </div>
+  `;
+}
+
       // ====== CETAK KARTU FUNCTIONS ======
       function onChangeAgendaCetakKartu() {
         currentAgendaForKartu = document.getElementById('CetakKartu_Agenda_Select').value;
@@ -3752,6 +4390,87 @@ function editSoal(firebaseSoalId) {
           buttonElement.textContent = '👁️';
         }
       }
+
+      function exportJawabanToCsv() {
+  if (!jawabanRef) return;
+  
+  showNotification('info', 'Export Data', 'Menyiapkan data untuk di-export...', 0);
+  
+  jawabanRef.once('value')
+    .then(snapshot => {
+      const rows = [];
+      snapshot.forEach(childSnap => {
+        rows.push({ id: childSnap.key, data: childSnap.val() });
+      });
+      
+      if (rows.length === 0) {
+        hideAllNotifications();
+        showNotification('warning', 'Peringatan', 'Tidak ada data jawaban untuk di-export');
+        return;
+      }
+      
+      // Tentukan header
+      const maxJ = 100; // Maksimal 100 soal
+      let csv = 'NIS,Nama Siswa,Agenda Ujian,Mata Pelajaran,Jenis Tes,Status,TglJam_Mulai,EndAt,TglJam_Selesai';
+      
+      for (let i = 1; i <= maxJ; i++) {
+        csv += `,Jwb${i}`;
+      }
+      
+      csv += '\n';
+      
+      // Isi data
+      rows.forEach(r => {
+        const d = r.data;
+        const nis = d.NIS_Username || '';
+        const namaSiswa = pesertaNameMap[nis] || nis;
+        let jenisTes = '';
+        
+        if (d.ID_Agenda && agendaCache[d.ID_Agenda]) {
+          jenisTes = agendaCache[d.ID_Agenda].Jenis_Tes || '';
+        }
+        
+        const row = [
+          `"${nis}"`,
+          `"${namaSiswa}"`,
+          `"${d.Judul_Ujian || ''}"`,
+          `"${d.Mata_Pelajaran || ''}"`,
+          `"${jenisTes}"`,
+          `"${d.Status || ''}"`,
+          `"${d.TglJam_Mulai || ''}"`,
+          `"${d.EndAt || ''}"`,
+          `"${d.TglJam_Selesai || ''}"`
+        ];
+        
+        for (let i = 1; i <= maxJ; i++) {
+          row.push(`"${d['Jwb' + i] || ''}"`);
+        }
+        
+        csv += row.join(',') + '\n';
+      });
+      
+      // Download
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `jawaban_siswa_${new Date().toISOString().slice(0,10)}.csv`);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      hideAllNotifications();
+      showNotification('success', 'Berhasil', `Data berhasil di-export (${rows.length} baris)`);
+      
+    })
+    .catch(err => {
+      hideAllNotifications();
+      showNotification('error', 'Gagal', 'Gagal mengexport data: ' + err.message);
+    });
+}
 
       // ====== INITIALIZATION ======
       document.addEventListener('DOMContentLoaded', function() {
