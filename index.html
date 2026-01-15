@@ -1970,48 +1970,19 @@
     <div id="printArea"></div>
 
     <script>
-      // ====== KONFIGURASI ======
-      const firebaseConfig = {
-        apiKey: "AIzaSyC1Yakfe4BkvRKs54Vqp3-mcrf-wSn5Gro",
-        authDomain: "appku-aa5b2.firebaseapp.com",
-        databaseURL: "https://appku-aa5b2-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "appku-aa5b2",
-        storageBucket: "appku-aa5b2.firebasestorage.app",
-        messagingSenderId: "431489373226",
-        appId: "1:431489373226:web:1ac51282e3cdb8ccf29f53",
-        measurementId: "G-90LQBNR7RG"
-      };
+      // ====== KONFIGURASI SUPABASE ======
+      const SUPABASE_URL = 'https://hkyjuzrovvuijqncpbdl.supabase.co'; // Ganti dengan URL Supabase Anda
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhreWp1enJvdnZ1aWpxbmNwYmRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0ODkyMjMsImV4cCI6MjA4NDA2NTIyM30.DWgqBuPKqulzJDFGDK4HjPVohiss8zvXK3GbbXqSNaA'; // Ganti dengan anon key Anda
 
-      // ====== GOOGLE APPS SCRIPT URL ======
-      const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwOXJ-kL-ywDQv-GAe4bDlngnTN7ljOr6fTdtz3a6O0x-JTgyo/exec';
-
-      // ====== INISIALISASI FIREBASE ======
-      let firebaseApp;
-      let db;
-      let pesertaRef;
-      let agendaRef;
-      let mapelRef;
-      let bankSoalRef;
-      let monitoringRef;
-      let jawabanRef;
-      let storage;
-
+      // ====== INISIALISASI SUPABASE ======
+      let supabase;
+      
       try {
-        firebaseApp = firebase.initializeApp(firebaseConfig);
-        db = firebase.database();
-        storage = firebase.storage();
-        
-        pesertaRef = db.ref('peserta');
-        agendaRef = db.ref('agenda_ujian');
-        mapelRef = db.ref('mata_pelajaran');
-        bankSoalRef = db.ref('bank_soal');
-        monitoringRef = db.ref('monitoring_pengerjaan');
-        jawabanRef = db.ref('jawaban_siswa');
-        
-        console.log('Firebase initialized successfully');
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('Supabase initialized successfully');
       } catch (error) {
-        console.error('Firebase initialization error:', error);
-        showNotification('error', 'Firebase Error', 'Gagal menginisialisasi Firebase. Periksa koneksi internet.');
+        console.error('Supabase initialization error:', error);
+        showNotification('error', 'Supabase Error', 'Gagal menginisialisasi Supabase. Periksa koneksi internet.');
       }
 
       // ====== VARIABEL GLOBAL ======
@@ -2124,99 +2095,6 @@
         document.getElementById('confirmationDialog').classList.remove('show');
       }
 
-      // ====== GOOGLE DRIVE UPLOAD FUNCTIONS ======
-      
-      function fileToBase64(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      }
-
-      async function uploadToGoogleDrive(file, context) {
-        try {
-          showNotification('info', 'Upload Gambar', 'Mengunggah ke Google Drive...', 0);
-          
-          const base64Data = await fileToBase64(file);
-          const base64String = base64Data.split(',')[1];
-          
-          const safeAgenda = (context.agenda || 'agenda')
-            .replace(/[^a-z0-9]/gi, '_')
-            .substring(0, 30);
-          
-          const safeMapel = (context.mapel || 'mapel')
-            .replace(/[^a-z0-9]/gi, '_')
-            .substring(0, 30);
-          
-          const timestamp = new Date().getTime();
-          const extension = file.name.split('.').pop().toLowerCase();
-          const fileName = `soal_${safeAgenda}_${safeMapel}_${context.noSoal}_${timestamp}.${extension}`;
-          
-          const requestData = {
-            base64Data: base64String,
-            fileName: fileName,
-            mimeType: file.type || 'image/jpeg'
-          };
-          
-          console.log('Uploading to Google Apps Script:', GAS_WEB_APP_URL);
-          
-          const response = await fetch(GAS_WEB_APP_URL, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData)
-          });
-          
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          
-          const result = await response.json();
-          
-          if (result.success) {
-            hideAllNotifications();
-            showNotification('success', 'Upload Berhasil', 'Gambar berhasil diupload ke Google Drive!');
-            return result.thumbnailUrl;
-          } else {
-            throw new Error(result.error || 'Upload gagal');
-          }
-          
-        } catch (error) {
-          console.error('Google Drive upload error:', error);
-          
-          hideAllNotifications();
-          showNotification('warning', 'Upload Gagal', 'Menyimpan sebagai base64 di Firebase...');
-          
-          const base64Data = await fileToBase64(file);
-          return base64Data;
-        }
-      }
-
-      function previewImage(input) {
-        const container = document.getElementById('imagePreviewContainer');
-        container.innerHTML = '';
-        
-        if (input.files && input.files[0]) {
-          const file = input.files[0];
-          const reader = new FileReader();
-          
-          reader.onload = function(e) {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'image-preview';
-            img.alt = 'Preview Gambar';
-            
-            container.appendChild(img);
-          };
-          
-          reader.readAsDataURL(file);
-        }
-      }
-
       // ====== LOGIN FUNCTIONS ======
       function checkLoginStatus() {
         const loggedIn = sessionStorage.getItem('adminLoggedIn');
@@ -2307,7 +2185,7 @@
         });
       }
 
-      // ====== PESERTA FUNCTIONS ======
+      // ====== PESERTA FUNCTIONS (SUPABASE VERSION) ======
       function generateNISFromNoWA(noWa) {
         if (!noWa) return '';
         let digits = noWa.replace(/\D/g, '');
@@ -2325,17 +2203,22 @@
         document.getElementById('NIS_Username').value = nis;
       }
 
-      function loadPeserta() {
-        if (!pesertaRef) return;
-        
-        pesertaRef.on('value', snapshot => {
+      async function loadPeserta() {
+        try {
+          const { data, error } = await supabase
+            .from('peserta')
+            .select('*')
+            .order('created_at', { ascending: false });
+          
+          if (error) throw error;
+          
           const tbody = document.querySelector('#pesertaTable tbody');
           tbody.innerHTML = '';
           pesertaNameMap = {};
 
-          snapshot.forEach(childSnap => {
-            const firebaseId = childSnap.key;
-            const data = childSnap.val();
+          data.forEach(item => {
+            const firebaseId = item.id;
+            const data = item;
             if (data.NIS_Username) {
               pesertaNameMap[data.NIS_Username] = data.Nama_Peserta || data.NIS_Username;
             }
@@ -2366,9 +2249,9 @@
             `;
             tbody.appendChild(tr);
           });
-        }, error => {
+        } catch (error) {
           showNotification('error', 'Error', 'Gagal membaca data peserta: ' + error.message);
-        });
+        }
       }
 
       function openPesertaModalForCreate() {
@@ -2376,9 +2259,9 @@
         showModal('modal-peserta');
       }
 
-      function savePeserta() {
-        if (!pesertaRef) {
-          showNotification('error', 'Error', 'Firebase tidak terinisialisasi');
+      async function savePeserta() {
+        if (!supabase) {
+          showNotification('error', 'Error', 'Supabase tidak terinisialisasi');
           return;
         }
 
@@ -2413,72 +2296,82 @@
           ID_Agenda
         };
 
-        if (firebaseId) {
-          const existingId = document.getElementById('ID_Peserta').value || firebaseId;
-          data.ID_Peserta = existingId;
-          pesertaRef.child(firebaseId).update(data)
-            .then(() => {
-              showNotification('success', 'Berhasil', 'Data peserta berhasil diperbarui');
-              resetForm();
-              hideModal('modal-peserta');
-            })
-            .catch(err => {
-              showNotification('error', 'Gagal', 'Gagal update peserta: ' + err.message);
-            });
-        } else {
-          const newRef = pesertaRef.push();
-          const newId = newRef.key;
-          data.ID_Peserta = newId;
-          newRef.set(data)
-            .then(() => {
-              showNotification('success', 'Berhasil', 'Data peserta berhasil disimpan');
-              document.getElementById('ID_Peserta').value = newId;
-              resetForm();
-              hideModal('modal-peserta');
-            })
-            .catch(err => {
-              showNotification('error', 'Gagal', 'Gagal menyimpan peserta: ' + err.message);
-            });
+        try {
+          if (firebaseId) {
+            const { error } = await supabase
+              .from('peserta')
+              .update(data)
+              .eq('id', firebaseId);
+            
+            if (error) throw error;
+            
+            showNotification('success', 'Berhasil', 'Data peserta berhasil diperbarui');
+            resetForm();
+            hideModal('modal-peserta');
+            loadPeserta();
+          } else {
+            const { error } = await supabase
+              .from('peserta')
+              .insert([data]);
+            
+            if (error) throw error;
+            
+            showNotification('success', 'Berhasil', 'Data peserta berhasil disimpan');
+            resetForm();
+            hideModal('modal-peserta');
+            loadPeserta();
+          }
+        } catch (err) {
+          showNotification('error', 'Gagal', 'Gagal menyimpan peserta: ' + err.message);
         }
       }
 
-      function editPeserta(firebaseId) {
-        if (!pesertaRef) return;
-        
-        pesertaRef.child(firebaseId).once('value')
-          .then(snapshot => {
-            const data = snapshot.val();
-            document.getElementById('firebaseId').value = firebaseId;
-            document.getElementById('ID_Peserta').value = data.ID_Peserta || '';
-            document.getElementById('NIS_Username').value = data.NIS_Username || '';
-            document.getElementById('Nama_Peserta').value = data.Nama_Peserta || '';
-            document.getElementById('Password').value = data.Password || '';
-            document.getElementById('Jenjang_Studi').value = data.Jenjang_Studi || '';
-            document.getElementById('Kelas').value = data.Kelas || '';
-            document.getElementById('Asal_Sekolah').value = data.Asal_Sekolah || '';
-            document.getElementById('No_WA_Peserta').value = data.No_WA_Peserta || '';
-            document.getElementById('No_WA_Ortu').value = data.No_WA_Ortu || '';
-            document.getElementById('ID_Agenda_Peserta').value = data.ID_Agenda || '';
-            
-            showModal('modal-peserta');
-          })
-          .catch(err => {
-            showNotification('error', 'Gagal', 'Gagal mengambil data peserta: ' + err.message);
-          });
+      async function editPeserta(id) {
+        try {
+          const { data, error } = await supabase
+            .from('peserta')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (error) throw error;
+          
+          document.getElementById('firebaseId').value = id;
+          document.getElementById('ID_Peserta').value = data.id || '';
+          document.getElementById('NIS_Username').value = data.NIS_Username || '';
+          document.getElementById('Nama_Peserta').value = data.Nama_Peserta || '';
+          document.getElementById('Password').value = data.Password || '';
+          document.getElementById('Jenjang_Studi').value = data.Jenjang_Studi || '';
+          document.getElementById('Kelas').value = data.Kelas || '';
+          document.getElementById('Asal_Sekolah').value = data.Asal_Sekolah || '';
+          document.getElementById('No_WA_Peserta').value = data.No_WA_Peserta || '';
+          document.getElementById('No_WA_Ortu').value = data.No_WA_Ortu || '';
+          document.getElementById('ID_Agenda_Peserta').value = data.ID_Agenda || '';
+          
+          showModal('modal-peserta');
+        } catch (err) {
+          showNotification('error', 'Gagal', 'Gagal mengambil data peserta: ' + err.message);
+        }
       }
 
-      function deletePeserta(firebaseId) {
+      async function deletePeserta(id) {
         showConfirmation(
           'Hapus Peserta',
           'Apakah Anda yakin ingin menghapus data peserta ini?',
-          function() {
-            pesertaRef.child(firebaseId).remove()
-              .then(() => {
-                showNotification('success', 'Berhasil', 'Data peserta berhasil dihapus');
-              })
-              .catch(err => {
-                showNotification('error', 'Gagal', 'Gagal menghapus peserta: ' + err.message);
-              });
+          async function() {
+            try {
+              const { error } = await supabase
+                .from('peserta')
+                .delete()
+                .eq('id', id);
+              
+              if (error) throw error;
+              
+              showNotification('success', 'Berhasil', 'Data peserta berhasil dihapus');
+              loadPeserta();
+            } catch (err) {
+              showNotification('error', 'Gagal', 'Gagal menghapus peserta: ' + err.message);
+            }
           }
         );
       }
@@ -2490,7 +2383,7 @@
         document.getElementById('NIS_Username').value = '';
       }
 
-      // ====== AGENDA FUNCTIONS ======
+      // ====== AGENDA FUNCTIONS (SUPABASE VERSION) ======
       function generateRandomToken() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         const length = 6 + Math.floor(Math.random() * 3);
@@ -2506,18 +2399,23 @@
         document.getElementById('Token_Ujian').value = token;
       }
 
-      function loadAgenda() {
-        if (!agendaRef) return;
-        
-        agendaRef.on('value', snapshot => {
+      async function loadAgenda() {
+        try {
+          const { data, error } = await supabase
+            .from('agenda_ujian')
+            .select('*')
+            .order('created_at', { ascending: false });
+          
+          if (error) throw error;
+          
           const tbody = document.querySelector('#agendaTable tbody');
           tbody.innerHTML = '';
           agendaCache = {};
           
-          snapshot.forEach(childSnap => {
-            const firebaseId = childSnap.key;
-            const data = childSnap.val();
-            agendaCache[firebaseId] = data;
+          data.forEach(item => {
+            const id = item.id;
+            const data = item;
+            agendaCache[id] = data;
             
             const mulai = data.TglJam_Mulai ? data.TglJam_Mulai.replace('T', ' ') : '';
             const selesai = data.TglJam_Selesai ? data.TglJam_Selesai.replace('T', ' ') : '';
@@ -2532,107 +2430,131 @@
               <td>${selesai}</td>
               <td>${data.Token_Ujian || ''}</td>
               <td class="actions">
-                <button onclick="editAgenda('${firebaseId}')">Edit</button>
-                <button onclick="deleteAgenda('${firebaseId}')">Hapus</button>
+                <button onclick="editAgenda('${id}')">Edit</button>
+                <button onclick="deleteAgenda('${id}')">Hapus</button>
               </td>
             `;
             tbody.appendChild(tr);
           });
-        }, error => {
+        } catch (error) {
           showNotification('error', 'Error', 'Gagal membaca data agenda: ' + error.message);
-        });
+        }
       }
 
-      function loadAgendaListForPeserta() {
+      async function loadAgendaListForPeserta() {
         const select = document.getElementById('ID_Agenda_Peserta');
-        if (!agendaRef) return;
         
-        agendaRef.on('value', snapshot => {
+        try {
+          const { data, error } = await supabase
+            .from('agenda_ujian')
+            .select('id, Agenda_Ujian, Jenjang_Studi')
+            .order('Agenda_Ujian', { ascending: true });
+          
+          if (error) throw error;
+          
           const currentValue = select.value;
           select.innerHTML = '<option value="">-- Pilih Agenda --</option>';
           
-          snapshot.forEach(childSnap => {
-            const id = childSnap.key;
-            const ag = childSnap.val();
+          data.forEach(item => {
             const opt = document.createElement('option');
-            opt.value = id;
-            let label = ag.Agenda_Ujian || id;
-            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.value = item.id;
+            let label = item.Agenda_Ujian || item.id;
+            if (item.Jenjang_Studi) label += ' (' + item.Jenjang_Studi + ')';
             opt.textContent = label;
             select.appendChild(opt);
           });
           
           if (currentValue) select.value = currentValue;
-        });
+        } catch (error) {
+          console.error('Error loading agenda for peserta:', error);
+        }
       }
 
-      function loadAgendaListForMapelDropdown() {
+      async function loadAgendaListForMapelDropdown() {
         const select = document.getElementById('Mapel_Agenda_Select');
-        if (!agendaRef) return;
         
-        agendaRef.on('value', snapshot => {
+        try {
+          const { data, error } = await supabase
+            .from('agenda_ujian')
+            .select('id, Agenda_Ujian, Jenjang_Studi')
+            .order('Agenda_Ujian', { ascending: true });
+          
+          if (error) throw error;
+          
           const currentValue = select.value;
           select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
           
-          snapshot.forEach(childSnap => {
-            const id = childSnap.key;
-            const ag = childSnap.val();
+          data.forEach(item => {
             const opt = document.createElement('option');
-            opt.value = id;
-            let label = ag.Agenda_Ujian || id;
-            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.value = item.id;
+            let label = item.Agenda_Ujian || item.id;
+            if (item.Jenjang_Studi) label += ' (' + item.Jenjang_Studi + ')';
             opt.textContent = label;
             select.appendChild(opt);
           });
           
           if (currentValue) select.value = currentValue;
-        });
+        } catch (error) {
+          console.error('Error loading agenda for mapel:', error);
+        }
       }
 
-      function loadAgendaListForBankSoalDropdown() {
+      async function loadAgendaListForBankSoalDropdown() {
         const select = document.getElementById('Bank_Agenda_Select');
-        if (!agendaRef) return;
         
-        agendaRef.on('value', snapshot => {
+        try {
+          const { data, error } = await supabase
+            .from('agenda_ujian')
+            .select('id, Agenda_Ujian, Jenjang_Studi')
+            .order('Agenda_Ujian', { ascending: true });
+          
+          if (error) throw error;
+          
           const currentValue = select.value;
           select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
           
-          snapshot.forEach(childSnap => {
-            const id = childSnap.key;
-            const ag = childSnap.val();
+          data.forEach(item => {
             const opt = document.createElement('option');
-            opt.value = id;
-            let label = ag.Agenda_Ujian || id;
-            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.value = item.id;
+            let label = item.Agenda_Ujian || item.id;
+            if (item.Jenjang_Studi) label += ' (' + item.Jenjang_Studi + ')';
             opt.textContent = label;
             select.appendChild(opt);
           });
           
           if (currentValue) select.value = currentValue;
-        });
+        } catch (error) {
+          console.error('Error loading agenda for bank soal:', error);
+        }
       }
 
-      function loadAgendaListForCetakKartuDropdown() {
+      async function loadAgendaListForCetakKartuDropdown() {
         const select = document.getElementById('CetakKartu_Agenda_Select');
-        if (!agendaRef) return;
         
-        agendaRef.on('value', snapshot => {
+        try {
+          const { data, error } = await supabase
+            .from('agenda_ujian')
+            .select('id, Agenda_Ujian, Jenjang_Studi')
+            .order('Agenda_Ujian', { ascending: true });
+          
+          if (error) throw error;
+          
           const currentValue = select.value;
           select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
           
-          snapshot.forEach(childSnap => {
-            const id = childSnap.key;
-            const ag = childSnap.val();
+          data.forEach(item => {
             const opt = document.createElement('option');
-            opt.value = id;
-            let label = ag.Agenda_Ujian || id;
-            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.value = item.id;
+            let label = item.Agenda_Ujian || item.id;
+            if (item.Jenjang_Studi) label += ' (' + item.Jenjang_Studi + ')';
             opt.textContent = label;
             select.appendChild(opt);
           });
           
           if (currentValue) select.value = currentValue;
-        });
+        } catch (error) {
+          console.error('Error loading agenda for cetak kartu:', error);
+        }
       }
 
       function openAgendaModalForCreate() {
@@ -2640,13 +2562,13 @@
         showModal('modal-agenda');
       }
 
-      function saveAgenda() {
-        if (!agendaRef) {
-          showNotification('error', 'Error', 'Firebase tidak terinisialisasi');
+      async function saveAgenda() {
+        if (!supabase) {
+          showNotification('error', 'Error', 'Supabase tidak terinisialisasi');
           return;
         }
 
-        const firebaseAgendaId = document.getElementById('firebaseAgendaId').value;
+        const id = document.getElementById('firebaseAgendaId').value;
         const Agenda_Ujian = document.getElementById('Agenda_Ujian').value.trim();
         const Deskripsi_Ujian = document.getElementById('Deskripsi_Ujian').value.trim();
         const Jenjang_Studi = document.getElementById('Jenjang_Studi_Agenda').value.trim();
@@ -2676,70 +2598,80 @@
           Token_Ujian
         };
 
-        if (firebaseAgendaId) {
-          const existingId = document.getElementById('ID_Agenda_Agenda').value || firebaseAgendaId;
-          data.ID_Agenda = existingId;
-          agendaRef.child(firebaseAgendaId).update(data)
-            .then(() => {
-              showNotification('success', 'Berhasil', 'Agenda ujian berhasil diperbarui');
-              resetAgendaForm();
-              hideModal('modal-agenda');
-            })
-            .catch(err => {
-              showNotification('error', 'Gagal', 'Gagal update agenda: ' + err.message);
-            });
-        } else {
-          const newRef = agendaRef.push();
-          const newId = newRef.key;
-          data.ID_Agenda = newId;
-          newRef.set(data)
-            .then(() => {
-              showNotification('success', 'Berhasil', 'Agenda ujian berhasil disimpan');
-              document.getElementById('ID_Agenda_Agenda').value = newId;
-              resetAgendaForm();
-              hideModal('modal-agenda');
-            })
-            .catch(err => {
-              showNotification('error', 'Gagal', 'Gagal menyimpan agenda: ' + err.message);
-            });
+        try {
+          if (id) {
+            const { error } = await supabase
+              .from('agenda_ujian')
+              .update(data)
+              .eq('id', id);
+            
+            if (error) throw error;
+            
+            showNotification('success', 'Berhasil', 'Agenda ujian berhasil diperbarui');
+            resetAgendaForm();
+            hideModal('modal-agenda');
+            loadAgenda();
+          } else {
+            const { error } = await supabase
+              .from('agenda_ujian')
+              .insert([data]);
+            
+            if (error) throw error;
+            
+            showNotification('success', 'Berhasil', 'Agenda ujian berhasil disimpan');
+            resetAgendaForm();
+            hideModal('modal-agenda');
+            loadAgenda();
+          }
+        } catch (err) {
+          showNotification('error', 'Gagal', 'Gagal menyimpan agenda: ' + err.message);
         }
       }
 
-      function editAgenda(firebaseAgendaId) {
-        if (!agendaRef) return;
-        
-        agendaRef.child(firebaseAgendaId).once('value')
-          .then(snapshot => {
-            const data = snapshot.val();
-            document.getElementById('firebaseAgendaId').value = firebaseAgendaId;
-            document.getElementById('ID_Agenda_Agenda').value = data.ID_Agenda || '';
-            document.getElementById('Agenda_Ujian').value = data.Agenda_Ujian || '';
-            document.getElementById('Deskripsi_Ujian').value = data.Deskripsi_Ujian || '';
-            document.getElementById('Jenjang_Studi_Agenda').value = data.Jenjang_Studi || '';
-            document.getElementById('Jenis_Tes').value = data.Jenis_Tes || '';
-            document.getElementById('TglJam_Mulai').value = data.TglJam_Mulai || '';
-            document.getElementById('TglJam_Selesai').value = data.TglJam_Selesai || '';
-            document.getElementById('Token_Ujian').value = data.Token_Ujian || '';
-            
-            showModal('modal-agenda');
-          })
-          .catch(err => {
-            showNotification('error', 'Gagal', 'Gagal mengambil data agenda: ' + err.message);
-          });
+      async function editAgenda(id) {
+        try {
+          const { data, error } = await supabase
+            .from('agenda_ujian')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (error) throw error;
+          
+          document.getElementById('firebaseAgendaId').value = id;
+          document.getElementById('ID_Agenda_Agenda').value = data.id || '';
+          document.getElementById('Agenda_Ujian').value = data.Agenda_Ujian || '';
+          document.getElementById('Deskripsi_Ujian').value = data.Deskripsi_Ujian || '';
+          document.getElementById('Jenjang_Studi_Agenda').value = data.Jenjang_Studi || '';
+          document.getElementById('Jenis_Tes').value = data.Jenis_Tes || '';
+          document.getElementById('TglJam_Mulai').value = data.TglJam_Mulai || '';
+          document.getElementById('TglJam_Selesai').value = data.TglJam_Selesai || '';
+          document.getElementById('Token_Ujian').value = data.Token_Ujian || '';
+          
+          showModal('modal-agenda');
+        } catch (err) {
+          showNotification('error', 'Gagal', 'Gagal mengambil data agenda: ' + err.message);
+        }
       }
 
-      function deleteAgenda(firebaseAgendaId) {
+      async function deleteAgenda(id) {
         showConfirmation(
           'Hapus Agenda',
           'Apakah Anda yakin ingin menghapus agenda ujian ini?',
-          function() {
-            agendaRef.child(firebaseAgendaId).remove()
-              .then(() => {
-                showNotification('success', 'Berhasil', 'Agenda ujian berhasil dihapus');
-              })
-              .catch(err => {
-                showNotification('error', 'Gagal', 'Gagal menghapus agenda: ' + err.message);
-              });
+          async function() {
+            try {
+              const { error } = await supabase
+                .from('agenda_ujian')
+                .delete()
+                .eq('id', id);
+              
+              if (error) throw error;
+              
+              showNotification('success', 'Berhasil', 'Agenda ujian berhasil dihapus');
+              loadAgenda();
+            } catch (err) {
+              showNotification('error', 'Gagal', 'Gagal menghapus agenda: ' + err.message);
+            }
           }
         );
       }
@@ -2751,7 +2683,7 @@
         document.getElementById('Token_Ujian').value = '';
       }
 
-      // ====== MATA PELAJARAN FUNCTIONS ======
+      // ====== MATA PELAJARAN FUNCTIONS (SUPABASE VERSION) ======
       function onChangeAgendaMapel() {
         currentAgendaForMapel = document.getElementById('Mapel_Agenda_Select').value;
         document.getElementById('ID_Agenda_Mapel').value = currentAgendaForMapel || '';
@@ -2759,42 +2691,48 @@
         loadMapelTable();
       }
 
-      function loadMapelTable() {
+      async function loadMapelTable() {
         const tbody = document.querySelector('#mapelTable tbody');
         tbody.innerHTML = '';
         
-        if (!currentAgendaForMapel || !mapelRef) return;
+        if (!currentAgendaForMapel) return;
         
-        mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForMapel).once('value')
-          .then(snapshot => {
-            snapshot.forEach(childSnap => {
-              const firebaseId = childSnap.key;
-              const data = childSnap.val();
-              const isSiap = data.Status_Mapel === 'Siap';
-              
-              const tr = document.createElement('tr');
-              tr.innerHTML = `
-                <td>${data.Nama_Mata_Pelajaran || ''}</td>
-                <td>${data.Jumlah_Soal || ''}</td>
-                <td>${data.Durasi_Ujian || ''}</td>
-                <td>
-                  <label style="display:flex; align-items:center; gap:4px; font-weight:400;">
-                    <input type="checkbox" ${isSiap ? 'checked' : ''} 
-                           onchange="toggleStatusMapel('${firebaseId}', this.checked)">
-                    <span>${isSiap ? 'Siap' : 'Draft'}</span>
-                  </label>
-                </td>
-                <td class="actions">
-                  <button onclick="editMapel('${firebaseId}')">Edit</button>
-                  <button onclick="deleteMapel('${firebaseId}')">Hapus</button>
-                </td>
-              `;
-              tbody.appendChild(tr);
-            });
-          })
-          .catch(err => {
-            showNotification('error', 'Error', 'Gagal membaca data mapel: ' + err.message);
+        try {
+          const { data, error } = await supabase
+            .from('mata_pelajaran')
+            .select('*')
+            .eq('ID_Agenda', currentAgendaForMapel)
+            .order('Nama_Mata_Pelajaran', { ascending: true });
+          
+          if (error) throw error;
+          
+          data.forEach(item => {
+            const id = item.id;
+            const data = item;
+            const isSiap = data.Status_Mapel === 'Siap';
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${data.Nama_Mata_Pelajaran || ''}</td>
+              <td>${data.Jumlah_Soal || ''}</td>
+              <td>${data.Durasi_Ujian || ''}</td>
+              <td>
+                <label style="display:flex; align-items:center; gap:4px; font-weight:400;">
+                  <input type="checkbox" ${isSiap ? 'checked' : ''} 
+                         onchange="toggleStatusMapel('${id}', this.checked)">
+                  <span>${isSiap ? 'Siap' : 'Draft'}</span>
+                </label>
+              </td>
+              <td class="actions">
+                <button onclick="editMapel('${id}')">Edit</button>
+                <button onclick="deleteMapel('${id}')">Hapus</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
           });
+        } catch (err) {
+          showNotification('error', 'Error', 'Gagal membaca data mapel: ' + err.message);
+        }
       }
 
       function openMapelModalForCreate() {
@@ -2806,13 +2744,13 @@
         showModal('modal-mapel');
       }
 
-      function saveMapel() {
-        if (!mapelRef) {
-          showNotification('error', 'Error', 'Firebase tidak terinisialisasi');
+      async function saveMapel() {
+        if (!supabase) {
+          showNotification('error', 'Error', 'Supabase tidak terinisialisasi');
           return;
         }
 
-        const firebaseMapelId = document.getElementById('firebaseMapelId').value;
+        const id = document.getElementById('firebaseMapelId').value;
         const ID_Agenda = currentAgendaForMapel;
         
         if (!ID_Agenda) {
@@ -2838,88 +2776,98 @@
           Status_Mapel
         };
         
-        if (firebaseMapelId) {
-          const existingId = document.getElementById('ID_Mapel_Mapel').value || firebaseMapelId;
-          data.ID_Mapel = existingId;
-          mapelRef.child(firebaseMapelId).update(data)
-            .then(() => {
-              showNotification('success', 'Berhasil', 'Mata pelajaran berhasil diperbarui');
-              resetMapelForm(false);
-              loadMapelTable();
-              hideModal('modal-mapel');
-            })
-            .catch(err => {
-              showNotification('error', 'Gagal', 'Gagal update mapel: ' + err.message);
-            });
-        } else {
-          const newRef = mapelRef.push();
-          const newId = newRef.key;
-          data.ID_Mapel = newId;
-          newRef.set(data)
-            .then(() => {
-              showNotification('success', 'Berhasil', 'Mata pelajaran berhasil disimpan');
-              document.getElementById('ID_Mapel_Mapel').value = newId;
-              resetMapelForm(false);
-              loadMapelTable();
-              hideModal('modal-mapel');
-            })
-            .catch(err => {
-              showNotification('error', 'Gagal', 'Gagal menyimpan mapel: ' + err.message);
-            });
+        try {
+          if (id) {
+            const { error } = await supabase
+              .from('mata_pelajaran')
+              .update(data)
+              .eq('id', id);
+            
+            if (error) throw error;
+            
+            showNotification('success', 'Berhasil', 'Mata pelajaran berhasil diperbarui');
+            resetMapelForm(false);
+            loadMapelTable();
+            hideModal('modal-mapel');
+          } else {
+            const { error } = await supabase
+              .from('mata_pelajaran')
+              .insert([data]);
+            
+            if (error) throw error;
+            
+            showNotification('success', 'Berhasil', 'Mata pelajaran berhasil disimpan');
+            resetMapelForm(false);
+            loadMapelTable();
+            hideModal('modal-mapel');
+          }
+        } catch (err) {
+          showNotification('error', 'Gagal', 'Gagal menyimpan mapel: ' + err.message);
         }
       }
 
-      function editMapel(firebaseMapelId) {
-        if (!mapelRef) return;
-        
-        mapelRef.child(firebaseMapelId).once('value')
-          .then(snapshot => {
-            const data = snapshot.val();
-            document.getElementById('firebaseMapelId').value = firebaseMapelId;
-            currentAgendaForMapel = data.ID_Agenda || '';
-            document.getElementById('Mapel_Agenda_Select').value = currentAgendaForMapel;
-            document.getElementById('ID_Agenda_Mapel').value = currentAgendaForMapel;
-            document.getElementById('ID_Mapel_Mapel').value = data.ID_Mapel || '';
-            document.getElementById('Nama_Mata_Pelajaran').value = data.Nama_Mata_Pelajaran || '';
-            document.getElementById('Jumlah_Soal').value = data.Jumlah_Soal || '';
-            document.getElementById('Durasi_Ujian').value = data.Durasi_Ujian || '';
-            document.getElementById('Status_Mapel').value = data.Status_Mapel || 'Draft';
-            
-            showModal('modal-mapel');
-          })
-          .catch(err => {
-            showNotification('error', 'Gagal', 'Gagal mengambil data mapel: ' + err.message);
-          });
+      async function editMapel(id) {
+        try {
+          const { data, error } = await supabase
+            .from('mata_pelajaran')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (error) throw error;
+          
+          document.getElementById('firebaseMapelId').value = id;
+          currentAgendaForMapel = data.ID_Agenda || '';
+          document.getElementById('Mapel_Agenda_Select').value = currentAgendaForMapel;
+          document.getElementById('ID_Agenda_Mapel').value = currentAgendaForMapel;
+          document.getElementById('ID_Mapel_Mapel').value = data.id || '';
+          document.getElementById('Nama_Mata_Pelajaran').value = data.Nama_Mata_Pelajaran || '';
+          document.getElementById('Jumlah_Soal').value = data.Jumlah_Soal || '';
+          document.getElementById('Durasi_Ujian').value = data.Durasi_Ujian || '';
+          document.getElementById('Status_Mapel').value = data.Status_Mapel || 'Draft';
+          
+          showModal('modal-mapel');
+        } catch (err) {
+          showNotification('error', 'Gagal', 'Gagal mengambil data mapel: ' + err.message);
+        }
       }
 
-      function deleteMapel(firebaseMapelId) {
+      async function deleteMapel(id) {
         showConfirmation(
           'Hapus Mata Pelajaran',
           'Apakah Anda yakin ingin menghapus mata pelajaran ini?',
-          function() {
-            mapelRef.child(firebaseMapelId).remove()
-              .then(() => {
-                showNotification('success', 'Berhasil', 'Mata pelajaran berhasil dihapus');
-                loadMapelTable();
-              })
-              .catch(err => {
-                showNotification('error', 'Gagal', 'Gagal menghapus mapel: ' + err.message);
-              });
+          async function() {
+            try {
+              const { error } = await supabase
+                .from('mata_pelajaran')
+                .delete()
+                .eq('id', id);
+              
+              if (error) throw error;
+              
+              showNotification('success', 'Berhasil', 'Mata pelajaran berhasil dihapus');
+              loadMapelTable();
+            } catch (err) {
+              showNotification('error', 'Gagal', 'Gagal menghapus mapel: ' + err.message);
+            }
           }
         );
       }
 
-      function toggleStatusMapel(firebaseMapelId, isSiap) {
-        if (!mapelRef) return;
-        
-        const newStatus = isSiap ? 'Siap' : 'Draft';
-        mapelRef.child(firebaseMapelId).update({ Status_Mapel: newStatus })
-          .then(() => {
-            loadMapelTable();
-          })
-          .catch(err => {
-            showNotification('error', 'Gagal', 'Gagal mengubah status mapel: ' + err.message);
-          });
+      async function toggleStatusMapel(id, isSiap) {
+        try {
+          const newStatus = isSiap ? 'Siap' : 'Draft';
+          const { error } = await supabase
+            .from('mata_pelajaran')
+            .update({ Status_Mapel: newStatus })
+            .eq('id', id);
+          
+          if (error) throw error;
+          
+          loadMapelTable();
+        } catch (err) {
+          showNotification('error', 'Gagal', 'Gagal mengubah status mapel: ' + err.message);
+        }
       }
 
       function resetMapelForm(resetAgenda = true) {
@@ -2937,7 +2885,7 @@
         }
       }
 
-      // ====== BANK SOAL FUNCTIONS ======
+      // ====== BANK SOAL FUNCTIONS (SUPABASE VERSION) ======
       function onTypeSoalChange() {
         const type = document.getElementById('Type_Soal').value;
         const pg = document.getElementById('group-pg');
@@ -2957,25 +2905,30 @@
         }
       }
 
-      function setAutoNoSoal() {
-        if (!currentAgendaForBank || !bankSoalRef) return;
+      async function setAutoNoSoal() {
+        if (!currentAgendaForBank) return;
         
-        bankSoalRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
-          .then(snapshot => {
-            let maxNo = 0;
-            snapshot.forEach(childSnap => {
-              const d = childSnap.val();
-              const n = parseInt(d.No_Soal, 10);
-              if (!isNaN(n) && n > maxNo) maxNo = n;
-            });
-            document.getElementById('No_Soal').value = maxNo + 1;
-          })
-          .catch(err => {
-            console.error('Gagal menghitung No_Soal:', err);
+        try {
+          const { data, error } = await supabase
+            .from('bank_soal')
+            .select('No_Soal')
+            .eq('ID_Agenda', currentAgendaForBank);
+          
+          if (error) throw error;
+          
+          let maxNo = 0;
+          data.forEach(item => {
+            const n = parseInt(item.No_Soal, 10);
+            if (!isNaN(n) && n > maxNo) maxNo = n;
           });
+          
+          document.getElementById('No_Soal').value = maxNo + 1;
+        } catch (err) {
+          console.error('Gagal menghitung No_Soal:', err);
+        }
       }
 
-      function onChangeAgendaBankSoal() {
+      async function onChangeAgendaBankSoal() {
         currentAgendaForBank = document.getElementById('Bank_Agenda_Select').value;
         document.getElementById('ID_Agenda_Bank').value = currentAgendaForBank || '';
         currentMapelForBank = '';
@@ -2985,24 +2938,28 @@
         document.querySelector('#bankSoalTable tbody').innerHTML = '';
         document.getElementById('No_Soal').value = '';
         
-        if (!currentAgendaForBank || !mapelRef) return;
+        if (!currentAgendaForBank) return;
         
         const select = document.getElementById('Bank_Mapel_Select');
-        mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
-          .then(snapshot => {
-            snapshot.forEach(childSnap => {
-              const id = childSnap.key;
-              const data = childSnap.val();
-              const opt = document.createElement('option');
-              opt.value = id;
-              opt.textContent = data.Nama_Mata_Pelajaran || id;
-              opt.dataset.nama = data.Nama_Mata_Pelajaran || '';
-              select.appendChild(opt);
-            });
-          })
-          .catch(err => {
-            showNotification('error', 'Error', 'Gagal membaca mapel: ' + err.message);
+        try {
+          const { data, error } = await supabase
+            .from('mata_pelajaran')
+            .select('id, Nama_Mata_Pelajaran')
+            .eq('ID_Agenda', currentAgendaForBank)
+            .order('Nama_Mata_Pelajaran', { ascending: true });
+          
+          if (error) throw error;
+          
+          data.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.Nama_Mata_Pelajaran || item.id;
+            opt.dataset.nama = item.Nama_Mata_Pelajaran || '';
+            select.appendChild(opt);
           });
+        } catch (err) {
+          showNotification('error', 'Error', 'Gagal membaca mapel: ' + err.message);
+        }
       }
 
       function onChangeMapelBankSoal() {
@@ -3021,48 +2978,46 @@
         loadBankSoalTable();
       }
 
-      function loadBankSoalTable() {
+      async function loadBankSoalTable() {
         const tbody = document.querySelector('#bankSoalTable tbody');
         tbody.innerHTML = '';
         
-        if (!currentMapelForBank || !bankSoalRef) return;
+        if (!currentMapelForBank) return;
         
-        bankSoalRef.orderByChild('ID_Mapel').equalTo(currentMapelForBank).once('value')
-          .then(snapshot => {
-            const list = [];
-            snapshot.forEach(childSnap => {
-              const data = childSnap.val();
-              list.push({ id: childSnap.key, ...data });
-            });
+        try {
+          const { data, error } = await supabase
+            .from('bank_soal')
+            .select('*')
+            .eq('ID_Mapel', currentMapelForBank)
+            .order('No_Soal', { ascending: true });
+          
+          if (error) throw error;
+          
+          data.forEach(item => {
+            const tr = document.createElement('tr');
+            const pertSingkat = (item.Pertanyaan || '').length > 80
+              ? item.Pertanyaan.substring(0, 80) + '...'
+              : (item.Pertanyaan || '');
             
-            list.sort((a, b) => Number(a.No_Soal || 0) - Number(b.No_Soal || 0));
+            const gambarCell = item.Gambar
+              ? `<a href="${item.Gambar}" target="_blank" title="Lihat gambar">📷</a>` : '';
             
-            list.forEach(item => {
-              const tr = document.createElement('tr');
-              const pertSingkat = (item.Pertanyaan || '').length > 80
-                ? item.Pertanyaan.substring(0, 80) + '...'
-                : (item.Pertanyaan || '');
-              
-              const gambarCell = item.Gambar
-                ? `<a href="${item.Gambar}" target="_blank" title="Lihat gambar">📷</a>` : '';
-              
-              tr.innerHTML = `
-                <td><input type="checkbox" class="banksoal-checkbox" value="${item.id}"></td>
-                <td>${item.No_Soal || ''}</td>
-                <td>${item.Type_Soal || ''}</td>
-                <td>${pertSingkat}</td>
-                <td>${gambarCell}</td>
-                <td class="actions">
-                  <button onclick="editSoal('${item.id}')">Edit</button>
-                  <button onclick="deleteSoal('${item.id}')">Hapus</button>
-                </td>
-              `;
-              tbody.appendChild(tr);
-            });
-          })
-          .catch(err => {
-            showNotification('error', 'Error', 'Gagal membaca bank soal: ' + err.message);
+            tr.innerHTML = `
+              <td><input type="checkbox" class="banksoal-checkbox" value="${item.id}"></td>
+              <td>${item.No_Soal || ''}</td>
+              <td>${item.Type_Soal || ''}</td>
+              <td>${pertSingkat}</td>
+              <td>${gambarCell}</td>
+              <td class="actions">
+                <button onclick="editSoal('${item.id}')">Edit</button>
+                <button onclick="deleteSoal('${item.id}')">Hapus</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
           });
+        } catch (err) {
+          showNotification('error', 'Error', 'Gagal membaca bank soal: ' + err.message);
+        }
       }
 
       function toggleSelectAllBankSoal(src) {
@@ -3082,7 +3037,7 @@
         document.getElementById('bankSoal_select_all').checked = false;
       }
 
-      function deleteSelectedBankSoal() {
+      async function deleteSelectedBankSoal() {
         const checked = document.querySelectorAll('.banksoal-checkbox:checked');
         if (!checked.length) {
           showNotification('warning', 'Peringatan', 'Pilih soal yang akan dihapus');
@@ -3092,25 +3047,26 @@
         showConfirmation(
           'Hapus Soal Terpilih',
           `Yakin akan menghapus ${checked.length} soal terpilih?`,
-          function() {
-            const promises = [];
-            checked.forEach(cb => {
-              promises.push(bankSoalRef.child(cb.value).remove());
-            });
-            
-            Promise.all(promises)
-              .then(() => {
-                showNotification('success', 'Berhasil', `${checked.length} soal berhasil dihapus`);
-                loadBankSoalTable();
-              })
-              .catch(err => {
-                showNotification('error', 'Gagal', 'Gagal menghapus soal: ' + err.message);
-              });
+          async function() {
+            try {
+              const ids = Array.from(checked).map(cb => cb.value);
+              const { error } = await supabase
+                .from('bank_soal')
+                .delete()
+                .in('id', ids);
+              
+              if (error) throw error;
+              
+              showNotification('success', 'Berhasil', `${checked.length} soal berhasil dihapus`);
+              loadBankSoalTable();
+            } catch (err) {
+              showNotification('error', 'Gagal', 'Gagal menghapus soal: ' + err.message);
+            }
           }
         );
       }
 
-      function deleteAllBankSoal() {
+      async function deleteAllBankSoal() {
         if (!currentMapelForBank) {
           showNotification('error', 'Error', 'Pilih mata pelajaran terlebih dahulu');
           return;
@@ -3119,468 +3075,184 @@
         showConfirmation(
           'Hapus Semua Soal',
           'Yakin akan menghapus SEMUA soal pada mata pelajaran ini? Tindakan ini tidak dapat dibatalkan!',
-          function() {
-            bankSoalRef.orderByChild('ID_Mapel').equalTo(currentMapelForBank).once('value')
-              .then(snapshot => {
-                const promises = [];
-                let count = 0;
-                
-                snapshot.forEach(childSnap => {
-                  promises.push(bankSoalRef.child(childSnap.key).remove());
-                  count++;
-                });
-                
-                if (count === 0) {
-                  showNotification('info', 'Info', 'Tidak ada soal untuk dihapus');
-                  return;
-                }
-                
-                Promise.all(promises)
-                  .then(() => {
-                    showNotification('success', 'Berhasil', `${count} soal berhasil dihapus`);
-                    loadBankSoalTable();
-                  })
-                  .catch(err => {
-                    showNotification('error', 'Gagal', 'Gagal menghapus soal: ' + err.message);
-                  });
-              })
-              .catch(err => {
-                showNotification('error', 'Gagal', 'Gagal membaca data soal: ' + err.message);
-              });
+          async function() {
+            try {
+              const { error } = await supabase
+                .from('bank_soal')
+                .delete()
+                .eq('ID_Mapel', currentMapelForBank);
+              
+              if (error) throw error;
+              
+              const count = checked.length;
+              if (count === 0) {
+                showNotification('info', 'Info', 'Tidak ada soal untuk dihapus');
+                return;
+              }
+              
+              showNotification('success', 'Berhasil', `${count} soal berhasil dihapus`);
+              loadBankSoalTable();
+            } catch (err) {
+              showNotification('error', 'Gagal', 'Gagal menghapus soal: ' + err.message);
+            }
           }
         );
       }
 
-      // ====== IMPORT BANK SOAL FUNCTIONS ======
-
-function openImportBankSoalModal() {
-  if (!currentAgendaForBank) {
-    showNotification('error', 'Error', 'Pilih Agenda Ujian terlebih dahulu di Tab Bank Soal');
-    return;
-  }
-  
-  const container = document.getElementById('import-banksoal-mapel-list');
-  container.innerHTML = 'Memuat daftar mata pelajaran...';
-  
-  // Load daftar mata pelajaran untuk agenda ini
-  if (!mapelRef) return;
-  
-  mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
-    .then(snapshot => {
-      importBankSoalMapelMap = {};
-      let html = '<strong>Mata Pelajaran dalam Agenda Ini:</strong><br>';
-      
-      if (!snapshot.exists()) {
-        html += '<p style="color:var(--text-muted); font-size:11px; margin-top:4px;">Tidak ada mata pelajaran. Buat dulu di Tab Mata Pelajaran.</p>';
-      } else {
-        html += '<div style="max-height:150px; overflow-y:auto; margin-top:6px;">';
-        snapshot.forEach(childSnap => {
-          const data = childSnap.val();
-          const mapelName = data.Nama_Mata_Pelajaran || '';
-          const mapelId = childSnap.key;
-          
-          if (mapelName) {
-            importBankSoalMapelMap[mapelName] = mapelId;
-            html += `
-              <div style="font-size:12px; padding:4px 6px; background:var(--surface-alt); border-radius:4px; margin-bottom:4px;">
-                ✓ ${mapelName}
-              </div>
-            `;
-          }
-        });
-        html += '</div>';
-      }
-      
-      container.innerHTML = html;
-      showModal('modal-import-banksoal');
-    })
-    .catch(err => {
-      container.innerHTML = `<p style="color:var(--danger);">Error: ${err.message}</p>`;
-      showModal('modal-import-banksoal');
-    });
-}
-
-function importBankSoalFromFile() {
-  const fileInput = document.getElementById('file_import_banksoal');
-  const file = fileInput.files[0];
-  
-  if (!file) {
-    showNotification('error', 'Error', 'Pilih file CSV terlebih dahulu');
-    return;
-  }
-  
-  if (!currentAgendaForBank) {
-    showNotification('error', 'Error', 'Pilih Agenda Ujian terlebih dahulu');
-    return;
-  }
-  
-  if (Object.keys(importBankSoalMapelMap).length === 0) {
-    showNotification('error', 'Error', 'Tidak ada mata pelajaran yang tersedia. Buat dulu di Tab Mata Pelajaran.');
-    return;
-  }
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const csvContent = e.target.result;
-      const rows = csvContent.split('\n');
-      
-      if (rows.length < 2) {
-        showNotification('error', 'Error', 'File CSV kosong atau format salah');
-        return;
-      }
-      
-      // Parse header
-      const headers = rows[0].split(',').map(h => h.trim());
-      
-      // Cek kolom wajib
-      const requiredCols = ['No_Soal', 'Mata_Pelajaran', 'Pertanyaan'];
-      const missingCols = requiredCols.filter(col => !headers.includes(col));
-      
-      if (missingCols.length > 0) {
-        showNotification('error', 'Format Error', `Kolom wajib tidak ditemukan: ${missingCols.join(', ')}`);
-        return;
-      }
-      
-      showNotification('info', 'Memproses', `Membaca ${rows.length - 1} baris data...`, 0);
-      
-      let successCount = 0;
-      let errorCount = 0;
-      let promises = [];
-      
-      // Process each row
-      for (let i = 1; i < rows.length; i++) {
-        if (!rows[i].trim()) continue;
-        
-        const cols = rows[i].split(',').map(c => c.trim());
-        if (cols.length < 3) continue;
-        
-        const rowData = {};
-        headers.forEach((header, index) => {
-          if (index < cols.length) {
-            rowData[header] = cols[index];
-          }
-        });
-        
-        // Validasi data
-        const noSoal = rowData.No_Soal || '';
-        const mapelName = rowData.Mata_Pelajaran || '';
-        const pertanyaan = rowData.Pertanyaan || '';
-        const typeSoal = rowData.Type_Soal || 'Pilihan Ganda Tunggal';
-        
-        if (!noSoal || !mapelName || !pertanyaan) {
-          errorCount++;
-          continue;
-        }
-        
-        // Cek apakah mapel ada di sistem
-        const mapelId = importBankSoalMapelMap[mapelName];
-        if (!mapelId) {
-          errorCount++;
-          continue;
-        }
-        
-        // Prepare soal data
-        const soalData = {
-          ID_Agenda: currentAgendaForBank,
-          ID_Mapel: mapelId,
-          Nama_Mata_Pelajaran: mapelName,
-          No_Soal: noSoal,
-          Pertanyaan: pertanyaan,
-          Type_Soal: typeSoal,
-          Gambar: rowData.Gambar_URL || rowData.Gambar || '',
-          Pilihan_A: rowData.Pilihan_A || rowData.A || '',
-          Pilihan_B: rowData.Pilihan_B || rowData.B || '',
-          Pilihan_C: rowData.Pilihan_C || rowData.C || '',
-          Pilihan_D: rowData.Pilihan_D || rowData.D || '',
-          Pilihan_E: rowData.Pilihan_E || rowData.E || ''
-        };
-        
-        // Add pernyataan if exists
-        for (let j = 1; j <= 10; j++) {
-          const key = `Pernyataan_${j}`;
-          if (rowData[key]) {
-            soalData[key] = rowData[key];
-          }
-        }
-        
-        // Add pejodohan if exists
-        for (let j = 1; j <= 10; j++) {
-          const kiriKey = `Pasangan_kiri_${j}`;
-          const kananKey = `Pasangan_kanan_${j}`;
-          if (rowData[kiriKey]) soalData[kiriKey] = rowData[kiriKey];
-          if (rowData[kananKey]) soalData[kananKey] = rowData[kananKey];
-        }
-        
-        // Save to Firebase
-        promises.push(
-          bankSoalRef.push(soalData).then(() => {
-            successCount++;
-          }).catch(err => {
-            errorCount++;
-            console.error('Error saving soal:', err);
-          })
-        );
-      }
-      
-      // Wait for all saves
-      Promise.all(promises).then(() => {
-        hideAllNotifications();
-        
-        if (successCount > 0) {
-          showNotification('success', 'Import Berhasil', 
-            `${successCount} soal berhasil diimport. ${errorCount > 0 ? `(${errorCount} gagal)` : ''}`);
-          
-          // Refresh table
-          if (currentMapelForBank) {
-            loadBankSoalTable();
-          }
-        } else {
-          showNotification('error', 'Import Gagal', 
-            `Tidak ada soal yang berhasil diimport. ${errorCount} error.`);
-        }
-        
-        hideModal('modal-import-banksoal');
-        document.getElementById('file_import_banksoal').value = '';
-        
-      }).catch(err => {
-        hideAllNotifications();
-        showNotification('error', 'Import Error', 'Terjadi kesalahan saat menyimpan data: ' + err.message);
-      });
-      
-    } catch (error) {
-      hideAllNotifications();
-      showNotification('error', 'Parse Error', 'Gagal membaca file CSV: ' + error.message);
-    }
-  };
-  
-  reader.onerror = function() {
-    showNotification('error', 'File Error', 'Gagal membaca file');
-  };
-  
-  reader.readAsText(file);
-}
-
-function downloadTemplateBankSoal() {
-  // Create CSV template content
-  const headers = [
-    'No_Soal',
-    'Mata_Pelajaran',
-    'Pertanyaan',
-    'Type_Soal',
-    'Gambar_URL',
-    'Pilihan_A',
-    'Pilihan_B',
-    'Pilihan_C',
-    'Pilihan_D',
-    'Pilihan_E',
-    'Pernyataan_1',
-    'Pernyataan_2',
-    'Pernyataan_3',
-    'Pernyataan_4',
-    'Pernyataan_5',
-    'Pernyataan_6',
-    'Pernyataan_7',
-    'Pernyataan_8',
-    'Pernyataan_9',
-    'Pernyataan_10'
-  ];
-  
-  const exampleRow = [
-    '1',
-    'Matematika',
-    'Berapakah hasil dari 2 + 2?',
-    'Pilihan Ganda Tunggal',
-    'https://example.com/image.jpg',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    ''
-  ];
-  
-  const csvContent = [headers.join(','), exampleRow.join(',')].join('\n');
-  
-  // Create download link
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'Template_Import_Bank_Soal.csv';
-  link.style.display = 'none';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-  
-  showNotification('success', 'Template Downloaded', 'File template berhasil diunduh');
-}
-
+      // ====== IMPORT FUNCTIONS ======
       function downloadTemplatePeserta() {
-  const headers = [
-    'Nama_Peserta',
-    'Password',
-    'Jenjang_Studi',
-    'Kelas',
-    'Asal_Sekolah',
-    'No_WA_Peserta',
-    'No_WA_Ortu',
-    'ID_Agenda'
-  ];
-  
-  const exampleRow = [
-    'Budi Santoso',
-    'password123',
-    'SMA',
-    '12 IPA 1',
-    'SMA Negeri 1 Jakarta',
-    '08123456789',
-    '08129876543',
-    'agenda_id_1'
-  ];
-  
-  const csvContent = [headers.join(','), exampleRow.join(',')].join('\n');
-  
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'Template_Import_Peserta.csv';
-  link.style.display = 'none';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-  
-  showNotification('success', 'Template Downloaded', 'File template peserta berhasil diunduh');
-}
+        const headers = [
+          'Nama_Peserta',
+          'Password',
+          'Jenjang_Studi',
+          'Kelas',
+          'Asal_Sekolah',
+          'No_WA_Peserta',
+          'No_WA_Ortu',
+          'ID_Agenda'
+        ];
+        
+        const exampleRow = [
+          'Budi Santoso',
+          'password123',
+          'SMA',
+          '12 IPA 1',
+          'SMA Negeri 1 Jakarta',
+          '08123456789',
+          '08129876543',
+          'agenda_id_1'
+        ];
+        
+        const csvContent = [headers.join(','), exampleRow.join(',')].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'Template_Import_Peserta.csv';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showNotification('success', 'Template Downloaded', 'File template peserta berhasil diunduh');
+      }
 
-function importPesertaFromFile() {
-  const fileInput = document.getElementById('file_import_peserta');
-  const file = fileInput.files[0];
-  
-  if (!file) {
-    showNotification('error', 'Error', 'Pilih file CSV terlebih dahulu');
-    return;
-  }
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const csvContent = e.target.result;
-      const rows = csvContent.split('\n');
-      
-      if (rows.length < 2) {
-        showNotification('error', 'Error', 'File CSV kosong atau format salah');
-        return;
-      }
-      
-      const headers = rows[0].split(',').map(h => h.trim());
-      const requiredCols = ['Nama_Peserta', 'Password', 'No_WA_Peserta', 'ID_Agenda'];
-      const missingCols = requiredCols.filter(col => !headers.includes(col));
-      
-      if (missingCols.length > 0) {
-        showNotification('error', 'Format Error', `Kolom wajib tidak ditemukan: ${missingCols.join(', ')}`);
-        return;
-      }
-      
-      showNotification('info', 'Memproses', `Mengimport ${rows.length - 1} peserta...`, 0);
-      
-      let successCount = 0;
-      let errorCount = 0;
-      let promises = [];
-      
-      for (let i = 1; i < rows.length; i++) {
-        if (!rows[i].trim()) continue;
+      async function importPesertaFromFile() {
+        const fileInput = document.getElementById('file_import_peserta');
+        const file = fileInput.files[0];
         
-        const cols = rows[i].split(',').map(c => c.trim());
-        if (cols.length < 4) continue;
-        
-        const rowData = {};
-        headers.forEach((header, index) => {
-          if (index < cols.length) {
-            rowData[header] = cols[index];
-          }
-        });
-        
-        // Generate NIS from phone number
-        const noWa = rowData.No_WA_Peserta || '';
-        const nis = generateNISFromNoWA(noWa);
-        
-        if (!nis) {
-          errorCount++;
-          continue;
+        if (!file) {
+          showNotification('error', 'Error', 'Pilih file CSV terlebih dahulu');
+          return;
         }
         
-        const pesertaData = {
-          NIS_Username: nis,
-          Nama_Peserta: rowData.Nama_Peserta || '',
-          Password: rowData.Password || '123456',
-          Jenjang_Studi: rowData.Jenjang_Studi || '',
-          Kelas: rowData.Kelas || '',
-          Asal_Sekolah: rowData.Asal_Sekolah || '',
-          No_WA_Peserta: noWa,
-          No_WA_Ortu: rowData.No_WA_Ortu || '',
-          ID_Agenda: rowData.ID_Agenda || ''
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          try {
+            const csvContent = e.target.result;
+            const rows = csvContent.split('\n');
+            
+            if (rows.length < 2) {
+              showNotification('error', 'Error', 'File CSV kosong atau format salah');
+              return;
+            }
+            
+            const headers = rows[0].split(',').map(h => h.trim());
+            const requiredCols = ['Nama_Peserta', 'Password', 'No_WA_Peserta', 'ID_Agenda'];
+            const missingCols = requiredCols.filter(col => !headers.includes(col));
+            
+            if (missingCols.length > 0) {
+              showNotification('error', 'Format Error', `Kolom wajib tidak ditemukan: ${missingCols.join(', ')}`);
+              return;
+            }
+            
+            showNotification('info', 'Memproses', `Mengimport ${rows.length - 1} peserta...`, 0);
+            
+            let successCount = 0;
+            let errorCount = 0;
+            const pesertaData = [];
+            
+            for (let i = 1; i < rows.length; i++) {
+              if (!rows[i].trim()) continue;
+              
+              const cols = rows[i].split(',').map(c => c.trim());
+              if (cols.length < 4) continue;
+              
+              const rowData = {};
+              headers.forEach((header, index) => {
+                if (index < cols.length) {
+                  rowData[header] = cols[index];
+                }
+              });
+              
+              // Generate NIS from phone number
+              const noWa = rowData.No_WA_Peserta || '';
+              const nis = generateNISFromNoWA(noWa);
+              
+              if (!nis) {
+                errorCount++;
+                continue;
+              }
+              
+              const data = {
+                NIS_Username: nis,
+                Nama_Peserta: rowData.Nama_Peserta || '',
+                Password: rowData.Password || '123456',
+                Jenjang_Studi: rowData.Jenjang_Studi || '',
+                Kelas: rowData.Kelas || '',
+                Asal_Sekolah: rowData.Asal_Sekolah || '',
+                No_WA_Peserta: noWa,
+                No_WA_Ortu: rowData.No_WA_Ortu || '',
+                ID_Agenda: rowData.ID_Agenda || ''
+              };
+              
+              // Check for required fields
+              if (!data.Nama_Peserta || !data.Password || !data.ID_Agenda) {
+                errorCount++;
+                continue;
+              }
+              
+              pesertaData.push(data);
+            }
+            
+            if (pesertaData.length > 0) {
+              const { error } = await supabase
+                .from('peserta')
+                .insert(pesertaData);
+              
+              if (error) throw error;
+              
+              successCount = pesertaData.length;
+            }
+            
+            hideAllNotifications();
+            
+            if (successCount > 0) {
+              showNotification('success', 'Import Berhasil', 
+                `${successCount} peserta berhasil diimport. ${errorCount > 0 ? `(${errorCount} gagal)` : ''}`);
+              loadPeserta();
+            } else {
+              showNotification('error', 'Import Gagal', 
+                `Tidak ada peserta yang berhasil diimport. ${errorCount} error.`);
+            }
+            
+            hideModal('modal-import-peserta');
+            document.getElementById('file_import_peserta').value = '';
+            
+          } catch (error) {
+            hideAllNotifications();
+            showNotification('error', 'Parse Error', 'Gagal membaca file CSV: ' + error.message);
+          }
         };
         
-        // Check for required fields
-        if (!pesertaData.Nama_Peserta || !pesertaData.Password || !pesertaData.ID_Agenda) {
-          errorCount++;
-          continue;
-        }
+        reader.onerror = function() {
+          showNotification('error', 'File Error', 'Gagal membaca file');
+        };
         
-        promises.push(
-          pesertaRef.push(pesertaData).then(() => {
-            successCount++;
-          }).catch(err => {
-            errorCount++;
-            console.error('Error saving peserta:', err);
-          })
-        );
+        reader.readAsText(file);
       }
-      
-      Promise.all(promises).then(() => {
-        hideAllNotifications();
-        
-        if (successCount > 0) {
-          showNotification('success', 'Import Berhasil', 
-            `${successCount} peserta berhasil diimport. ${errorCount > 0 ? `(${errorCount} gagal)` : ''}`);
-        } else {
-          showNotification('error', 'Import Gagal', 
-            `Tidak ada peserta yang berhasil diimport. ${errorCount} error.`);
-        }
-        
-        hideModal('modal-import-peserta');
-        document.getElementById('file_import_peserta').value = '';
-        
-      }).catch(err => {
-        hideAllNotifications();
-        showNotification('error', 'Import Error', 'Terjadi kesalahan saat menyimpan data: ' + err.message);
-      });
-      
-    } catch (error) {
-      hideAllNotifications();
-      showNotification('error', 'Parse Error', 'Gagal membaca file CSV: ' + error.message);
-    }
-  };
-  
-  reader.onerror = function() {
-    showNotification('error', 'File Error', 'Gagal membaca file');
-  };
-  
-  reader.readAsText(file);
-}
 
       function openBankSoalModalForCreate() {
         if (!currentAgendaForBank || !currentMapelForBank) {
@@ -3598,7 +3270,7 @@ function importPesertaFromFile() {
         }
         
         try {
-          const firebaseSoalId = document.getElementById('firebaseSoalId').value;
+          const id = document.getElementById('firebaseSoalId').value;
           const ID_Agenda = currentAgendaForBank;
           const ID_Mapel = currentMapelForBank;
           const Nama_Mata_Pelajaran = document.getElementById('Nama_Mata_Pelajaran_Bank').value || '';
@@ -3634,134 +3306,164 @@ function importPesertaFromFile() {
             data['Pasangan_kanan_' + j] = document.getElementById('Pasangan_kanan_' + j)?.value.trim() || '';
           }
           
+          // File upload handling (simplified for Supabase)
           const fileInput = document.getElementById('Gambar');
           const file = fileInput.files[0];
           const existingUrl = document.getElementById('Gambar_Url').value || '';
           
           if (file) {
-            showNotification('info', 'Upload Gambar', 'Sedang mengupload gambar...', 0);
-            
-            const context = {
-              agenda: Nama_Mata_Pelajaran,
-              mapel: ID_Mapel,
-              noSoal: No_Soal
+            showNotification('info', 'Upload Gambar', 'Menyimpan gambar...', 3000);
+            // For Supabase Storage, you would need additional setup
+            // For now, we'll just save the image as base64
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+              data.Gambar = e.target.result;
+              await completeSaveSoal(id, data);
             };
-            
-            const imageUrl = await uploadToGoogleDrive(file, context);
-            data.Gambar = imageUrl;
+            reader.readAsDataURL(file);
           } else {
             data.Gambar = existingUrl;
+            await completeSaveSoal(id, data);
           }
           
-          if (firebaseSoalId) {
-            await bankSoalRef.child(firebaseSoalId).update(data);
+        } catch (error) {
+          console.error('Save soal error:', error);
+          showNotification('error', 'Gagal', 'Gagal menyimpan soal: ' + error.message);
+          hideAllNotifications();
+        }
+      }
+
+      async function completeSaveSoal(id, data) {
+        try {
+          if (id) {
+            const { error } = await supabase
+              .from('bank_soal')
+              .update(data)
+              .eq('id', id);
+            
+            if (error) throw error;
+            
             showNotification('success', 'Berhasil', 'Soal berhasil diperbarui');
           } else {
-            await bankSoalRef.push(data);
+            const { error } = await supabase
+              .from('bank_soal')
+              .insert([data]);
+            
+            if (error) throw error;
+            
             showNotification('success', 'Berhasil', 'Soal berhasil disimpan');
           }
           
           resetBankSoalForm(false);
           loadBankSoalTable();
           hideModal('modal-banksoal');
+          hideAllNotifications();
           
         } catch (error) {
-          console.error('Save soal error:', error);
           showNotification('error', 'Gagal', 'Gagal menyimpan soal: ' + error.message);
-        } finally {
           hideAllNotifications();
         }
       }
 
-      function editSoal(firebaseSoalId) {
-        if (!bankSoalRef) return;
-        
-        bankSoalRef.child(firebaseSoalId).once('value')
-          .then(snapshot => {
-            const data = snapshot.val();
-            document.getElementById('firebaseSoalId').value = firebaseSoalId;
-            currentAgendaForBank = data.ID_Agenda || '';
-            currentMapelForBank = data.ID_Mapel || '';
+      async function editSoal(id) {
+        try {
+          const { data, error } = await supabase
+            .from('bank_soal')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (error) throw error;
+          
+          document.getElementById('firebaseSoalId').value = id;
+          currentAgendaForBank = data.ID_Agenda || '';
+          currentMapelForBank = data.ID_Mapel || '';
+          
+          document.getElementById('ID_Agenda_Bank').value = currentAgendaForBank;
+          document.getElementById('ID_Mapel_Bank').value = currentMapelForBank;
+          document.getElementById('Nama_Mata_Pelajaran_Bank').value = data.Nama_Mata_Pelajaran || '';
+          document.getElementById('No_Soal').value = data.No_Soal || '';
+          document.getElementById('Pertanyaan').value = data.Pertanyaan || '';
+          document.getElementById('Type_Soal').value = data.Type_Soal || '';
+          document.getElementById('Gambar_Url').value = data.Gambar || '';
+          
+          if (data.Gambar) {
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = '';
             
-            document.getElementById('ID_Agenda_Bank').value = currentAgendaForBank;
-            document.getElementById('ID_Mapel_Bank').value = currentMapelForBank;
-            document.getElementById('Nama_Mata_Pelajaran_Bank').value = data.Nama_Mata_Pelajaran || '';
-            document.getElementById('No_Soal').value = data.No_Soal || '';
-            document.getElementById('Pertanyaan').value = data.Pertanyaan || '';
-            document.getElementById('Type_Soal').value = data.Type_Soal || '';
-            document.getElementById('Gambar_Url').value = data.Gambar || '';
+            const img = document.createElement('img');
+            img.src = data.Gambar;
+            img.className = 'image-preview';
+            img.alt = 'Gambar Soal';
+            container.appendChild(img);
+          }
+          
+          document.getElementById('Pilihan_A').value = data.Pilihan_A || '';
+          document.getElementById('Pilihan_B').value = data.Pilihan_B || '';
+          document.getElementById('Pilihan_C').value = data.Pilihan_C || '';
+          document.getElementById('Pilihan_D').value = data.Pilihan_D || '';
+          document.getElementById('Pilihan_E').value = data.Pilihan_E || '';
+          
+          for (let i = 1; i <= 10; i++) {
+            const el = document.getElementById('Pernyataan_' + i);
+            if (el) el.value = data['Pernyataan_' + i] || '';
+          }
+          
+          for (let i = 1; i <= 10; i++) {
+            const lk = document.getElementById('Pasangan_kiri_' + i);
+            const rk = document.getElementById('Pasangan_kanan_' + i);
+            if (lk) lk.value = data['Pasangan_kiri_' + i] || '';
+            if (rk) rk.value = data['Pasangan_kanan_' + i] || '';
+          }
+          
+          document.getElementById('Bank_Agenda_Select').value = currentAgendaForBank;
+          
+          const mpSelect = document.getElementById('Bank_Mapel_Select');
+          if (supabase) {
+            const { data: mapelData } = await supabase
+              .from('mata_pelajaran')
+              .select('id, Nama_Mata_Pelajaran')
+              .eq('ID_Agenda', currentAgendaForBank);
             
-            if (data.Gambar) {
-              const container = document.getElementById('imagePreviewContainer');
-              container.innerHTML = '';
-              
-              const img = document.createElement('img');
-              img.src = data.Gambar;
-              img.className = 'image-preview';
-              img.alt = 'Gambar Soal';
-              container.appendChild(img);
+            if (mapelData) {
+              mpSelect.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+              mapelData.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = item.Nama_Mata_Pelajaran || item.id;
+                opt.dataset.nama = item.Nama_Mata_Pelajaran || '';
+                mpSelect.appendChild(opt);
+              });
+              mpSelect.value = currentMapelForBank;
             }
-            
-            document.getElementById('Pilihan_A').value = data.Pilihan_A || '';
-            document.getElementById('Pilihan_B').value = data.Pilihan_B || '';
-            document.getElementById('Pilihan_C').value = data.Pilihan_C || '';
-            document.getElementById('Pilihan_D').value = data.Pilihan_D || '';
-            document.getElementById('Pilihan_E').value = data.Pilihan_E || '';
-            
-            for (let i = 1; i <= 10; i++) {
-              const el = document.getElementById('Pernyataan_' + i);
-              if (el) el.value = data['Pernyataan_' + i] || '';
-            }
-            
-            for (let i = 1; i <= 10; i++) {
-              const lk = document.getElementById('Pasangan_kiri_' + i);
-              const rk = document.getElementById('Pasangan_kanan_' + i);
-              if (lk) lk.value = data['Pasangan_kiri_' + i] || '';
-              if (rk) rk.value = data['Pasangan_kanan_' + i] || '';
-            }
-            
-            document.getElementById('Bank_Agenda_Select').value = currentAgendaForBank;
-            
-            const mpSelect = document.getElementById('Bank_Mapel_Select');
-            if (mapelRef) {
-              mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
-                .then(snap => {
-                  mpSelect.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
-                  snap.forEach(child => {
-                    const id = child.key;
-                    const d = child.val();
-                    const opt = document.createElement('option');
-                    opt.value = id;
-                    opt.textContent = d.Nama_Mata_Pelajaran || id;
-                    opt.dataset.nama = d.Nama_Mata_Pelajaran || '';
-                    mpSelect.appendChild(opt);
-                  });
-                  mpSelect.value = currentMapelForBank;
-                });
-            }
-            
-            onTypeSoalChange();
-            showModal('modal-banksoal');
-            
-          })
-          .catch(err => {
-            showNotification('error', 'Gagal', 'Gagal mengambil soal: ' + err.message);
-          });
+          }
+          
+          onTypeSoalChange();
+          showModal('modal-banksoal');
+          
+        } catch (err) {
+          showNotification('error', 'Gagal', 'Gagal mengambil soal: ' + err.message);
+        }
       }
 
-      function deleteSoal(firebaseSoalId) {
+      async function deleteSoal(id) {
         showConfirmation(
           'Hapus Soal',
           'Apakah Anda yakin ingin menghapus soal ini?',
-          function() {
-            bankSoalRef.child(firebaseSoalId).remove()
-              .then(() => {
-                showNotification('success', 'Berhasil', 'Soal berhasil dihapus');
-                loadBankSoalTable();
-              })
-              .catch(err => {
-                showNotification('error', 'Gagal', 'Gagal menghapus soal: ' + err.message);
-              });
+          async function() {
+            try {
+              const { error } = await supabase
+                .from('bank_soal')
+                .delete()
+                .eq('id', id);
+              
+              if (error) throw error;
+              
+              showNotification('success', 'Berhasil', 'Soal berhasil dihapus');
+              loadBankSoalTable();
+            } catch (err) {
+              showNotification('error', 'Gagal', 'Gagal menghapus soal: ' + err.message);
+            }
           }
         );
       }
@@ -3812,46 +3514,38 @@ function importPesertaFromFile() {
         }
       }
 
-      // ====== MONITORING FUNCTIONS ======
-      function loadMonitoring() {
-        if (!monitoringRef) return;
-        
-        monitoringRef.orderByChild('TglJam_Mulai').on('value', snapshot => {
+      // ====== MONITORING FUNCTIONS (SUPABASE VERSION) ======
+      async function loadMonitoring() {
+        try {
+          const { data, error } = await supabase
+            .from('monitoring_pengerjaan')
+            .select('*')
+            .order('TglJam_Mulai', { ascending: false });
+          
+          if (error) throw error;
+          
           const tbody = document.querySelector('#monitoringTable tbody');
           tbody.innerHTML = '';
           
-          const dataArray = [];
-          snapshot.forEach(childSnap => {
-            const id = childSnap.key;
-            const data = childSnap.val();
-            dataArray.push({ id, data });
-          });
-          
-          dataArray.sort((a, b) => {
-            const dateA = new Date(a.data.TglJam_Mulai || 0);
-            const dateB = new Date(b.data.TglJam_Mulai || 0);
-            return dateB - dateA;
-          });
-          
-          dataArray.forEach(item => {
+          data.forEach(item => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td><input type="checkbox" class="monitoring-checkbox" value="${item.id}"></td>
-              <td>${item.data.NIS_Username || ''}</td>
-              <td>${item.data.Nama_Peserta || ''}</td>
-              <td>${item.data.Aktivitas_Login || ''}</td>
-              <td>${item.data.Judul_Ujian || ''}</td>
-              <td>${item.data.Mata_Pelajaran || ''}</td>
-              <td>${item.data.Status_Pengerjaan || ''}</td>
-              <td>${item.data.TglJam_Mulai || ''}</td>
-              <td>${item.data.Last_Update || ''}</td>
-              <td>${item.data.TglJam_Selesai || ''}</td>
+              <td>${item.NIS_Username || ''}</td>
+              <td>${item.Nama_Peserta || ''}</td>
+              <td>${item.Aktivitas_Login || ''}</td>
+              <td>${item.Judul_Ujian || ''}</td>
+              <td>${item.Mata_Pelajaran || ''}</td>
+              <td>${item.Status_Pengerjaan || ''}</td>
+              <td>${item.TglJam_Mulai || ''}</td>
+              <td>${item.Last_Update || ''}</td>
+              <td>${item.TglJam_Selesai || ''}</td>
             `;
             tbody.appendChild(tr);
           });
-        }, error => {
+        } catch (error) {
           showNotification('error', 'Error', 'Gagal membaca Monitoring: ' + error.message);
-        });
+        }
       }
 
       function toggleSelectAllMonitoring(src) {
@@ -3859,7 +3553,7 @@ function importPesertaFromFile() {
         cbs.forEach(cb => cb.checked = src.checked);
       }
 
-      function deleteSelectedMonitoring() {
+      async function deleteSelectedMonitoring() {
         const checked = document.querySelectorAll('.monitoring-checkbox:checked');
         if (!checked.length) {
           showNotification('warning', 'Peringatan', 'Pilih data monitoring yang akan dihapus');
@@ -3869,48 +3563,43 @@ function importPesertaFromFile() {
         showConfirmation(
           'Hapus Monitoring',
           `Yakin akan menghapus ${checked.length} data monitoring?`,
-          function() {
-            const promises = [];
-            checked.forEach(cb => {
-              promises.push(monitoringRef.child(cb.value).remove());
-            });
-            
-            Promise.all(promises)
-              .then(() => {
-                showNotification('success', 'Berhasil', `${checked.length} data monitoring berhasil dihapus`);
-              })
-              .catch(err => {
-                showNotification('error', 'Gagal', 'Gagal menghapus data monitoring: ' + err.message);
-              });
+          async function() {
+            try {
+              const ids = Array.from(checked).map(cb => cb.value);
+              const { error } = await supabase
+                .from('monitoring_pengerjaan')
+                .delete()
+                .in('id', ids);
+              
+              if (error) throw error;
+              
+              showNotification('success', 'Berhasil', `${checked.length} data monitoring berhasil dihapus`);
+              loadMonitoring();
+            } catch (err) {
+              showNotification('error', 'Gagal', 'Gagal menghapus data monitoring: ' + err.message);
+            }
           }
         );
       }
 
-      // ====== JAWABAN SISWA FUNCTIONS ======
-      function loadJawaban() {
-        if (!jawabanRef) return;
-        
-        jawabanRef.orderByChild('TglJam_Mulai').on('value', snapshot => {
+      // ====== JAWABAN SISWA FUNCTIONS (SUPABASE VERSION) ======
+      async function loadJawaban() {
+        try {
+          const { data, error } = await supabase
+            .from('jawaban_siswa')
+            .select('*')
+            .order('TglJam_Mulai', { ascending: false });
+          
+          if (error) throw error;
+          
           const tbody = document.querySelector('#jawabanTable tbody');
           const headerTr = document.getElementById('jawabanHeaderRow');
           tbody.innerHTML = '';
           headerTr.innerHTML = '';
           
-          const rows = [];
-          snapshot.forEach(childSnap => {
-            rows.push({ id: childSnap.key, data: childSnap.val() });
-          });
-          
-          rows.sort((a, b) => {
-            const dateA = new Date(a.data.TglJam_Mulai || 0);
-            const dateB = new Date(b.data.TglJam_Mulai || 0);
-            return dateB - dateA;
-          });
-          
           let maxJ = 0;
-          rows.forEach(r => {
-            const d = r.data;
-            for (const key in d) {
+          data.forEach(item => {
+            for (const key in item) {
               if (key.indexOf('Jwb') === 0) {
                 const num = parseInt(key.substring(3), 10);
                 if (!isNaN(num) && num > maxJ) maxJ = num;
@@ -3939,8 +3628,8 @@ function importPesertaFromFile() {
           `;
           headerTr.innerHTML = headerHtml;
           
-          rows.forEach(r => {
-            const d = r.data;
+          data.forEach(item => {
+            const d = item;
             const nis = d.NIS_Username || '';
             const namaSiswa = pesertaNameMap[nis] || nis;
             
@@ -3962,7 +3651,7 @@ function importPesertaFromFile() {
               : '';
             
             let rowHtml = `
-              <td><input type="checkbox" class="jawaban-checkbox" value="${r.id}"></td>
+              <td><input type="checkbox" class="jawaban-checkbox" value="${item.id}"></td>
               <td>${namaSiswa} ${jawabanBadge}</td>
               <td>${d.Judul_Ujian || ''}</td>
               <td>${d.Mata_Pelajaran || ''}</td>
@@ -3981,7 +3670,7 @@ function importPesertaFromFile() {
               <td>${d.EndAt || ''}</td>
               <td>${d.TglJam_Selesai || ''}</td>
               <td class="actions">
-                <button onclick="openResetJawabanModal('${r.id}')" title="Reset jawaban siswa">🔄 Reset</button>
+                <button onclick="openResetJawabanModal('${item.id}')" title="Reset jawaban siswa">🔄 Reset</button>
               </td>
             `;
             
@@ -3990,9 +3679,9 @@ function importPesertaFromFile() {
             tbody.appendChild(tr);
           });
           
-        }, error => {
+        } catch (error) {
           showNotification('error', 'Error', 'Gagal membaca Jawaban Siswa: ' + error.message);
-        });
+        }
       }
 
       function toggleSelectAllJawaban(src) {
@@ -4000,7 +3689,7 @@ function importPesertaFromFile() {
         cbs.forEach(cb => cb.checked = src.checked);
       }
 
-      function deleteSelectedJawaban() {
+      async function deleteSelectedJawaban() {
         const checked = document.querySelectorAll('.jawaban-checkbox:checked');
         if (!checked.length) {
           showNotification('warning', 'Peringatan', 'Pilih data jawaban yang akan dihapus');
@@ -4010,404 +3699,74 @@ function importPesertaFromFile() {
         showConfirmation(
           'Hapus Jawaban',
           `Yakin akan menghapus ${checked.length} data jawaban?`,
-          function() {
-            const promises = [];
-            checked.forEach(cb => {
-              promises.push(jawabanRef.child(cb.value).remove());
-            });
-            
-            Promise.all(promises)
-              .then(() => {
-                showNotification('success', 'Berhasil', `${checked.length} data jawaban berhasil dihapus`);
-              })
-              .catch(err => {
-                showNotification('error', 'Gagal', 'Gagal menghapus data jawaban: ' + err.message);
-              });
+          async function() {
+            try {
+              const ids = Array.from(checked).map(cb => cb.value);
+              const { error } = await supabase
+                .from('jawaban_siswa')
+                .delete()
+                .in('id', ids);
+              
+              if (error) throw error;
+              
+              showNotification('success', 'Berhasil', `${checked.length} data jawaban berhasil dihapus`);
+              loadJawaban();
+            } catch (err) {
+              showNotification('error', 'Gagal', 'Gagal menghapus data jawaban: ' + err.message);
+            }
           }
         );
       }
 
-      function resetAllJawabanForSelected() {
-        const checked = document.querySelectorAll('.jawaban-checkbox:checked');
-        if (!checked.length) {
-          showNotification('warning', 'Peringatan', 'Pilih minimal satu data jawaban untuk direset');
-          return;
-        }
-        
-        const siswaMap = new Map();
-        
-        checked.forEach(cb => {
-          const row = cb.closest('tr');
-          if (row) {
-            const cells = row.querySelectorAll('td');
-            if (cells.length >= 5) {
-              const nis = cells[1].textContent.split('(')[1]?.replace(')', '') || '';
-              const namaSiswa = cells[1].textContent.split(' ')[0] || '';
-              const mapel = cells[3].textContent || '';
-              
-              if (nis && namaSiswa) {
-                if (!siswaMap.has(nis)) {
-                  siswaMap.set(nis, {
-                    name: namaSiswa,
-                    mapels: new Set()
-                  });
-                }
-                if (mapel) {
-                  siswaMap.get(nis).mapels.add(mapel);
-                }
-              }
-            }
-          }
-        });
-        
-        if (siswaMap.size > 0) {
-          openMultiResetModal(siswaMap);
-        }
-      }
-
-      // ====== RESET JAWABAN FUNCTIONS ======
-      function openResetJawabanModal(jawabanId) {
-        if (!jawabanRef) return;
-        
-        jawabanRef.child(jawabanId).once('value')
-          .then(snapshot => {
-            const data = snapshot.val();
-            if (!data) {
-              showNotification('error', 'Error', 'Data jawaban tidak ditemukan');
-              return;
-            }
-            
-            selectedJawabanForReset = { id: jawabanId, data: data };
-            
-            const nis = data.NIS_Username || '';
-            const namaSiswa = pesertaNameMap[nis] || nis;
-            
-            document.getElementById('resetStudentName').textContent = `Siswa: ${namaSiswa} (${nis})`;
-            document.getElementById('resetStudentAgenda').textContent = `Agenda: ${data.Judul_Ujian || ''}`;
-            document.getElementById('resetStudentStatus').textContent = `Status: ${data.Status || 'Tidak diketahui'}`;
-            
-            loadMapelForReset(data.ID_Agenda, data.Mata_Pelajaran);
-            showModal('modal-reset-jawaban');
-            
-          })
-          .catch(error => {
-            showNotification('error', 'Error', 'Gagal mengambil data jawaban: ' + error.message);
-          });
-      }
-
-      function loadMapelForReset(agendaId, currentMapel) {
-        const container = document.getElementById('resetMapelList');
-        container.innerHTML = '<p style="font-size: 12px; color: var(--text-muted);">Memuat daftar mata pelajaran...</p>';
-        
-        if (!agendaId || !mapelRef) return;
-        
-        mapelRef.orderByChild('ID_Agenda').equalTo(agendaId).once('value')
-          .then(snapshot => {
-            resetMapelList = [];
-            container.innerHTML = '';
-            
-            let hasMapel = false;
-            snapshot.forEach(childSnap => {
-              const mapelData = childSnap.val();
-              const mapelName = mapelData.Nama_Mata_Pelajaran || '';
-              
-              if (mapelName) {
-                resetMapelList.push({
-                  name: mapelName,
-                  selected: mapelName === currentMapel
-                });
-                hasMapel = true;
-              }
-            });
-            
-            if (!hasMapel) {
-              container.innerHTML = '<p style="color: var(--text-muted); font-size: 12px; text-align: center;">Tidak ada mata pelajaran untuk agenda ini</p>';
-              return;
-            }
-            
-            resetMapelList.forEach((mapel, index) => {
-              const item = document.createElement('div');
-              item.className = 'reset-mapel-item';
-              
-              item.innerHTML = `
-                <input type="checkbox" id="reset_mapel_${index}" ${mapel.selected ? 'checked' : ''} 
-                       onchange="toggleResetMapel(${index}, this.checked)">
-                <label for="reset_mapel_${index}">${mapel.name}</label>
-              `;
-              
-              container.appendChild(item);
-            });
-            
-            const allItem = document.createElement('div');
-            allItem.className = 'reset-mapel-item';
-            allItem.style.borderTop = '2px solid var(--border)';
-            allItem.style.marginTop = '8px';
-            allItem.style.paddingTop = '12px';
-            
-            allItem.innerHTML = `
-              <input type="checkbox" id="reset_all_mapel" onchange="toggleAllResetMapel(this.checked)">
-              <label for="reset_all_mapel" style="font-weight: 600;">Pilih Semua Mata Pelajaran</label>
-            `;
-            
-            container.appendChild(allItem);
-            
-          })
-          .catch(error => {
-            container.innerHTML = `<p style="color: #dc2626; font-size: 12px;">Error: ${error.message}</p>`;
-          });
-      }
-
-      function toggleResetMapel(index, isChecked) {
-        if (resetMapelList[index]) {
-          resetMapelList[index].selected = isChecked;
-        }
-      }
-
-      function toggleAllResetMapel(isChecked) {
-        resetMapelList.forEach((mapel, index) => {
-          mapel.selected = isChecked;
-          const checkbox = document.getElementById(`reset_mapel_${index}`);
-          if (checkbox) {
-            checkbox.checked = isChecked;
-          }
-        });
-      }
-
-      function confirmResetJawaban() {
-        if (!selectedJawabanForReset || !jawabanRef) {
-          showNotification('error', 'Error', 'Tidak ada data jawaban yang dipilih');
-          return;
-        }
-        
-        const selectedMapels = resetMapelList.filter(mapel => mapel.selected);
-        
-        if (selectedMapels.length === 0) {
-          showNotification('warning', 'Peringatan', 'Pilih minimal satu mata pelajaran untuk direset');
-          return;
-        }
-        
-        const confirmMessage = selectedMapels.length === 1
-          ? `Yakin reset jawaban untuk mata pelajaran "${selectedMapels[0].name}"?`
-          : `Yakin reset jawaban untuk ${selectedMapels.length} mata pelajaran?`;
-        
-        showConfirmation(
-          'Konfirmasi Reset Jawaban',
-          confirmMessage,
-          function() {
-            performResetJawaban(selectedMapels);
-          }
-        );
-      }
-
-      async function performResetJawaban(selectedMapels) {
-        try {
-          showNotification('info', 'Memproses', 'Sedang mereset jawaban...', 0);
-          
-          const jawabanData = selectedJawabanForReset.data;
-          const jawabanId = selectedJawabanForReset.id;
-          const nis = jawabanData.NIS_Username || '';
-          const namaSiswa = pesertaNameMap[nis] || nis;
-          
-          for (const mapel of selectedMapels) {
-            const snapshot = await jawabanRef.orderByChild('NIS_Username').equalTo(nis).once('value');
-            
-            const updates = {};
-            snapshot.forEach(childSnap => {
-              const data = childSnap.val();
-              if (data.Mata_Pelajaran === mapel.name) {
-                const updatedData = { ...data };
-                
-                Object.keys(updatedData).forEach(key => {
-                  if (key.startsWith('Jwb')) {
-                    updatedData[key] = '';
-                  }
-                });
-                
-                updatedData.Status = 'Belum Mengerjakan';
-                updatedData.TglJam_Mulai = '';
-                updatedData.EndAt = '';
-                updatedData.TglJam_Selesai = '';
-                updatedData.Last_Update = new Date().toISOString();
-                
-                updates[childSnap.key] = updatedData;
-              }
-            });
-            
-            if (Object.keys(updates).length > 0) {
-              await jawabanRef.update(updates);
-            }
-          }
-          
-          hideModal('modal-reset-jawaban');
-          showNotification('success', 'Berhasil', 
-            `Jawaban untuk ${selectedMapels.length} mata pelajaran berhasil direset untuk ${namaSiswa}`);
-          
-        } catch (error) {
-          console.error('Reset jawaban error:', error);
-          showNotification('error', 'Gagal', 'Gagal mereset jawaban: ' + error.message);
-        } finally {
-          hideAllNotifications();
-        }
-      }
-
-      function openMultiResetModal(siswaMap) {
-        const container = document.getElementById('resetMapelList');
-        container.innerHTML = '';
-        
-        let html = `
-          <div style="margin-bottom: 12px; font-size: 12px; color: var(--text-muted);">
-            ${siswaMap.size} siswa terpilih. Pilih mata pelajaran yang akan direset:
-          </div>
-        `;
-        
-        const allMapels = new Set();
-        siswaMap.forEach(siswa => {
-          siswa.mapels.forEach(mapel => allMapels.add(mapel));
-        });
-        
-        Array.from(allMapels).sort().forEach((mapel, index) => {
-          html += `
-            <div class="reset-mapel-item">
-              <input type="checkbox" id="multi_mapel_${index}" checked>
-              <label for="multi_mapel_${index}">${mapel}</label>
-            </div>
-          `;
-        });
-        
-        if (allMapels.size === 0) {
-          html += '<p style="color: var(--text-muted); text-align: center;">Tidak ada mata pelajaran yang ditemukan</p>';
-        }
-        
-        container.innerHTML = html;
-        
-        document.getElementById('resetStudentName').textContent = `${siswaMap.size} Siswa Terpilih`;
-        document.getElementById('resetStudentAgenda').textContent = `Total: ${checked.length} data jawaban`;
-        document.getElementById('resetStudentStatus').textContent = `Mapel: ${allMapels.size} mata pelajaran`;
-        
-        window.confirmMultiReset = function() {
-          const selectedMapels = [];
-          Array.from(allMapels).forEach((mapel, index) => {
-            const checkbox = document.getElementById(`multi_mapel_${index}`);
-            if (checkbox && checkbox.checked) {
-              selectedMapels.push(mapel);
-            }
-          });
-          
-          if (selectedMapels.length === 0) {
-            showNotification('warning', 'Peringatan', 'Pilih minimal satu mata pelajaran');
-            return;
-          }
-          
-          showConfirmation(
-            'Reset Jawaban Multiple',
-            `Yakin reset jawaban untuk ${siswaMap.size} siswa pada ${selectedMapels.length} mata pelajaran?`,
-            async function() {
-              try {
-                showNotification('info', 'Memproses', 'Sedang mereset jawaban...', 0);
-                
-                const updates = {};
-                let resetCount = 0;
-                
-                for (const [nis, siswa] of siswaMap) {
-                  for (const mapel of selectedMapels) {
-                    const snapshot = await jawabanRef.orderByChild('NIS_Username').equalTo(nis).once('value');
-                    
-                    snapshot.forEach(childSnap => {
-                      const data = childSnap.val();
-                      if (data.Mata_Pelajaran === mapel) {
-                        const updatedData = { ...data };
-                        
-                        Object.keys(updatedData).forEach(key => {
-                          if (key.startsWith('Jwb')) {
-                            updatedData[key] = '';
-                          }
-                        });
-                        
-                        updatedData.Status = 'Belum Mengerjakan';
-                        updatedData.TglJam_Mulai = '';
-                        updatedData.EndAt = '';
-                        updatedData.TglJam_Selesai = '';
-                        updatedData.Last_Update = new Date().toISOString();
-                        
-                        updates[childSnap.key] = updatedData;
-                        resetCount++;
-                      }
-                    });
-                  }
-                }
-                
-                if (Object.keys(updates).length > 0) {
-                  await jawabanRef.update(updates);
-                }
-                
-                hideModal('modal-reset-jawaban');
-                showNotification('success', 'Berhasil', 
-                  `${resetCount} jawaban berhasil direset untuk ${siswaMap.size} siswa`);
-                
-              } catch (error) {
-                console.error('Multi reset error:', error);
-                showNotification('error', 'Gagal', 'Gagal mereset jawaban: ' + error.message);
-              } finally {
-                hideAllNotifications();
-              }
-            }
-          );
-        };
-        
-        const confirmBtn = document.querySelector('#modal-reset-jawaban button[onclick="confirmResetJawaban()"]');
-        if (confirmBtn) {
-          confirmBtn.onclick = window.confirmMultiReset;
-        }
-        
-        showModal('modal-reset-jawaban');
-      }
-
-      // ====== CETAK KARTU FUNCTIONS ======
+      // ====== CETAK KARTU FUNCTIONS (SUPABASE VERSION) ======
       function onChangeAgendaCetakKartu() {
         currentAgendaForKartu = document.getElementById('CetakKartu_Agenda_Select').value;
         loadKartuPesertaTable();
       }
 
-      function loadKartuPesertaTable() {
+      async function loadKartuPesertaTable() {
         const tbody = document.querySelector('#cetakKartuTable tbody');
         tbody.innerHTML = '';
         kartuPesertaList = [];
         
-        if (!currentAgendaForKartu || !pesertaRef) return;
+        if (!currentAgendaForKartu) return;
         
-        pesertaRef.orderByChild('ID_Agenda').equalTo(currentAgendaForKartu).once('value')
-          .then(snapshot => {
-            let idx = 0;
-            snapshot.forEach(childSnap => {
-              const data = childSnap.val();
-              kartuPesertaList.push(data);
-              
-              const tr = document.createElement('tr');
-              tr.innerHTML = `
-                <td><input type="checkbox" class="kartu-checkbox" data-index="${idx}"></td>
-                <td>${data.NIS_Username || ''}</td>
-                <td>${data.Nama_Peserta || ''}</td>
-                <td>
-                  <div class="password-wrapper" style="position: relative; display: inline-block; width: 100px;">
-                    <input type="password" value="${data.Password || ''}" readonly 
-                           style="width: 100%; padding-right: 30px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 30px 4px 8px;">
-                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this.previousElementSibling, this)" 
-                            style="position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; font-size: 11px; padding: 0;">
-                      👁️
-                    </button>
-                  </div>
-                </td>
-                <td class="actions">
-                  <button type="button" onclick="printKartuSingle(${idx})">Print</button>
-                </td>
-              `;
-              tbody.appendChild(tr);
-              idx++;
-            });
-          })
-          .catch(err => {
-            showNotification('error', 'Error', 'Gagal membaca peserta: ' + err.message);
+        try {
+          const { data, error } = await supabase
+            .from('peserta')
+            .select('*')
+            .eq('ID_Agenda', currentAgendaForKartu)
+            .order('Nama_Peserta', { ascending: true });
+          
+          if (error) throw error;
+          
+          data.forEach((item, idx) => {
+            kartuPesertaList.push(item);
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><input type="checkbox" class="kartu-checkbox" data-index="${idx}"></td>
+              <td>${item.NIS_Username || ''}</td>
+              <td>${item.Nama_Peserta || ''}</td>
+              <td>
+                <div class="password-wrapper" style="position: relative; display: inline-block; width: 100px;">
+                  <input type="password" value="${item.Password || ''}" readonly 
+                         style="width: 100%; padding-right: 30px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 30px 4px 8px;">
+                  <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this.previousElementSibling, this)" 
+                          style="position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; font-size: 11px; padding: 0;">
+                    👁️
+                  </button>
+                </div>
+              </td>
+              <td class="actions">
+                <button type="button" onclick="printKartuSingle(${idx})">Print</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
           });
+        } catch (err) {
+          showNotification('error', 'Error', 'Gagal membaca peserta: ' + err.message);
+        }
       }
 
       function toggleSelectAllKartu(src) {
@@ -4536,16 +3895,6 @@ function importPesertaFromFile() {
         if (!el) return;
         el.classList.remove('show');
         document.body.style.overflow = '';
-        
-        if (id === 'modal-reset-jawaban') {
-          selectedJawabanForReset = null;
-          resetMapelList = [];
-          
-          const confirmBtn = document.querySelector('#modal-reset-jawaban button[onclick="confirmResetJawaban()"]');
-          if (confirmBtn) {
-            confirmBtn.onclick = confirmResetJawaban;
-          }
-        }
       }
 
       function togglePasswordVisibility(inputElement, buttonElement) {
@@ -4562,12 +3911,124 @@ function importPesertaFromFile() {
         }
       }
 
+      // ====== EXPORT FUNCTIONS ======
+      async function exportPesertaToCsv() {
+        try {
+          const { data, error } = await supabase
+            .from('peserta')
+            .select('*');
+          
+          if (error) throw error;
+          
+          if (data.length === 0) {
+            showNotification('warning', 'Peringatan', 'Tidak ada data peserta untuk diexport');
+            return;
+          }
+          
+          const headers = [
+            'NIS_Username',
+            'Nama_Peserta',
+            'Password',
+            'Jenjang_Studi',
+            'Kelas',
+            'Asal_Sekolah',
+            'No_WA_Peserta',
+            'No_WA_Ortu',
+            'ID_Agenda'
+          ];
+          
+          const rows = data.map(item => [
+            item.NIS_Username || '',
+            item.Nama_Peserta || '',
+            item.Password || '',
+            item.Jenjang_Studi || '',
+            item.Kelas || '',
+            item.Asal_Sekolah || '',
+            item.No_WA_Peserta || '',
+            item.No_WA_Ortu || '',
+            item.ID_Agenda || ''
+          ]);
+          
+          const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.join(','))
+          ].join('\n');
+          
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `Data_Peserta_${new Date().toISOString().split('T')[0]}.csv`;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          
+          showNotification('success', 'Export Berhasil', 'Data peserta berhasil diexport ke CSV');
+          
+        } catch (error) {
+          showNotification('error', 'Export Gagal', 'Gagal mengexport data: ' + error.message);
+        }
+      }
+
+      async function exportJawabanToCsv() {
+        try {
+          const { data, error } = await supabase
+            .from('jawaban_siswa')
+            .select('*');
+          
+          if (error) throw error;
+          
+          if (data.length === 0) {
+            showNotification('warning', 'Peringatan', 'Tidak ada data jawaban untuk diexport');
+            return;
+          }
+          
+          // Get all possible columns
+          const allColumns = new Set();
+          data.forEach(item => {
+            Object.keys(item).forEach(key => {
+              allColumns.add(key);
+            });
+          });
+          
+          const headers = Array.from(allColumns);
+          const rows = data.map(item => 
+            headers.map(header => item[header] || '')
+          );
+          
+          const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.join(','))
+          ].join('\n');
+          
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `Data_Jawaban_${new Date().toISOString().split('T')[0]}.csv`;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          
+          showNotification('success', 'Export Berhasil', 'Data jawaban berhasil diexport ke CSV');
+          
+        } catch (error) {
+          showNotification('error', 'Export Gagal', 'Gagal mengexport data: ' + error.message);
+        }
+      }
+
       // ====== INITIALIZATION ======
       document.addEventListener('DOMContentLoaded', function() {
         checkLoginStatus();
         
-        if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes('https://script.google.com/macros/s/AKfycbwOXJ-kL-ywDQv-GAe4bDlngnTN7ljOr6fTdtz3a6O0x-JTgyo/exec')) {
-          showNotification('warning', 'Konfigurasi', 'URL Google Apps Script belum dikonfigurasi. Upload gambar akan menggunakan fallback ke base64.', 10000);
+        // Check if Supabase is configured
+        if (SUPABASE_URL === 'https://your-project.supabase.co') {
+          showNotification('warning', 'Konfigurasi', 
+            'Supabase URL dan API key belum dikonfigurasi. Silakan ganti dengan kredensial Supabase Anda.', 10000);
         }
       });
 
