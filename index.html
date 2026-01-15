@@ -3182,6 +3182,62 @@ function deleteAllBankSoal() {
     doSave(existingUrl);
   }
 }
+function uploadImageToDrive(base64Data, fileName, mimeType) {
+  if (!base64Data) {
+    throw new Error('Data gambar kosong');
+  }
+
+  var bytes = Utilities.base64Decode(base64Data);
+  var blob = Utilities.newBlob(bytes, mimeType || 'application/octet-stream', fileName);
+
+  var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+  var file = folder.createFile(blob);
+
+  // Set agar bisa diakses via link
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  var fileId = file.getId();
+  var link = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1000';
+  return link;
+}
+
+function uploadImageToDrive(base64Data, fileName, mimeType) {
+  try {
+    if (!base64Data) {
+      throw new Error('Data gambar kosong');
+    }
+    
+    // Decode base64 data
+    var bytes = Utilities.base64Decode(base64Data);
+    var blob = Utilities.newBlob(bytes, mimeType || 'image/png', fileName);
+    
+    // Get the folder
+    var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+    
+    // Upload file to Google Drive
+    var file = folder.createFile(blob);
+    
+    // Set sharing permissions to anyone with link can view
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    
+    // Get the file ID
+    var fileId = file.getId();
+    
+    // Return the thumbnail URL (this will give you the link format you want)
+    // You can adjust the size (sz parameter) as needed
+    var link = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1200';
+    
+    // Alternatively, you can return the direct link like this:
+    // var link = 'https://drive.google.com/uc?id=' + fileId;
+    
+    // Or the view link:
+    // var link = 'https://drive.google.com/file/d/' + fileId + '/view';
+    
+    return link;
+  } catch (error) {
+    return 'Error: ' + error.toString();
+  }
+}
 
 // Fungsi untuk menampilkan notifikasi
 function showNotification(type, title, message, duration = 5000) {
