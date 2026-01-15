@@ -3636,96 +3636,194 @@
 
       // ====== RESET JAWABAN FUNCTIONS ======
       function openResetJawabanModal(jawabanId) {
-        if (!jawabanRef) return;
-        
-        jawabanRef.child(jawabanId).once('value')
-          .then(snapshot => {
-            const data = snapshot.val();
-            if (!data) {
-              showNotification('error', 'Error', 'Data jawaban tidak ditemukan');
-              return;
-            }
-            
-            selectedJawabanForReset = { id: jawabanId, data: data };
-            
-            const nis = data.NIS_Username || '';
-            const namaSiswa = pesertaNameMap[nis] || nis;
-            
-            document.getElementById('resetStudentName').textContent = `Siswa: ${namaSiswa} (${nis})`;
-            document.getElementById('resetStudentAgenda').textContent = `Agenda: ${data.Judul_Ujian || ''}`;
-            document.getElementById('resetStudentStatus').textContent = `Status: ${data.Status || 'Tidak diketahui'}`;
-            
-            loadMapelForReset(data.ID_Agenda, data.Mata_Pelajaran);
-            showModal('modal-reset-jawaban');
-            
-          })
-          .catch(error => {
-            showNotification('error', 'Error', 'Gagal mengambil data jawaban: ' + error.message);
-          });
+  if (!jawabanRef) return;
+  
+  showNotification('info', 'Memuat', 'Sedang mengambil data jawaban...', 0);
+  
+  jawabanRef.child(jawabanId).once('value')
+    .then(snapshot => {
+      const data = snapshot.val();
+      if (!data) {
+        hideAllNotifications();
+        showNotification('error', 'Error', 'Data jawaban tidak ditemukan');
+        return;
       }
+      
+      selectedJawabanForReset = { id: jawabanId, data: data };
+      
+      const nis = data.NIS_Username || '';
+      const namaSiswa = pesertaNameMap[nis] || nis;
+      const agendaId = data.ID_Agenda || '';
+      
+      // Cari nama agenda dari cache
+      let agendaName = 'Tidak diketahui';
+      if (agendaId && agendaCache[agendaId]) {
+        agendaName = agendaCache[agendaId].Agenda_Ujian || agendaId;
+      }
+      
+      document.getElementById('resetStudentName').textContent = `Siswa: ${namaSiswa} (${nis})`;
+      document.getElementById('resetStudentAgenda').textContent = `Agenda: ${agendaName}`;
+      document.getElementById('resetStudentStatus').textContent = `Status: ${data.Status || 'Tidak diketahui'}`;
+      
+      // Debug info
+      console.log('Data jawaban yang akan direset:', {
+        id: jawabanId,
+        nis: nis,
+        agendaId: agendaId,
+        agendaName: agendaName,
+        currentMapel: data.Mata_Pelajaran,
+        agendaCacheKeys: Object.keys(agendaCache)
+      });
+      
+      loadMapelForReset(agendaId, data.Mata_Pelajaran);
+      hideAllNotifications();
+      showModal('modal-reset-jawaban');
+      
+    })
+    .catch(error => {
+      hideAllNotifications();
+      showNotification('error', 'Error', 'Gagal mengambil data jawaban: ' + error.message);
+      console.error('Error openResetJawabanModal:', error);
+    });
+}
 
       function loadMapelForReset(agendaId, currentMapel) {
-        const container = document.getElementById('resetMapelList');
-        container.innerHTML = '<p style="font-size: 12px; color: var(--text-muted);">Memuat daftar mata pelajaran...</p>';
-        
-        if (!agendaId || !mapelRef) return;
-        
-        mapelRef.orderByChild('ID_Agenda').equalTo(agendaId).once('value')
-          .then(snapshot => {
-            resetMapelList = [];
-            container.innerHTML = '';
+  const container = document.getElementById('resetMapelList');
+  container.innerHTML = '<p style="font-size: 12px; color: var(--text-muted);">Memuat daftar mata pelajaran...</p>';
+  
+  if (!agendaId) {
+    container.innerHTML = '<p style="color: #dc2626; font-size: 12px;">Error: ID Agenda tidak valid</p>';
+    return;
+  }
+  
+  if (!mapelRef) {
+    container.innerHTML = '<p style="color: #dc2626; font-size: 12px;">Error: Firebase tidak terinisialisasi</p>';
+    return;
+  }
+  
+  // Coba cari mapel berdasarkan ID_Agenda terlebih dahulu
+  mapelRef.orderByChild('ID_Agenda').equalTo(agendaId).once('value')
+    .then(snapshot => {
+      resetMapelList = [];
+      container.innerHTML = '';
+      
+      let hasMapel = false;
+      
+      if (snapshot.exists()) {
+        snapshot.forEach(childSnap => {
+          const mapelData = childSnap.val();
+          const mapelName = mapelData.Nama_Mata_Pelajaran || '';
+          
+          if (mapelName) {
+            resetMapelList.push({
+              name: mapelName,
+              selected: mapelName === currentMapel || mapelName.trim() === currentMapel?.trim()
+            });
+            hasMapel = true;
             
-            let hasMapel = false;
-            snapshot.forEach(childSnap => {
+            // Tampilkan di console untuk debugging
+            console.log('Mapel ditemukan:', mapelName, 'current:', currentMapel);
+          }
+        });
+      }
+      
+      // Jika tidak ada mapel yang ditemukan, coba cara alternatif
+      if (!hasMapel) {
+        console.log('Tidak ada mapel ditemukan untuk agenda:', agendaId);
+        console.log('Current mapel dari data jawaban:', currentMapel);
+        
+        // Jika currentMapel ada, gunakan itu saja
+        if (currentMapel && currentMapel.trim() !== '') {
+          resetMapelList.push({
+            name: currentMapel,
+            selected: true
+          });
+          hasMapel = true;
+          console.log('Menggunakan mapel dari data jawaban:', currentMapel);
+        }
+        
+        // Coba cari semua mapel tanpa filter agenda
+        if (!hasMapel) {
+          return mapelRef.once('value').then(allSnapshot => {
+            const allMapels = new Set();
+            allSnapshot.forEach(childSnap => {
               const mapelData = childSnap.val();
               const mapelName = mapelData.Nama_Mata_Pelajaran || '';
-              
               if (mapelName) {
-                resetMapelList.push({
-                  name: mapelName,
-                  selected: mapelName === currentMapel
-                });
-                hasMapel = true;
+                allMapels.add(mapelName);
               }
             });
             
-            if (!hasMapel) {
-              container.innerHTML = '<p style="color: var(--text-muted); font-size: 12px; text-align: center;">Tidak ada mata pelajaran untuk agenda ini</p>';
-              return;
+            if (allMapels.size > 0) {
+              Array.from(allMapels).sort().forEach(mapelName => {
+                resetMapelList.push({
+                  name: mapelName,
+                  selected: mapelName === currentMapel || mapelName.trim() === currentMapel?.trim()
+                });
+              });
+              hasMapel = true;
+              console.log('Menggunakan semua mapel yang tersedia:', Array.from(allMapels));
             }
             
-            resetMapelList.forEach((mapel, index) => {
-              const item = document.createElement('div');
-              item.className = 'reset-mapel-item';
-              
-              item.innerHTML = `
-                <input type="checkbox" id="reset_mapel_${index}" ${mapel.selected ? 'checked' : ''} 
-                       onchange="toggleResetMapel(${index}, this.checked)">
-                <label for="reset_mapel_${index}">${mapel.name}</label>
-              `;
-              
-              container.appendChild(item);
-            });
-            
-            const allItem = document.createElement('div');
-            allItem.className = 'reset-mapel-item';
-            allItem.style.borderTop = '2px solid var(--border)';
-            allItem.style.marginTop = '8px';
-            allItem.style.paddingTop = '12px';
-            
-            allItem.innerHTML = `
-              <input type="checkbox" id="reset_all_mapel" onchange="toggleAllResetMapel(this.checked)">
-              <label for="reset_all_mapel" style="font-weight: 600;">Pilih Semua Mata Pelajaran</label>
-            `;
-            
-            container.appendChild(allItem);
-            
-          })
-          .catch(error => {
-            container.innerHTML = `<p style="color: #dc2626; font-size: 12px;">Error: ${error.message}</p>`;
+            updateMapelListUI(container, hasMapel);
           });
+        }
       }
+      
+      updateMapelListUI(container, hasMapel);
+      
+    })
+    .catch(error => {
+      console.error('Error load mapel:', error);
+      container.innerHTML = `
+        <p style="color: #dc2626; font-size: 12px;">
+          Error: ${error.message || 'Gagal memuat data'}
+        </p>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+          ID Agenda: ${agendaId || 'tidak ada'}<br>
+          Mapel saat ini: ${currentMapel || 'tidak ada'}
+        </p>
+      `;
+    });
+}
 
+      function updateMapelListUI(container, hasMapel) {
+  if (!hasMapel) {
+    container.innerHTML = `
+      <div style="padding: 16px; text-align: center;">
+        <p style="color: var(--text-muted); font-size: 12px;">
+          Tidak ada mata pelajaran ditemukan untuk agenda ini
+        </p>
+        <p style="font-size: 11px; color: var(--warning); margin-top: 8px;">
+          Coba tambahkan mata pelajaran terlebih dahulu di tab "Mata Pelajaran"
+        </p>
+      </div>
+    `;
+    return;
+  }
+  
+  let html = '<div style="margin-bottom: 8px; font-size: 11px; color: var(--text-muted);">';
+  html += `${resetMapelList.length} mata pelajaran tersedia</div>`;
+  
+  resetMapelList.forEach((mapel, index) => {
+    html += `
+      <div class="reset-mapel-item">
+        <input type="checkbox" id="reset_mapel_${index}" ${mapel.selected ? 'checked' : ''} 
+               onchange="toggleResetMapel(${index}, this.checked)">
+        <label for="reset_mapel_${index}">${mapel.name}</label>
+      </div>
+    `;
+  });
+  
+  html += `
+    <div class="reset-mapel-item" style="border-top: 2px solid var(--border); margin-top: 8px; padding-top: 12px;">
+      <input type="checkbox" id="reset_all_mapel" onchange="toggleAllResetMapel(this.checked)">
+      <label for="reset_all_mapel" style="font-weight: 600;">Pilih Semua Mata Pelajaran</label>
+    </div>
+  `;
+  
+  container.innerHTML = html;
+}
       function toggleResetMapel(index, isChecked) {
         if (resetMapelList[index]) {
           resetMapelList[index].selected = isChecked;
