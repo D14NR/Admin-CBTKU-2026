@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -1076,21 +1077,6 @@
       .preview-container {
         margin-top: 8px;
       }
-
-      /* Tambahkan di bagian CSS */
-#jawabanMapelList label {
-  cursor: pointer;
-  user-select: none;
-  transition: color 0.2s;
-}
-
-#jawabanMapelList label:hover {
-  color: var(--primary);
-}
-
-#jawabanMapelList input[type="checkbox"] {
-  transform: translateY(1px);
-}
     </style>
   </head>
   <body class="login-page">
@@ -1362,57 +1348,32 @@
         </div>
       </div>
 
-<!-- TAB JAWABAN SISWA -->
-<div id="tab-jawaban" class="tab-content" style="display:none;">
-  <div class="section-header">
-    <h2>Jawaban Siswa</h2>
-    <p class="section-subtitle">Rekap jawaban peserta untuk setiap sesi ujian.</p>
-  </div>
+      <!-- TAB JAWABAN SISWA -->
+      <div id="tab-jawaban" class="tab-content" style="display:none;">
+        <div class="section-header">
+          <h2>Jawaban Siswa</h2>
+          <p class="section-subtitle">Rekap jawaban peserta untuk setiap sesi ujian.</p>
+        </div>
 
-  <!-- Filter Agenda -->
-  <label>
-    Pilih Agenda Ujian:
-    <select id="Jawaban_Agenda_Select" onchange="onChangeAgendaJawaban()">
-      <option value="">-- Pilih Agenda Ujian dulu --</option>
-    </select>
-  </label>
+        <div style="margin-bottom:8px; display:flex; flex-wrap:wrap; gap:6px;">
+          <button type="button" onclick="deleteSelectedJawaban()">Hapus Terpilih</button>
+          <button type="button" onclick="exportJawabanToCsv()">Export Data</button>
+        </div>
 
-  <!-- Daftar Mata Pelajaran untuk dipilih -->
-  <div id="jawaban-mapel-selection" style="margin:10px 0; display:none;">
-    <strong style="display:block; margin-bottom:8px; font-size:13px;">Pilih Mata Pelajaran:</strong>
-    <div id="jawabanMapelList" style="display:flex; flex-wrap:wrap; gap:8px; padding:10px; border-radius:6px; border:1px solid #e5e7eb; background:#f9fafb;">
-      <!-- List mapel akan diisi dinamis -->
-    </div>
-    <div style="margin-top:8px;">
-      <button type="button" onclick="selectAllMapelJawaban()">Pilih Semua</button>
-      <button type="button" onclick="deselectAllMapelJawaban()">Batal Pilih</button>
-    </div>
-  </div>
+        <div class="table-card">
+          <div class="table-container">
+            <table id="jawabanTable">
+              <thead>
+                <tr id="jawabanHeaderRow">
+                  <!-- header diisi dinamis oleh JS -->
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-  <div style="margin:12px 0 10px; display:flex; flex-wrap:wrap; gap:6px;">
-    <button type="button" onclick="loadJawabanBySelection()" style="background:#059669;">Tampilkan Jawaban</button>
-    <button type="button" onclick="deleteSelectedJawaban()">Hapus Terpilih</button>
-    <button type="button" onclick="exportJawabanToCsv()">Export Data</button>
-  </div>
-
-  <div class="section-header">
-    <h2>Daftar Jawaban Siswa</h2>
-    <p class="section-subtitle">Berdasarkan agenda dan mata pelajaran yang dipilih.</p>
-  </div>
-
-  <div class="table-card">
-    <div class="table-container">
-      <table id="jawabanTable">
-        <thead>
-          <tr id="jawabanHeaderRow">
-            <!-- header diisi dinamis oleh JS -->
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-</div>
       <!-- TAB CETAK KARTU -->
       <div id="tab-cetakkartu" class="tab-content" style="display:none;">
         <div class="section-header">
@@ -1967,9 +1928,6 @@
       let currentAgendaForKartu = '';
       let kartuPesertaList = [];
       let agendaCache = {};
-      let currentAgendaForJawaban = '';
-let selectedMapelJawaban = [];
-let jawabanMapelCache = {};
 
       // ====== UTILITY FUNCTIONS ======
       
@@ -2251,7 +2209,7 @@ async function uploadToGoogleDrive(file, context) {
         loadAgendaListForBankSoalDropdown();
         loadAgendaListForCetakKartuDropdown();
         loadMonitoring();
-        loadAgendaListForJawabanDropdown();
+        loadJawaban();
         showTab('peserta');
       }
 
@@ -3481,415 +3439,129 @@ function editSoal(firebaseSoalId) {
         );
       }
 
-      // ====== FUNGSI UNTUK JAWABAN SISWA ======
-
-function loadAgendaListForJawabanDropdown() {
-  const select = document.getElementById('Jawaban_Agenda_Select');
-  if (!agendaRef) return;
-  
-  agendaRef.on('value', snapshot => {
-    const currentValue = select.value;
-    select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
-    
-    snapshot.forEach(childSnap => {
-      const id = childSnap.key;
-      const ag = childSnap.val();
-      const opt = document.createElement('option');
-      opt.value = id;
-      let label = ag.Agenda_Ujian || id;
-      if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
-      opt.textContent = label;
-      select.appendChild(opt);
-    });
-    
-    if (currentValue) select.value = currentValue;
-  });
-}
-
-function onChangeAgendaJawaban() {
-  currentAgendaForJawaban = document.getElementById('Jawaban_Agenda_Select').value;
-  selectedMapelJawaban = [];
-  
-  if (!currentAgendaForJawaban) {
-    document.getElementById('jawaban-mapel-selection').style.display = 'none';
-    document.querySelector('#jawabanTable tbody').innerHTML = '';
-    document.getElementById('jawabanHeaderRow').innerHTML = '';
-    return;
-  }
-  
-  loadMapelForJawabanSelection();
-}
-
-function loadMapelForJawabanSelection() {
-  if (!currentAgendaForJawaban || !mapelRef) return;
-  
-  const container = document.getElementById('jawabanMapelList');
-  container.innerHTML = '<div style="color:var(--text-muted); font-size:12px;">Memuat mata pelajaran...</div>';
-  document.getElementById('jawaban-mapel-selection').style.display = 'block';
-  
-  mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForJawaban).once('value')
-    .then(snapshot => {
-      if (!snapshot.exists()) {
-        container.innerHTML = '<div style="color:var(--danger); font-size:12px;">Tidak ada mata pelajaran untuk agenda ini</div>';
-        return;
-      }
-      
-      container.innerHTML = '';
-      jawabanMapelCache = {};
-      
-      snapshot.forEach(childSnap => {
-        const mapelId = childSnap.key;
-        const data = childSnap.val();
-        const namaMapel = data.Nama_Mata_Pelajaran || mapelId;
+      // ====== JAWABAN SISWA FUNCTIONS ======
+      function loadJawaban() {
+        if (!jawabanRef) return;
         
-        jawabanMapelCache[mapelId] = {
-          id: mapelId,
-          nama: namaMapel,
-          jumlahSoal: data.Jumlah_Soal || 0
-        };
-        
-        const checkboxId = `mapel_jawaban_${mapelId}`;
-        const checkbox = document.createElement('div');
-        checkbox.style.display = 'flex';
-        checkbox.style.alignItems = 'center';
-        checkbox.style.gap = '4px';
-        
-        checkbox.innerHTML = `
-          <input type="checkbox" id="${checkboxId}" value="${mapelId}" 
-                 onchange="toggleMapelSelectionJawaban('${mapelId}', this.checked)">
-          <label for="${checkboxId}" style="font-size:12px; cursor:pointer;">
-            ${namaMapel} (${data.Jumlah_Soal || 0} soal)
-          </label>
-        `;
-        
-        container.appendChild(checkbox);
-      });
-    })
-    .catch(err => {
-      container.innerHTML = '<div style="color:var(--danger); font-size:12px;">Gagal memuat mata pelajaran</div>';
-      showNotification('error', 'Error', 'Gagal memuat mata pelajaran: ' + err.message);
-    });
-}
-
-function toggleMapelSelectionJawaban(mapelId, isChecked) {
-  if (isChecked) {
-    if (!selectedMapelJawaban.includes(mapelId)) {
-      selectedMapelJawaban.push(mapelId);
-    }
-  } else {
-    const index = selectedMapelJawaban.indexOf(mapelId);
-    if (index > -1) {
-      selectedMapelJawaban.splice(index, 1);
-    }
-  }
-}
-
-function selectAllMapelJawaban() {
-  selectedMapelJawaban = [];
-  const checkboxes = document.querySelectorAll('#jawabanMapelList input[type="checkbox"]');
-  checkboxes.forEach(cb => {
-    cb.checked = true;
-    const mapelId = cb.value;
-    if (!selectedMapelJawaban.includes(mapelId)) {
-      selectedMapelJawaban.push(mapelId);
-    }
-  });
-}
-
-function deselectAllMapelJawaban() {
-  selectedMapelJawaban = [];
-  const checkboxes = document.querySelectorAll('#jawabanMapelList input[type="checkbox"]');
-  checkboxes.forEach(cb => {
-    cb.checked = false;
-  });
-}
-
-function loadJawabanBySelection() {
-  if (!currentAgendaForJawaban) {
-    showNotification('error', 'Error', 'Pilih Agenda Ujian terlebih dahulu');
-    return;
-  }
-  
-  if (selectedMapelJawaban.length === 0) {
-    showNotification('error', 'Error', 'Pilih minimal satu mata pelajaran');
-    return;
-  }
-  
-  loadJawabanFiltered();
-}
-
-function loadJawabanFiltered() {
-  if (!jawabanRef) return;
-  
-  const tbody = document.querySelector('#jawabanTable tbody');
-  const headerTr = document.getElementById('jawabanHeaderRow');
-  tbody.innerHTML = '';
-  
-  showNotification('info', 'Memuat', 'Sedang memuat data jawaban...', 3000);
-  
-  // Hitung total soal dari semua mapel yang dipilih
-  let totalSoal = 0;
-  const soalPerMapel = {};
-  
-  selectedMapelJawaban.forEach(mapelId => {
-    const mapel = jawabanMapelCache[mapelId];
-    if (mapel) {
-      soalPerMapel[mapelId] = mapel.jumlahSoal || 0;
-      totalSoal += parseInt(mapel.jumlahSoal || 0);
-    }
-  });
-  
-  // Bangun header
-  let headerHtml = `
-    <th><input type="checkbox" id="jawaban_select_all" onclick="toggleSelectAllJawaban(this)"></th>
-    <th>Nama Siswa</th>
-    <th>Agenda Ujian</th>
-  `;
-  
-  // Tambahkan kolom untuk setiap mapel yang dipilih
-  selectedMapelJawaban.forEach(mapelId => {
-    const mapel = jawabanMapelCache[mapelId];
-    if (mapel) {
-      headerHtml += `<th>${mapel.nama}</th>`;
-    }
-  });
-  
-  headerHtml += `
-    <th>Jenis Tes</th>
-    <th>Status</th>
-    <th>TglJam Mulai</th>
-    <th>TglJam Selesai</th>
-  `;
-  
-  headerTr.innerHTML = headerHtml;
-  
-  // Ambil data jawaban untuk agenda ini
-  jawabanRef.orderByChild('ID_Agenda').equalTo(currentAgendaForJawaban).once('value')
-    .then(snapshot => {
-      if (!snapshot.exists()) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="${4 + selectedMapelJawaban.length + 3}" style="text-align:center; padding:20px; color:var(--text-muted);">
-              Tidak ada data jawaban untuk agenda ini
-            </td>
-          </tr>
-        `;
-        showNotification('info', 'Info', 'Tidak ada data jawaban untuk agenda ini');
-        return;
-      }
-      
-      const jawabanData = [];
-      snapshot.forEach(childSnap => {
-        const data = childSnap.val();
-        // Filter berdasarkan mapel yang dipilih
-        if (selectedMapelJawaban.includes(data.ID_Mapel)) {
-          jawabanData.push({
-            id: childSnap.key,
-            data: data,
-            mapelId: data.ID_Mapel
+        jawabanRef.orderByChild('TglJam_Mulai').on('value', snapshot => {
+          const tbody = document.querySelector('#jawabanTable tbody');
+          const headerTr = document.getElementById('jawabanHeaderRow');
+          tbody.innerHTML = '';
+          headerTr.innerHTML = '';
+          
+          const rows = [];
+          snapshot.forEach(childSnap => {
+            rows.push({ id: childSnap.key, data: childSnap.val() });
           });
-        }
-      });
-      
-      // Group by peserta (NIS_Username)
-      const groupedByPeserta = {};
-      jawabanData.forEach(item => {
-        const nis = item.data.NIS_Username || 'unknown';
-        if (!groupedByPeserta[nis]) {
-          groupedByPeserta[nis] = {
-            namaSiswa: pesertaNameMap[nis] || nis,
-            agenda: item.data.Judul_Ujian || '',
-            jenisTes: '',
-            status: item.data.Status || '',
-            tglMulai: item.data.TglJam_Mulai || '',
-            tglSelesai: item.data.TglJam_Selesai || '',
-            jawabanPerMapel: {}
-          };
-        }
-        
-        // Simpan jawaban per mapel
-        groupedByPeserta[nis].jawabanPerMapel[item.mapelId] = {
-          jawaban: extractJawabanData(item.data, soalPerMapel[item.mapelId]),
-          mapelName: jawabanMapelCache[item.mapelId]?.nama || item.mapelId
-        };
-        
-        // Ambil jenis tes dari agenda cache
-        if (agendaCache[currentAgendaForJawaban]) {
-          groupedByPeserta[nis].jenisTes = agendaCache[currentAgendaForJawaban].Jenis_Tes || '';
-        }
-      });
-      
-      // Tampilkan data dalam tabel
-      Object.keys(groupedByPeserta).forEach(nis => {
-        const peserta = groupedByPeserta[nis];
-        let rowHtml = `
-          <td><input type="checkbox" class="jawaban-checkbox" value="${nis}_${currentAgendaForJawaban}"></td>
-          <td>${peserta.namaSiswa}</td>
-          <td>${peserta.agenda}</td>
-        `;
-        
-        // Tambahkan kolom jawaban untuk setiap mapel yang dipilih
-        selectedMapelJawaban.forEach(mapelId => {
-          const jawabanMapel = peserta.jawabanPerMapel[mapelId];
-          if (jawabanMapel) {
-            // Format jawaban sebagai string (Jwb1: A, Jwb2: B, ...)
-            const jawabanStr = formatJawabanString(jawabanMapel.jawaban);
-            rowHtml += `<td title="${jawabanMapel.mapelName}" style="font-family:monospace; font-size:11px; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${jawabanStr}</td>`;
-          } else {
-            rowHtml += `<td style="color:var(--text-muted); font-style:italic;">Belum ada jawaban</td>`;
+          
+          rows.sort((a, b) => {
+            const dateA = new Date(a.data.TglJam_Mulai || 0);
+            const dateB = new Date(b.data.TglJam_Mulai || 0);
+            return dateB - dateA;
+          });
+          
+          let maxJ = 0;
+          rows.forEach(r => {
+            const d = r.data;
+            for (const key in d) {
+              if (key.indexOf('Jwb') === 0) {
+                const num = parseInt(key.substring(3), 10);
+                if (!isNaN(num) && num > maxJ) maxJ = num;
+              }
+            }
+          });
+          
+          let headerHtml = `
+            <th><input type="checkbox" id="jawaban_select_all" onclick="toggleSelectAllJawaban(this)"></th>
+            <th>Nama Siswa</th>
+            <th>Agenda Ujian</th>
+            <th>Mata Pelajaran</th>
+            <th>Jenis Tes</th>
+          `;
+          
+          for (let i = 1; i <= maxJ; i++) {
+            headerHtml += `<th>Jwb${i}</th>`;
           }
+          
+          headerHtml += `
+            <th>Status</th>
+            <th>TglJam_Mulai</th>
+            <th>EndAt</th>
+            <th>TglJam_Selesai</th>
+          `;
+          headerTr.innerHTML = headerHtml;
+          
+          rows.forEach(r => {
+            const d = r.data;
+            const nis = d.NIS_Username || '';
+            const namaSiswa = pesertaNameMap[nis] || nis;
+            
+            let jenisTes = '';
+            const agendaId = d.ID_Agenda || '';
+            if (agendaId && agendaCache[agendaId]) {
+              jenisTes = agendaCache[agendaId].Jenis_Tes || '';
+            }
+            
+            let rowHtml = `
+              <td><input type="checkbox" class="jawaban-checkbox" value="${r.id}"></td>
+              <td>${namaSiswa}</td>
+              <td>${d.Judul_Ujian || ''}</td>
+              <td>${d.Mata_Pelajaran || ''}</td>
+              <td>${jenisTes}</td>
+            `;
+            
+            for (let i = 1; i <= maxJ; i++) {
+              rowHtml += `<td>${d['Jwb' + i] || ''}</td>`;
+            }
+            
+            rowHtml += `
+              <td>${d.Status || ''}</td>
+              <td>${d.TglJam_Mulai || ''}</td>
+              <td>${d.EndAt || ''}</td>
+              <td>${d.TglJam_Selesai || ''}</td>
+            `;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = rowHtml;
+            tbody.appendChild(tr);
+          });
+          
+        }, error => {
+          showNotification('error', 'Error', 'Gagal membaca Jawaban Siswa: ' + error.message);
         });
-        
-        rowHtml += `
-          <td>${peserta.jenisTes}</td>
-          <td>${peserta.status}</td>
-          <td>${peserta.tglMulai}</td>
-          <td>${peserta.tglSelesai}</td>
-        `;
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = rowHtml;
-        tbody.appendChild(tr);
-      });
-      
-      if (tbody.innerHTML === '') {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="${4 + selectedMapelJawaban.length + 3}" style="text-align:center; padding:20px; color:var(--text-muted);">
-              Tidak ada jawaban untuk mata pelajaran yang dipilih
-            </td>
-          </tr>
-        `;
       }
-      
-    })
-    .catch(err => {
-      showNotification('error', 'Error', 'Gagal membaca data jawaban: ' + err.message);
-    });
-}
-
-function extractJawabanData(data, maxSoal) {
-  const jawaban = {};
-  for (let i = 1; i <= maxSoal; i++) {
-    jawaban[i] = data['Jwb' + i] || '-';
-  }
-  return jawaban;
-}
-
-function formatJawabanString(jawabanObj) {
-  if (!jawabanObj) return '';
-  
-  const parts = [];
-  for (let i = 1; i <= Object.keys(jawabanObj).length; i++) {
-    if (jawabanObj[i] && jawabanObj[i] !== '-') {
-      parts.push(`${i}:${jawabanObj[i]}`);
-    }
-  }
-  
-  return parts.length > 0 ? parts.join(', ') : 'Tidak ada jawaban';
-}
-
 
       function toggleSelectAllJawaban(src) {
         const cbs = document.querySelectorAll('.jawaban-checkbox');
         cbs.forEach(cb => cb.checked = src.checked);
       }
 
-function deleteSelectedJawaban() {
-  const checked = document.querySelectorAll('.jawaban-checkbox:checked');
-  if (!checked.length) {
-    showNotification('warning', 'Peringatan', 'Pilih data jawaban yang akan dihapus');
-    return;
-  }
-  
-  showConfirmation(
-    'Hapus Jawaban',
-    `Yakin akan menghapus ${checked.length} data jawaban?`,
-    function() {
-      const promises = [];
-      checked.forEach(cb => {
-        // Format value: nis_agendaId
-        const value = cb.value;
-        // Hapus semua jawaban untuk NIS dan agenda ini
-        jawabanRef.orderByChild('NIS_Username').equalTo(value.split('_')[0]).once('value')
-          .then(snapshot => {
-            snapshot.forEach(childSnap => {
-              const data = childSnap.val();
-              if (data.ID_Agenda === value.split('_')[1]) {
-                promises.push(jawabanRef.child(childSnap.key).remove());
-              }
-            });
-          });
-      });
-      
-      Promise.all(promises)
-        .then(() => {
-          showNotification('success', 'Berhasil', `${checked.length} data jawaban berhasil dihapus`);
-          loadJawabanFiltered(); // Reload data yang ditampilkan
-        })
-        .catch(err => {
-          showNotification('error', 'Gagal', 'Gagal menghapus data jawaban: ' + err.message);
-        });
-    }
-  );
-}
-
-function exportJawabanToCsv() {
-  if (!currentAgendaForJawaban || selectedMapelJawaban.length === 0) {
-    showNotification('error', 'Error', 'Pilih agenda dan mata pelajaran terlebih dahulu');
-    return;
-  }
-  
-  const rows = [];
-  const tbody = document.querySelector('#jawabanTable tbody');
-  const rowsEl = tbody.querySelectorAll('tr');
-  
-  if (rowsEl.length === 0) {
-    showNotification('warning', 'Peringatan', 'Tidak ada data untuk diexport');
-    return;
-  }
-  
-  // Buat header CSV
-  const headers = ['Nama Siswa', 'Agenda Ujian'];
-  selectedMapelJawaban.forEach(mapelId => {
-    const mapel = jawabanMapelCache[mapelId];
-    if (mapel) {
-      headers.push(mapel.nama);
-    }
-  });
-  headers.push('Jenis Tes', 'Status', 'TglJam Mulai', 'TglJam Selesai');
-  rows.push(headers.join(','));
-  
-  // Ambil data dari tabel
-  rowsEl.forEach(row => {
-    if (row.cells.length > 1) {
-      const cols = [];
-      for (let i = 1; i < row.cells.length; i++) { // Skip checkbox column
-        const cell = row.cells[i];
-        let text = cell.textContent || cell.innerText || '';
-        // Handle CSV escaping
-        if (text.includes(',') || text.includes('"') || text.includes('\n')) {
-          text = '"' + text.replace(/"/g, '""') + '"';
+      function deleteSelectedJawaban() {
+        const checked = document.querySelectorAll('.jawaban-checkbox:checked');
+        if (!checked.length) {
+          showNotification('warning', 'Peringatan', 'Pilih data jawaban yang akan dihapus');
+          return;
         }
-        cols.push(text);
+        
+        showConfirmation(
+          'Hapus Jawaban',
+          `Yakin akan menghapus ${checked.length} data jawaban?`,
+          function() {
+            const promises = [];
+            checked.forEach(cb => {
+              promises.push(jawabanRef.child(cb.value).remove());
+            });
+            
+            Promise.all(promises)
+              .then(() => {
+                showNotification('success', 'Berhasil', `${checked.length} data jawaban berhasil dihapus`);
+              })
+              .catch(err => {
+                showNotification('error', 'Gagal', 'Gagal menghapus data jawaban: ' + err.message);
+              });
+          }
+        );
       }
-      rows.push(cols.join(','));
-    }
-  });
-  
-  const csvContent = rows.join('\n');
-  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `jawaban_siswa_${currentAgendaForJawaban}_${new Date().toISOString().split('T')[0]}.csv`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-  
-  showNotification('success', 'Export Berhasil', 'Data berhasil diexport ke CSV');
-}      
 
       // ====== CETAK KARTU FUNCTIONS ======
       function onChangeAgendaCetakKartu() {
@@ -4093,4 +3765,4 @@ function exportJawabanToCsv() {
 
     </script>
   </body>
-</html>
+</html
