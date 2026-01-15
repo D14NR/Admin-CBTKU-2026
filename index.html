@@ -11,6 +11,8 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
     <style>
       :root {
@@ -1970,32 +1972,60 @@
     <div id="printArea"></div>
 
     <script>
-      // ====== KONFIGURASI SUPABASE ======
-      const SUPABASE_URL = 'https://hkyjuzrovvuijqncpbdl.supabase.co'; // Ganti dengan URL Supabase Anda
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhreWp1enJvdnZ1aWpxbmNwYmRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0ODkyMjMsImV4cCI6MjA4NDA2NTIyM30.DWgqBuPKqulzJDFGDK4HjPVohiss8zvXK3GbbXqSNaA'; // Ganti dengan anon key Anda
+   const SUPABASE_URL = 'https://hkyjuzrovvuijqncpbdl.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhreWp1enJvdnZ1aWpxbmNwYmRsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg0ODkyMjMsImV4cCI6MjA4NDA2NTIyM30.DWgqBuPKqulzJDFGDK4HjPVohiss8zvXK3GbbXqSNaA';
 
-      // ====== INISIALISASI SUPABASE ======
-      let supabase;
-      
-      try {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase initialized successfully');
-      } catch (error) {
-        console.error('Supabase initialization error:', error);
-        showNotification('error', 'Supabase Error', 'Gagal menginisialisasi Supabase. Periksa koneksi internet.');
-      }
+// ====== INISIALISASI SUPABASE ======
+let supabase;
 
-      // ====== VARIABEL GLOBAL ======
-      let pesertaNameMap = {};
-      let currentAgendaForMapel = '';
-      let currentAgendaForBank = '';
-      let importBankSoalMapelMap = {};
-      let currentMapelForBank = '';
-      let currentAgendaForKartu = '';
-      let kartuPesertaList = [];
-      let agendaCache = {};
-      let selectedJawabanForReset = null;
-      let resetMapelList = [];
+function initializeSupabase() {
+  try {
+    if (typeof createClient !== 'undefined') {
+      supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('Supabase initialized successfully');
+      return true;
+    } else {
+      console.error('Supabase SDK not loaded');
+      showNotification('error', 'SDK Error', 'Supabase SDK tidak ditemukan. Pastikan script CDN terload.');
+      return false;
+    }
+  } catch (error) {
+    console.error('Supabase initialization error:', error);
+    showNotification('error', 'Supabase Error', 'Gagal menginisialisasi Supabase: ' + error.message);
+    return false;
+  }
+}
+
+// ====== VARIABEL GLOBAL ======
+let pesertaNameMap = {};
+let currentAgendaForMapel = '';
+let currentAgendaForBank = '';
+let importBankSoalMapelMap = {};
+let currentMapelForBank = '';
+let currentAgendaForKartu = '';
+let kartuPesertaList = [];
+let agendaCache = {};
+let selectedJawabanForReset = null;
+let resetMapelList = [];
+
+// ====== INITIALIZATION ======
+document.addEventListener('DOMContentLoaded', function() {
+  // Inisialisasi Supabase
+  const supabaseInitialized = initializeSupabase();
+  
+  if (!supabaseInitialized) {
+    showNotification('warning', 'Inisialisasi Gagal', 
+      'Supabase tidak dapat diinisialisasi. Refresh halaman atau periksa koneksi.', 8000);
+  }
+  
+  checkLoginStatus();
+  
+  // Check if Supabase is configured with placeholder
+  if (SUPABASE_URL === 'https://your-project.supabase.co') {
+    showNotification('warning', 'Konfigurasi', 
+      'Supabase URL dan API key belum dikonfigurasi. Silakan ganti dengan kredensial Supabase Anda.', 10000);
+  }
+});
 
       // ====== UTILITY FUNCTIONS ======
       
