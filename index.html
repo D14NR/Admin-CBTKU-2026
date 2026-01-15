@@ -1,429 +1,4057 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
+<html>
+  <head>
+    <base target="_top">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Portal Admin CBTKU 2026</title>
-    
-    <!-- Favicon profesional untuk sistem CBT -->
-    <link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/96/000000/test-partial-filled.png">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/color/96/000000/test-partial-filled.png">
-    
-    <!-- Untuk iOS Safari -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Admin CBTKU 2026">
-    
-    <!-- Untuk Android -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#2c3e50">
-    
-    <!-- Font untuk loading -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login Admin - Portal Admin CBT 2026</title>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+      :root {
+        --bg: #f3f4f6;
+        --surface: #ffffff;
+        --surface-alt: #f9fafb;
+        --border: #e5e7eb;
+        --border-strong: #d1d5db;
+        --primary: #2563eb;
+        --primary-soft: rgba(37, 99, 235, 0.12);
+        --primary-hover: #1d4ed8;
+        --danger: #dc2626;
+        --danger-soft: rgba(220, 38, 38, 0.1);
+        --danger-hover: #b91c1c;
+        --text: #111827;
+        --text-muted: #6b7280;
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+        --shadow-md: 0 4px 6px rgba(15, 23, 42, 0.08);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top left, #e0f2fe 0, #eef2ff 35%, #f9fafb 70%, #f3f4f6 100%);
+        color: var(--text);
+      }
+
+      /* LOGIN STYLES */
+      #login-section {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: radial-gradient(circle at top left, #e0f2fe 0, #eef2ff 35%, #f9fafb 70%, #f3f4f6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .login-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 360px;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        text-align: center;
+      }
+
+      .login-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--text);
+      }
+
+      .login-subtitle {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-bottom: 24px;
+      }
+
+      .login-form input {
+        margin-bottom: 12px;
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-strong);
+        font-size: 14px;
+      }
+
+      .login-btn {
+        width: 100%;
+        margin-top: 8px;
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      /* Password wrapper styles */
+      .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .password-wrapper input {
+        flex: 1;
+        padding-right: 40px;
+        margin-bottom: 0;
+      }
+
+      .toggle-password {
+        position: absolute;
+        right: 8px;
+        background: transparent;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 100%;
+      }
+
+      .toggle-password:hover {
+        color: var(--primary);
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .toggle-password:active {
+        transform: none;
+      }
+
+      /* APP STYLES */
+      .app-shell {
+        max-width: 1200px;
+        margin: 24px auto 40px;
+        padding: 0 16px;
+        display: none;
+      }
+
+      .app-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .app-title {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 650;
+        color: var(--text);
+      }
+
+      .app-subtitle {
+        margin: 2px 0 0;
+        font-size: 13px;
+        color: var(--text-muted);
+        max-width: 520px;
+      }
+
+      .app-badge {
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: var(--primary-soft);
+        color: var(--primary);
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        align-self: flex-start;
+        white-space: nowrap;
+        cursor: pointer;
+      }
+
+      /* Tabs */
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 6px;
+        background: rgba(255,255,255,0.9);
+        border-radius: 999px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        position: sticky;
+        top: 12px;
+        z-index: 50;
+        backdrop-filter: blur(10px);
+      }
+
+      .tab-button {
+        flex: 1 1 auto;
+        border-radius: 999px;
+        border: none;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s;
+        white-space: nowrap;
+      }
+
+      .tab-button:hover {
+        background: rgba(15,23,42,0.04);
+        color: var(--text);
+      }
+
+      .tab-button.active {
+        background: #ffffff;
+        color: var(--primary);
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+      }
+
+      .tab-content {
+        margin-top: 18px;
+        padding: 16px 18px 20px;
+        background: rgba(255,255,255,0.95);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border);
+      }
+
+      .section-header {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-bottom: 10px;
+      }
+
+      .section-header h2 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 600;
+      }
+
+      .section-subtitle {
+        margin: 0;
+        font-size: 12px;
+        color: var(--text-muted);
+      }
+
+      /* Forms */
+      form {
+        margin-bottom: 16px;
+        padding: 14px 16px 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        background: var(--surface);
+        box-shadow: var(--shadow-sm);
+        max-width: 900px;
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 10px;
+      }
+
+      label > input,
+      label > select,
+      label > textarea {
+        margin-top: 4px;
+      }
+
+      input[type="text"],
+      input[type="password"],
+      input[type="tel"],
+      input[type="number"],
+      input[type="datetime-local"],
+      select,
+      textarea {
+        width: 100%;
+        padding: 7px 9px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-strong);
+        background: var(--surface-alt);
+        font-size: 13px;
+        color: var(--text);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+      }
+
+      input[type="text"]:focus,
+      input[type="password"]:focus,
+      input[type="tel"]:focus,
+      input[type="number"]:focus,
+      input[type="datetime-local"]:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 1px var(--primary-soft);
+        background: #ffffff;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 70px;
+      }
+
+      input[readonly] {
+        background: #f3f4f6;
+        color: var(--text-muted);
+      }
+
+      /* Buttons */
+      button {
+        border-radius: 999px;
+        border: none;
+        padding: 7px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        background: var(--primary);
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.04s ease;
+      }
+
+      button:hover {
+        background: var(--primary-hover);
+        box-shadow: 0 3px 6px rgba(37, 99, 235, 0.25);
+      }
+
+      button:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+      }
+
+      button[disabled] {
+        opacity: 0.65;
+        cursor: default;
+        box-shadow: none;
+      }
+
+      button[onclick^="delete"],
+      button[onclick^="hapus"],
+      button[onclick^="deleteSelected"] {
+        background: var(--danger);
+      }
+
+      button[onclick^="delete"]:hover,
+      button[onclick^="hapus"]:hover,
+      button[onclick^="deleteSelected"]:hover {
+        background: var(--danger-hover);
+        box-shadow: 0 3px 6px rgba(220, 38, 38, 0.24);
+      }
+
+      button[onclick="generateTokenUjian()"] {
+        background: #0f172a;
+      }
+
+      button[onclick="generateTokenUjian()"]:hover {
+        background: #020617;
+      }
+
+      .actions button {
+        padding: 4px 10px;
+        font-size: 12px;
+      }
+
+      /* Tables */
+      .table-card {
+        margin-top: 4px;
+        padding: 10px 12px 12px;
+        border-radius: var(--radius-md);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .table-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 13px;
+        min-width: 700px;
+      }
+
+      th, td {
+        border-bottom: 1px solid var(--border);
+        padding: 7px 8px;
+        text-align: left;
+      }
+
+      th {
+        background: var(--surface-alt);
+        font-weight: 600;
+        color: var(--text-muted);
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+
+      tbody tr:nth-child(even) {
+        background: #f9fafb;
+      }
+
+      tbody tr:hover {
+        background: #eff6ff;
+      }
+
+      th:first-child,
+      td:first-child {
+        padding-left: 10px;
+      }
+
+      th:last-child,
+      td:last-child {
+        padding-right: 10px;
+      }
+
+      th input[type="checkbox"] {
+        transform: translateY(1px);
+      }
+
+      /* Bank Soal sections */
+      #group-pg,
+      #group-pernyataan,
+      #group-pejodohan {
+        border-radius: var(--radius-sm);
+        border: 1px dashed var(--border-strong);
+        background: #f9fafb;
+        padding: 12px;
+        margin-top: 8px;
+      }
+
+      #group-pg strong,
+      #group-pernyataan strong,
+      #group-pejodohan strong {
+        font-size: 13px;
+        color: var(--text);
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      /* Kartu Peserta - Print Styles */
+      .kartu-container {
+        page-break-inside: avoid;
+        border: 2px solid #111827;
+        padding: 16px;
+        margin: 12px auto;
+        width: 8.5cm;
+        height: 12cm;
+        font-size: 13px;
+        background: #ffffff;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        position: relative;
+      }
+
+      .kartu-logo {
+        text-align: center;
+        margin-bottom: 8px;
+        color: #2563eb;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .kartu-header {
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 8px;
+        border-bottom: 3px double #111827;
+        padding-bottom: 8px;
+        letter-spacing: 0.05em;
+        font-size: 16px;
+        color: #1e293b;
+      }
+
+      .kartu-title {
+        text-align: center;
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 12px;
+        color: #2563eb;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        padding: 4px 0;
+      }
+
+      .kartu-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 8px 0;
+      }
+
+      .kartu-table td {
+        padding: 6px 4px;
+        vertical-align: top;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .kartu-table td.label {
+        width: 45%;
+        font-weight: 600;
+        color: #374151;
+      }
+
+      .kartu-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .kartu-footer {
+        margin-top: 12px;
+        font-size: 10px;
+        color: #6b7280;
+        text-align: center;
+        padding: 8px;
+        border-top: 1px dashed #d1d5db;
+        background: #f9fafb;
+        border-radius: 6px;
+      }
+
+      .kartu-watermark {
+        position: absolute;
+        bottom: 8px;
+        right: 8px;
+        font-size: 9px;
+        color: #9ca3af;
+        font-style: italic;
+      }
+
+      /* Print area */
+      #printArea {
+        display: none;
+      }
+
+      @media print {
+        body * {
+          visibility: hidden;
+        }
+        #printArea,
+        #printArea * {
+          visibility: visible;
+        }
+        #printArea {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          margin: 0;
+          padding: 20px;
+          display: grid !important;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
         }
         
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            position: fixed;
-            touch-action: manipulation;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        .kartu-container {
+          width: 100% !important;
+          height: auto !important;
+          margin: 0 !important;
+          break-inside: avoid;
+          box-shadow: none !important;
+          border: 1.5px solid #000 !important;
         }
         
-        /* Loading screen profesional */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
+        @page {
+          margin: 15mm;
+          size: A4 portrait;
         }
-        
-        .loading-container {
-            text-align: center;
-            max-width: 500px;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: fadeInUp 0.8s ease;
+      }
+
+      /* Modal */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      .modal-backdrop.show {
+        display: flex;
+      }
+
+      .modal {
+        background: #ffffff;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 720px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.35);
+        border: 1px solid rgba(148, 163, 184, 0.6);
+      }
+
+      .modal-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .modal-title {
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .modal-close-btn {
+        border-radius: 999px;
+        border: none;
+        width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 18px;
+        padding: 0;
+      }
+
+      .modal-close-btn:hover {
+        background: rgba(15,23,42,0.05);
+        color: var(--text);
+      }
+
+      .modal-body {
+        padding: 12px 16px 14px;
+        overflow: auto;
+      }
+
+      .modal-body form {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
+      }
+
+      @media (max-width: 768px) {
+        .app-shell {
+          margin: 16px auto 24px;
+          padding: 0 10px;
         }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .tab-content {
+          padding: 12px 12px 16px;
         }
-        
-        .logo-container {
-            margin-bottom: 30px;
+        .app-header {
+          margin-bottom: 10px;
         }
-        
-        .logo {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 20px;
-            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 40px;
-            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
-            animation: pulse 2s infinite ease-in-out;
+        .tabs {
+          border-radius: 16px;
         }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        table {
+          min-width: 600px;
         }
-        
-        .logo svg {
-            width: 50px;
-            height: 50px;
+        .kartu-container {
+          width: 100%;
+          height: auto;
         }
-        
-        .loading-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            letter-spacing: -0.5px;
+      }
+
+      @media (max-width: 480px) {
+        .tabs {
+          flex-wrap: nowrap;
+          overflow-x: auto;
         }
-        
-        .loading-subtitle {
-            font-size: 16px;
-            color: #7f8c8d;
-            margin-bottom: 30px;
-            font-weight: 400;
+        .tab-button {
+          flex: 0 0 auto;
         }
-        
-        /* Progress bar */
-        .progress-container {
-            width: 100%;
-            height: 6px;
-            background: #ecf0f1;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #3498db 0%, #2ecc71 100%);
-            width: 0%;
-            border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-        
-        /* Status loading */
-        .loading-status {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-top: 20px;
-            min-height: 20px;
-            font-weight: 500;
-        }
-        
-        .loading-status span {
-            color: #3498db;
-            font-weight: 600;
-        }
-        
-        /* Spinner modern */
-        .spinner {
-            width: 60px;
-            height: 60px;
-            position: relative;
-            margin: 20px auto;
-        }
-        
-        .spinner-dot {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            background: #3498db;
-            border-radius: 50%;
-            animation: spin 1.2s linear infinite;
-        }
-        
-        .spinner-dot:nth-child(1) { top: 0; left: 50%; transform: translateX(-50%); }
-        .spinner-dot:nth-child(2) { top: 10px; right: 10px; animation-delay: 0.1s; }
-        .spinner-dot:nth-child(3) { top: 50%; right: 0; transform: translateY(-50%); animation-delay: 0.2s; }
-        .spinner-dot:nth-child(4) { bottom: 10px; right: 10px; animation-delay: 0.3s; }
-        .spinner-dot:nth-child(5) { bottom: 0; left: 50%; transform: translateX(-50%); animation-delay: 0.4s; }
-        .spinner-dot:nth-child(6) { bottom: 10px; left: 10px; animation-delay: 0.5s; }
-        .spinner-dot:nth-child(7) { top: 50%; left: 0; transform: translateY(-50%); animation-delay: 0.6s; }
-        .spinner-dot:nth-child(8) { top: 10px; left: 10px; animation-delay: 0.7s; }
-        
-        @keyframes spin {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-        
-        /* Konten iframe */
-        iframe {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .iframe-loaded {
-            opacity: 1;
-        }
-        
-        /* Footer loading */
-        .loading-footer {
-            margin-top: 30px;
-            font-size: 12px;
-            color: #95a5a6;
-            border-top: 1px solid #ecf0f1;
-            padding-top: 15px;
-        }
-        
-        /* Responsif untuk mobile */
-        @media (max-width: 768px) {
-            .loading-container {
-                padding: 30px 20px;
-                margin: 0 20px;
-                border-radius: 15px;
-            }
-            
-            .logo {
-                width: 80px;
-                height: 80px;
-                font-size: 32px;
-            }
-            
-            .logo svg {
-                width: 40px;
-                height: 40px;
-            }
-            
-            .loading-title {
-                font-size: 22px;
-            }
-            
-            .loading-subtitle {
-                font-size: 14px;
-            }
-        }
+      }
+
+      /* ====== MODERN NOTIFICATION SYSTEM ====== */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.notification {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border-left: 5px solid;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transform: translateX(120%);
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  pointer-events: auto;
+  max-width: 380px;
+  min-width: 300px;
+}
+
+.notification.show {
+  transform: translateX(0);
+}
+
+.notification.hide {
+  transform: translateX(120%);
+}
+
+.notification-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.notification-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: #111827;
+}
+
+.notification-message {
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.notification-close {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.notification-close:hover {
+  color: #6b7280;
+}
+
+/* Notification Types */
+.notification.success {
+  border-left-color: #10b981;
+  background: linear-gradient(135deg, #f0fdf4, #ffffff);
+}
+
+.notification.success .notification-icon {
+  background: #10b981;
+  color: white;
+}
+
+.notification.error {
+  border-left-color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2, #ffffff);
+}
+
+.notification.error .notification-icon {
+  background: #ef4444;
+  color: white;
+}
+
+.notification.warning {
+  border-left-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb, #ffffff);
+}
+
+.notification.warning .notification-icon {
+  background: #f59e0b;
+  color: white;
+}
+
+.notification.info {
+  border-left-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff, #ffffff);
+}
+
+.notification.info .notification-icon {
+  background: #3b82f6;
+  color: white;
+}
+
+/* Progress bar */
+.notification-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+}
+
+.notification-progress-bar {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(1);
+  transition: transform linear;
+}
+
+.notification.success .notification-progress-bar {
+  background: #10b981;
+}
+
+.notification.error .notification-progress-bar {
+  background: #ef4444;
+}
+
+.notification.warning .notification-progress-bar {
+  background: #f59e0b;
+}
+
+.notification.info .notification-progress-bar {
+  background: #3b82f6;
+}
+
+/* Confirmation Dialog */
+.confirmation-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+.confirmation-dialog.show {
+  display: flex;
+}
+
+.confirmation-box {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  animation: dialogSlideIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes dialogSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.confirmation-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 28px;
+}
+
+.confirmation-icon.warning {
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+.confirmation-icon.info {
+  background: #dbeafe;
+  color: #3b82f6;
+}
+
+.confirmation-title {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+.confirmation-message {
+  font-size: 14px;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.confirmation-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.confirmation-btn {
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.confirmation-btn.cancel {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.confirmation-btn.cancel:hover {
+  background: #e5e7eb;
+}
+
+.confirmation-btn.confirm {
+  background: #3b82f6;
+  color: white;
+}
+
+.confirmation-btn.confirm:hover {
+  background: #2563eb;
+}
+
+.confirmation-btn.confirm.delete {
+  background: #ef4444;
+}
+
+.confirmation-btn.confirm.delete:hover {
+  background: #dc2626;
+}
+
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #1f2937;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  max-width: 90%;
+}
+
+.toast-notification.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-icon {
+  font-size: 18px;
+}
+
+.toast-message {
+  flex: 1;
+}
+
+/* ====== FOOTER STYLES ====== */
+.site-footer {
+  margin-top: 30px;
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.footer-text {
+  font-weight: 500;
+  color: var(--primary);
+  letter-spacing: 0.5px;
+}
+
+.footer-subtext {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .site-footer {
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 12px;
+  }
+  
+  .footer-subtext {
+    font-size: 10px;
+  }
+}
+
+/* Pastikan footer tetap di bawah konten */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-shell {
+  flex: 1;
+}
+
+/* Untuk login page */
+#login-section {
+  position: relative;
+}
+
+#login-section .site-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: transparent;
+  border-top: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
     </style>
-</head>
-<body>
-    <!-- Loading screen profesional -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-container">
-            <div class="logo-container">
-                <div class="logo">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-            </div>
-            
-            <h1 class="loading-title">Portal Admin CBTKU 2026</h1>
-            <p class="loading-subtitle">Sistem Manajemen Ujian Berbasis Komputer</p>
-            
-            <div class="spinner">
-                <div class="spinner-dot"></div>
-                <div class="spinner-dot"></div>
-                <div class="spinner-dot"></div>
-                <div class="spinner-dot"></div>
-                <div class="spinner-dot"></div>
-                <div class="spinner-dot"></div>
-                <div class="spinner-dot"></div>
-                <div class="spinner-dot"></div>
-            </div>
-            
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-            
-            <div class="loading-status" id="loadingStatus">
-                <span>Menginisialisasi sistem...</span>
-            </div>
-            
-            <div class="loading-footer">
-                &copy; 2026 CBTKU Admin Portal • Loading...
-            </div>
+  </head>
+  <body>
+
+    <!-- LOGIN SECTION -->
+    <div id="login-section">
+      <div class="login-card">
+        <div class="login-title">Login Admin</div>
+        <div class="login-subtitle">Portal Admin CBT 2026</div>
+        <form class="login-form" onsubmit="event.preventDefault(); handleLogin();">
+          <input type="text" id="login_username" placeholder="Username" required>
+          
+          <div class="password-wrapper">
+            <input type="password" id="login_password" placeholder="Password" required>
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('login_password', this)">
+              👁️
+            </button>
+          </div>
+          
+          <button type="submit" class="login-btn">Masuk</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- MAIN APP SHELL (Hidden by default) -->
+    <div class="app-shell" id="app-shell">
+      <header class="app-header">
+        <div>
+          <h1 class="app-title">Portal Admin CBT 2026</h1>
+          <p class="app-subtitle">
+            Kelola peserta, agenda ujian, mata pelajaran, bank soal, monitoring, jawaban siswa, dan cetak kartu peserta.
+          </p>
         </div>
+        <div class="app-badge" onclick="handleLogout()" title="Klik untuk Logout">
+          Admin CBT2026 (Logout)
+        </div>
+      </header>
+
+      <!-- TAB MENU -->
+      <div class="tabs">
+        <button id="tab-btn-peserta" class="tab-button active" onclick="showTab('peserta')">
+          Peserta
+        </button>
+        <button id="tab-btn-agenda" class="tab-button" onclick="showTab('agenda')">
+          Agenda Ujian
+        </button>
+        <button id="tab-btn-mapel" class="tab-button" onclick="showTab('mapel')">
+          Mata Pelajaran
+        </button>
+        <button id="tab-btn-banksoal" class="tab-button" onclick="showTab('banksoal')">
+          Bank Soal
+        </button>
+        <button id="tab-btn-monitoring" class="tab-button" onclick="showTab('monitoring')">
+          Monitoring Pengerjaan
+        </button>
+        <button id="tab-btn-jawaban" class="tab-button" onclick="showTab('jawaban')">
+          Jawaban Siswa
+        </button>
+        <button id="tab-btn-cetakkartu" class="tab-button" onclick="showTab('cetakkartu')">
+          Cetak Kartu
+        </button>
+      </div>
+
+      <!-- TAB PESERTA -->
+      <div id="tab-peserta" class="tab-content" style="display:block;">
+        <div class="section-header">
+          <h2>Data Peserta</h2>
+          <p class="section-subtitle">Input dan kelola data peserta ujian untuk setiap agenda.</p>
+        </div>
+
+        <div style="margin-bottom:8px; display:flex; flex-wrap:wrap; gap:6px;">
+          <button type="button" onclick="openPesertaModalForCreate()">+ Tambah Peserta</button>
+          <button type="button" onclick="showModal('modal-import-peserta')">Import Data</button>
+          <button type="button" onclick="exportPesertaToCsv()">Export Data</button>
+        </div>
+
+        <div class="section-header">
+          <h2>Daftar Peserta</h2>
+          <p class="section-subtitle">Data peserta yang tersimpan di Firebase.</p>
+        </div>
+
+        <div class="table-card">
+          <div class="table-container">
+            <table id="pesertaTable">
+              <thead>
+                <tr>
+                  <th>NIS_Username</th>
+                  <th>Nama_Peserta</th>
+                  <th>Password</th>
+                  <th>Jenjang_Studi</th>
+                  <th>Kelas</th>
+                  <th>Asal_Sekolah</th>
+                  <th>No_WA_Peserta</th>
+                  <th>No_WA_Ortu</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB AGENDA UJIAN -->
+      <div id="tab-agenda" class="tab-content" style="display:none;">
+        <div class="section-header">
+          <h2>Agenda Ujian</h2>
+          <p class="section-subtitle">Atur jadwal, token, dan deskripsi setiap agenda ujian.</p>
+        </div>
+
+        <div style="margin-bottom:8px;">
+          <button type="button" onclick="openAgendaModalForCreate()">+ Tambah Agenda</button>
+        </div>
+
+        <div class="section-header">
+          <h2>Daftar Agenda Ujian</h2>
+          <p class="section-subtitle">Semua agenda ujian yang sudah dibuat.</p>
+        </div>
+
+        <div class="table-card">
+          <div class="table-container">
+            <table id="agendaTable">
+              <thead>
+                <tr>
+                  <th>Agenda_Ujian</th>
+                  <th>Deskripsi_Ujian</th>
+                  <th>Jenjang_Studi</th>
+                  <th>Jenis_Tes</th>
+                  <th>TglJam_Mulai</th>
+                  <th>TglJam_Selesai</th>
+                  <th>Token_Ujian</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB MATA PELAJARAN -->
+      <div id="tab-mapel" class="tab-content" style="display:none;">
+        <div class="section-header">
+          <h2>Mata Pelajaran</h2>
+          <p class="section-subtitle">Tetapkan mapel, jumlah soal, dan durasi per agenda ujian.</p>
+        </div>
+
+        <label>
+          Pilih Agenda Ujian:
+          <select id="Mapel_Agenda_Select" onchange="onChangeAgendaMapel()">
+            <option value="">-- Pilih Agenda Ujian dulu --</option>
+          </select>
+        </label>
+
+        <div style="margin:8px 0 10px;">
+          <button type="button" onclick="openMapelModalForCreate()">+ Tambah Mata Pelajaran</button>
+        </div>
+
+        <div class="section-header">
+          <h2>Daftar Mata Pelajaran</h2>
+          <p class="section-subtitle">Berdasarkan agenda ujian yang dipilih.</p>
+        </div>
+
+        <div class="table-card">
+          <div class="table-container">
+            <table id="mapelTable">
+              <thead>
+                <tr>
+                  <th>Nama_Mata_Pelajaran</th>
+                  <th>Jumlah_Soal</th>
+                  <th>Durasi_Ujian (menit)</th>
+                  <th>Status_Mapel</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB BANK SOAL -->
+      <!-- TAB BANK SOAL -->
+<div id="tab-banksoal" class="tab-content" style="display:none;">
+  <div class="section-header">
+    <h2>Bank Soal</h2>
+    <p class="section-subtitle">Input dan kelola butir soal per agenda dan mata pelajaran.</p>
+  </div>
+
+  <label>
+    Pilih Agenda Ujian:
+    <select id="Bank_Agenda_Select" onchange="onChangeAgendaBankSoal()">
+      <option value="">-- Pilih Agenda Ujian dulu --</option>
+    </select>
+  </label>
+
+  <label>
+    Pilih Mata Pelajaran:
+    <select id="Bank_Mapel_Select" onchange="onChangeMapelBankSoal()">
+      <option value="">-- Pilih Mata Pelajaran --</option>
+    </select>
+  </label>
+
+  <!-- TAMBAHKAN TOMBOL AKSI DI SINI -->
+  <div style="margin:8px 0 10px; display:flex; flex-wrap:wrap; gap:6px;">
+  <button type="button" onclick="openBankSoalModalForCreate()">+ Tambah Soal</button>
+  <button type="button" onclick="openImportBankSoalModal()">Import Data</button>
+  <button type="button" onclick="deleteSelectedBankSoal()" style="background: var(--danger);">Hapus Terpilih</button>
+  <button type="button" onclick="selectAllBankSoal()">Pilih Semua</button>
+  <button type="button" onclick="deselectAllBankSoal()">Batal Pilih</button>
+  <!-- TAMBAHKAN TOMBOL HAPUS SEMUA (OPSIONAL) -->
+  <button type="button" onclick="deleteAllBankSoal()" style="background: var(--danger);">Hapus Semua di Mapel Ini</button>
+</div>
+
+  <div class="section-header">
+    <h2>Daftar Soal</h2>
+    <p class="section-subtitle">Berdasarkan agenda dan mata pelajaran yang dipilih.</p>
+  </div>
+
+  <div class="table-card">
+    <div class="table-container">
+      <table id="bankSoalTable">
+        <thead>
+          <tr>
+            <!-- TAMBAH KOLOM CHECKBOX DI SINI -->
+            <th style="width: 30px;">
+              <input type="checkbox" id="bankSoal_select_all" onclick="toggleSelectAllBankSoal(this)">
+            </th>
+            <th>No_Soal</th>
+            <th>Type_Soal</th>
+            <th>Pertanyaan</th>
+            <th>Gambar</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+      <!-- TAB MONITORING PENGERJAAN -->
+      <div id="tab-monitoring" class="tab-content" style="display:none;">
+        <div class="section-header">
+          <h2>Monitoring Pengerjaan</h2>
+          <p class="section-subtitle">Pantau aktivitas login dan status pengerjaan peserta.</p>
+        </div>
+
+        <div style="margin-bottom:8px;">
+          <button type="button" onclick="deleteSelectedMonitoring()">Hapus Terpilih</button>
+        </div>
+
+        <div class="table-card">
+          <div class="table-container">
+            <table id="monitoringTable">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="monitoring_select_all" onclick="toggleSelectAllMonitoring(this)"></th>
+                  <th>NIS_Username</th>
+                  <th>Nama_Peserta</th>
+                  <th>Aktivitas_Login</th>
+                  <th>Judul_Ujian</th>
+                  <th>Mata_Pelajaran</th>
+                  <th>Status_Pengerjaan</th>
+                  <th>TglJam_Mulai</th>
+                  <th>Last_Update</th>
+                  <th>TglJam_Selesai</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB JAWABAN SISWA -->
+      <div id="tab-jawaban" class="tab-content" style="display:none;">
+        <div class="section-header">
+          <h2>Jawaban Siswa</h2>
+          <p class="section-subtitle">Rekap jawaban peserta untuk setiap sesi ujian.</p>
+        </div>
+
+        <div style="margin-bottom:8px; display:flex; flex-wrap:wrap; gap:6px;">
+          <button type="button" onclick="deleteSelectedJawaban()">Hapus Terpilih</button>
+          <button type="button" onclick="exportJawabanToCsv()">Export Data</button>
+        </div>
+
+        <div class="table-card">
+          <div class="table-container">
+            <table id="jawabanTable">
+              <thead>
+                <tr id="jawabanHeaderRow">
+                  <!-- header diisi dinamis oleh JS -->
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB CETAK KARTU -->
+      <div id="tab-cetakkartu" class="tab-content" style="display:none;">
+        <div class="section-header">
+          <h2>Cetak Kartu Peserta</h2>
+          <p class="section-subtitle">Pilih agenda dan peserta yang akan dicetak kartunya.</p>
+        </div>
+
+        <label>
+          Pilih Agenda Ujian:
+          <select id="CetakKartu_Agenda_Select" onchange="onChangeAgendaCetakKartu()">
+            <option value="">-- Pilih Agenda Ujian dulu --</option>
+          </select>
+        </label>
+
+        <div style="margin:8px 0 10px;">
+          <button type="button" onclick="printKartuSelected()">Print Kartu Terpilih</button>
+        </div>
+
+        <div class="section-header">
+          <h2>Daftar Peserta</h2>
+          <p class="section-subtitle">Peserta pada agenda ujian yang dipilih.</p>
+        </div>
+
+        <div class="table-card">
+          <div class="table-container">
+            <table id="cetakKartuTable">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="kartu_select_all" onclick="toggleSelectAllKartu(this)"></th>
+                  <th>NIS_Username</th>
+                  <th>Nama_Peserta</th>
+                  <th>Password</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Modal Peserta -->
+    <div id="modal-peserta" class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">Form Peserta</div>
+            <p class="section-subtitle">Tambah atau edit data peserta ujian.</p>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="hideModal('modal-peserta')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="pesertaForm" onsubmit="event.preventDefault(); savePeserta();">
+            <input type="hidden" id="firebaseId">
+            <input type="hidden" id="ID_Peserta">
+
+            <label>
+              NIS / Username (otomatis dari No. WA Peserta):
+              <input type="text" id="NIS_Username" readonly>
+            </label>
+
+            <label>
+              Nama Peserta:
+              <input type="text" id="Nama_Peserta" required>
+            </label>
+
+            <label>
+              Password:
+              <div class="password-wrapper">
+                <input type="password" id="Password" required>
+                <button type="button" class="toggle-password" onclick="togglePasswordVisibility('Password', this)">
+                  👁️
+                </button>
+              </div>
+            </label>
+
+            <label>
+              Jenjang Studi:
+              <select id="Jenjang_Studi" required>
+                <option value="">-- Pilih Jenjang --</option>
+                <option value="SD">SD</option>
+                <option value="SMP">SMP</option>
+                <option value="SMA">SMA</option>
+                <option value="SMK">SMK</option>
+              </select>
+            </label>
+
+            <label>
+              Kelas:
+              <input type="text" id="Kelas" required placeholder="Contoh: 7A, 12 IPA 1">
+            </label>
+
+            <label>
+              Asal Sekolah:
+              <input type="text" id="Asal_Sekolah" required>
+            </label>
+
+            <label>
+              No. WA Peserta:
+              <input type="tel" id="No_WA_Peserta" required
+                     placeholder="Contoh: 08123456789 atau +628123456789"
+                     oninput="handleNoWAChange()">
+            </label>
+
+            <label>
+              No. WA Orang Tua:
+              <input type="tel" id="No_WA_Ortu">
+            </label>
+
+            <label>
+              Agenda (diambil dari data Agenda Ujian):
+              <select id="ID_Agenda_Peserta" required>
+                <option value="">-- Pilih Agenda --</option>
+              </select>
+            </label>
+
+            <div style="margin-top:8px;">
+              <button type="submit">Simpan</button>
+              <button type="button" onclick="resetForm()" style="margin-left:6px;">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Agenda -->
+    <div id="modal-agenda" class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">Form Agenda Ujian</div>
+            <p class="section-subtitle">Tambah atau edit agenda ujian.</p>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="hideModal('modal-agenda')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="agendaForm" onsubmit="event.preventDefault(); saveAgenda();">
+            <input type="hidden" id="firebaseAgendaId">
+            <input type="hidden" id="ID_Agenda_Agenda">
+
+            <label>
+              Agenda Ujian:
+              <input type="text" id="Agenda_Ujian" required>
+            </label>
+
+            <label>
+              Deskripsi Ujian:
+              <input type="text" id="Deskripsi_Ujian" required>
+            </label>
+
+            <label>
+              Jenjang Studi:
+              <select id="Jenjang_Studi_Agenda" required>
+                <option value="">-- Pilih Jenjang --</option>
+                <option value="SD">SD</option>
+                <option value="SMP">SMP</option>
+                <option value="SMA">SMA</option>
+                <option value="UMUM">UMUM</option>
+              </select>
+            </label>
+
+            <label>
+              Jenis Tes:
+              <select id="Jenis_Tes" required>
+                <option value="">-- Pilih Jenis Tes --</option>
+                <option value="SNBT">SNBT</option>
+                <option value="UMUM">UMUM</option>
+                <option value="TKA">TKA</option>
+                <option value="KEDINASAN">KEDINASAN</option>
+              </select>
+            </label>
+
+            <label>
+              Tanggal & Jam Mulai:
+              <input type="datetime-local" id="TglJam_Mulai" required>
+            </label>
+
+            <label>
+              Tanggal & Jam Selesai:
+              <input type="datetime-local" id="TglJam_Selesai" required>
+            </label>
+
+            <label>
+              Token Ujian (6–8 karakter, huruf & angka):
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="Token_Ujian" maxlength="8"
+                       placeholder="Contoh: AB12CD, X9K2M3, 7F8G9H"
+                       style="flex:1;">
+                <button type="button" onclick="generateTokenUjian()">Generate</button>
+              </div>
+            </label>
+
+            <div style="margin-top:8px;">
+              <button type="submit">Simpan</button>
+              <button type="button" onclick="resetAgendaForm()" style="margin-left:6px;">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Mapel -->
+    <div id="modal-mapel" class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">Form Mata Pelajaran</div>
+            <p class="section-subtitle">Tambah atau edit mata pelajaran untuk agenda terpilih.</p>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="hideModal('modal-mapel')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="mapelForm" onsubmit="event.preventDefault(); saveMapel();">
+            <input type="hidden" id="firebaseMapelId">
+            <input type="hidden" id="ID_Agenda_Mapel">
+            <input type="hidden" id="ID_Mapel_Mapel">
+
+            <label>
+              Nama Mata Pelajaran:
+              <select id="Nama_Mata_Pelajaran" required>
+                <option value="">-- Pilih Mata Pelajaran --</option>
+                <option value="Matematika">Matematika</option>
+                <option value="Matematika Tingkat Lanjut">Matematika Tingkat Lanjut</option>
+                <option value="Fisika">Fisika</option>
+                <option value="Kimia">Kimia</option>
+                <option value="Biologi">Biologi</option>
+                <option value="Ekonomi">Ekonomi</option>
+                <option value="Geografi">Geografi</option>
+                <option value="Sosiologi">Sosiologi</option>
+                <option value="Sejarah">Sejarah</option>
+                <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                <option value="Bahasa Indonesia Tingkat Lanjut">Bahasa Indonesia Tingkat Lanjut</option>
+                <option value="Bahasa Inggris">Bahasa Inggris</option>
+                <option value="Bahasa Inggris Tingkat Lanjut">Bahasa Inggris Tingkat Lanjut</option>
+                <option value="Ilmu Pengetahuan Alam">Ilmu Pengetahuan Alam</option>
+                <option value="Ilmu Pengetahuan Sosial">Ilmu Pengetahuan Sosial</option>
+                <option value="Ilmu Pengetahuan Alam &amp; Sosial">Ilmu Pengetahuan Alam &amp; Sosial</option>
+                <option value="Pendidikan Pancasila">Pendidikan Pancasila</option>
+                <option value="Produk/Projek Kreatif dan Kewirausahaan">Produk/Projek Kreatif dan Kewirausahaan</option>
+                <option value="Penalaran Umum (PU)">Penalaran Umum (PU)</option>
+                <option value="Pengetahuan dan Pemahaman Umum (PPU)">Pengetahuan dan Pemahaman Umum (PPU)</option>
+                <option value="Pemahaman Bacaan dan Menulis (PBM)">Pemahaman Bacaan dan Menulis (PBM)</option>
+                <option value="Pengetahuan Kuantitatif (PK)">Pengetahuan Kuantitatif (PK)</option>
+                <option value="Literasi Bahasa Indonesia (LBIND)">Literasi Bahasa Indonesia (LBIND)</option>
+                <option value="Literasi Bahasa Inggris (LBING)">Literasi Bahasa Inggris (LBING)</option>
+                <option value="Penalaran Matematika (PM)">Penalaran Matematika (PM)</option>
+                <option value="Tes Intelegensi Umum (TIU)">Tes Intelegensi Umum (TIU)</option>
+                <option value="Prakarya dan Kewirausahaan (PKWU)">Prakarya dan Kewirausahaan (PKWU)</option>
+                <option value="Tes Karakteristik Pribadi (TKP)">Tes Karakteristik Pribadi (TKP)</option>
+                <option value="Tes Bahasa Inggris (TBI)">Tes Bahasa Inggris (TBI)</option>
+                <option value="Tes Potensi Akademik (TPA)">Tes Potensi Akademik (TPA)</option>
+              </select>
+            </label>
+
+            <label>
+              Jumlah Soal:
+              <input type="number" id="Jumlah_Soal" min="1" required>
+            </label>
+
+            <label>
+              Durasi Ujian (menit):
+              <input type="number" id="Durasi_Ujian" min="1" required placeholder="Contoh: 90">
+            </label>
+
+            <input type="hidden" id="Status_Mapel" value="Draft">
+
+            <div style="margin-top:8px;">
+              <button type="submit">Simpan</button>
+              <button type="button" onclick="resetMapelForm()" style="margin-left:6px;">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Bank Soal (form manual) -->
+    <div id="modal-banksoal" class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">Form Soal</div>
+            <p class="section-subtitle">Tambah atau edit butir soal untuk mapel terpilih.</p>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="hideModal('modal-banksoal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="bankSoalForm" onsubmit="event.preventDefault(); saveSoal();">
+            <input type="hidden" id="firebaseSoalId">
+            <input type="hidden" id="Gambar_Url">
+            <input type="hidden" id="ID_Agenda_Bank">
+            <input type="hidden" id="ID_Mapel_Bank">
+
+            <label>
+              Nama Mata Pelajaran:
+              <input type="text" id="Nama_Mata_Pelajaran_Bank" readonly>
+            </label>
+
+            <label>
+              No. Soal:
+              <input type="number" id="No_Soal" min="1" required readonly>
+            </label>
+
+            <label>
+              Pertanyaan:
+              <textarea id="Pertanyaan" rows="3" required></textarea>
+            </label>
+
+            <label>
+              Gambar (opsional):
+              <input type="file" id="Gambar" accept="image/*">
+            </label>
+
+            <label>
+              Type Soal:
+              <select id="Type_Soal" onchange="onTypeSoalChange()" required>
+                <option value="">-- Pilih type soal --</option>
+                <option value="Pilihan Ganda Tunggal">Pilihan Ganda Tunggal</option>
+                <option value="Pilihan Ganda Kompleks">Pilihan Ganda Kompleks</option>
+                <option value="Pilihan Benar/Salah">Pilihan Benar/Salah</option>
+                <option value="Pilihan Setuju/Tidak">Pilihan Setuju/Tidak</option>
+                <option value="Pilihan Pejodohan">Pilihan Pejodohan</option>
+                <option value="Uraian">Uraian</option>
+              </select>
+            </label>
+
+            <!-- Pilihan Ganda A–E -->
+            <div id="group-pg" style="display:none; padding:8px; margin-top:8px;">
+              <strong>Pilihan Ganda (A–E)</strong>
+              <label>Pilihan A: <input type="text" id="Pilihan_A"></label>
+              <label>Pilihan B: <input type="text" id="Pilihan_B"></label>
+              <label>Pilihan C: <input type="text" id="Pilihan_C"></label>
+              <label>Pilihan D: <input type="text" id="Pilihan_D"></label>
+              <label>Pilihan E: <input type="text" id="Pilihan_E"></label>
+            </div>
+
+            <!-- Pernyataan 1–10 -->
+            <div id="group-pernyataan" style="display:none; padding:8px; margin-top:8px;">
+              <strong>Pernyataan (1–10)</strong>
+              <label>Pernyataan 1: <input type="text" id="Pernyataan_1"></label>
+              <label>Pernyataan 2: <input type="text" id="Pernyataan_2"></label>
+              <label>Pernyataan 3: <input type="text" id="Pernyataan_3"></label>
+              <label>Pernyataan 4: <input type="text" id="Pernyataan_4"></label>
+              <label>Pernyataan 5: <input type="text" id="Pernyataan_5"></label>
+              <label>Pernyataan 6: <input type="text" id="Pernyataan_6"></label>
+              <label>Pernyataan 7: <input type="text" id="Pernyataan_7"></label>
+              <label>Pernyataan 8: <input type="text" id="Pernyataan_8"></label>
+              <label>Pernyataan 9: <input type="text" id="Pernyataan_9"></label>
+              <label>Pernyataan 10:<input type="text" id="Pernyataan_10"></label>
+            </div>
+
+            <!-- Pejodohan kiri/kanan 1–10 -->
+            <div id="group-pejodohan" style="display:none; padding:8px; margin-top:8px;">
+              <strong>Pejodohan (Pasangan Kiri & Kanan 1–10)</strong>
+              <div style="display:flex; gap:10px; margin-top:6px;">
+                <div style="flex:1;">
+                  <em>Pasangan Kiri</em>
+                  <label>Kiri 1: <input type="text" id="Pasangan_kiri_1"></label>
+                  <label>Kiri 2: <input type="text" id="Pasangan_kiri_2"></label>
+                  <label>Kiri 3: <input type="text" id="Pasangan_kiri_3"></label>
+                  <label>Kiri 4: <input type="text" id="Pasangan_kiri_4"></label>
+                  <label>Kiri 5: <input type="text" id="Pasangan_kiri_5"></label>
+                  <label>Kiri 6: <input type="text" id="Pasangan_kiri_6"></label>
+                  <label>Kiri 7: <input type="text" id="Pasangan_kiri_7"></label>
+                  <label>Kiri 8: <input type="text" id="Pasangan_kiri_8"></label>
+                  <label>Kiri 9: <input type="text" id="Pasangan_kiri_9"></label>
+                  <label>Kiri 10:<input type="text" id="Pasangan_kiri_10"></label>
+                </div>
+                <div style="flex:1;">
+                  <em>Pasangan Kanan</em>
+                  <label>Kanan 1: <input type="text" id="Pasangan_kanan_1"></label>
+                  <label>Kanan 2: <input type="text" id="Pasangan_kanan_2"></label>
+                  <label>Kanan 3: <input type="text" id="Pasangan_kanan_3"></label>
+                  <label>Kanan 4: <input type="text" id="Pasangan_kanan_4"></label>
+                  <label>Kanan 5: <input type="text" id="Pasangan_kanan_5"></label>
+                  <label>Kanan 6: <input type="text" id="Pasangan_kanan_6"></label>
+                  <label>Kanan 7: <input type="text" id="Pasangan_kanan_7"></label>
+                  <label>Kanan 8: <input type="text" id="Pasangan_kanan_8"></label>
+                  <label>Kanan 9: <input type="text" id="Pasangan_kanan_9"></label>
+                  <label>Kanan 10:<input type="text" id="Pasangan_kanan_10"></label>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:10px;">
+              <button type="submit">Simpan Soal</button>
+              <button type="button" onclick="resetBankSoalForm()" style="margin-left:6px;">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Import Peserta -->
+    <div id="modal-import-peserta" class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">Import Data Peserta</div>
+            <p class="section-subtitle">Upload file CSV sesuai template untuk menambah banyak peserta sekaligus.</p>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="hideModal('modal-import-peserta')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:12px; color:var(--text-muted); margin-top:0;">
+            Format: CSV dipisah koma, tanpa tanda kutip ganda di dalam isi. Hindari penggunaan koma di dalam isi kolom.
+          </p>
+          <button type="button" onclick="downloadTemplatePeserta()">Download Template Peserta</button>
+          <div style="margin-top:10px;">
+            <label>
+              Pilih file CSV:
+              <input type="file" id="file_import_peserta" accept=".csv" style="margin-top:6px;">
+            </label>
+          </div>
+          <div style="margin-top:10px;">
+            <button type="button" onclick="importPesertaFromFile()">Import</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Import Bank Soal -->
+    <div id="modal-import-banksoal" class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title">Import Bank Soal</div>
+            <p class="section-subtitle">
+              Upload file CSV soal untuk agenda yang dipilih, lalu pilih mata pelajaran mana saja
+              yang akan diimport. Gunakan kolom <strong>Mata_Pelajaran</strong> di template.
+            </p>
+          </div>
+          <button type="button" class="modal-close-btn" onclick="hideModal('modal-import-banksoal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:12px; color:var(--text-muted); margin-top:0;">
+            Pastikan sudah memilih <strong>Agenda Ujian</strong> di Tab Bank Soal.
+            File CSV harus memiliki kolom: No_Soal, Mata_Pelajaran, Pertanyaan, Type_Soal
+            (opsional: Gambar_URL, pilihan, pernyataan, pasangan).
+          </p>
+
+          <!-- daftar mapel yg tersedia utk agenda ini -->
+          <div id="import-banksoal-mapel-list"
+               style="margin:8px 0 10px; padding:8px; border-radius:6px; border:1px solid #e5e7eb; background:#f9fafb; font-size:12px;">
+            <!-- diisi dinamis oleh JS -->
+          </div>
+
+          <button type="button" onclick="downloadTemplateBankSoal()">Download Template Bank Soal</button>
+
+          <div style="margin-top:10px;">
+            <label>
+              Pilih file CSV:
+              <input type="file" id="file_import_banksoal" accept=".csv" style="margin-top:6px;">
+            </label>
+          </div>
+          <div style="margin-top:10px;">
+            <button type="button" onclick="importBankSoalFromFile()">Import</button>
+          </div>
+        </div>
+      </div>
     </div>
     
-    <!-- Konten iframe -->
-    <iframe 
-        id="contentFrame"
-        src="https://script.google.com/a/~/macros/s/AKfycbyRogvtu8J1dVn04FzZ2U2ukMXI8q9Nsc6h7c-xU9Qilv8lN788XRSSrPtm663NRLzl/exec"
-        allowfullscreen
-        allow="autoplay; encrypted-media; picture-in-picture"
-        loading="eager">
-    </iframe>
-    
+
+    <!-- Modern Notification System -->
+<div class="notification-container" id="notificationContainer"></div>
+
+<!-- Confirmation Dialog -->
+<div class="confirmation-dialog" id="confirmationDialog">
+  <div class="confirmation-box">
+    <div class="confirmation-icon warning">⚠️</div>
+    <h3 class="confirmation-title" id="dialogTitle">Konfirmasi</h3>
+    <p class="confirmation-message" id="dialogMessage">Apakah Anda yakin?</p>
+    <div class="confirmation-buttons">
+      <button class="confirmation-btn cancel" onclick="hideConfirmation()">Batal</button>
+      <button class="confirmation-btn confirm" id="confirmActionBtn">Ya, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast-notification" id="toastNotification">
+  <span class="toast-icon">📋</span>
+  <span class="toast-message" id="toastMessage">Pesan toast</span>
+</div>
+
+<!-- Footer di bagian bawah halaman -->
+<footer class="site-footer">
+  <div class="footer-content">
+    <div class="footer-text">Developed by D14nr © 2026</div>
+    <div class="footer-subtext">Portal Admin CBT 2026</div>
+  </div>
+</footer>
+
+    <!-- Area khusus untuk print kartu -->
+    <div id="printArea"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script>
-        // Status loading yang realistis
-        const loadingSteps = [
-            "Menginisialisasi sistem...",
-            "Memuat modul administrasi...",
-            "Menyiapkan database...",
-            "Memverifikasi koneksi...",
-            "Menyiapkan antarmuka pengguna...",
-            "Hampir selesai..."
-        ];
+      const firebaseConfig = {
+        apiKey: "AIzaSyC1Yakfe4BkvRKs54Vqp3-mcrf-wSn5Gro",
+        authDomain: "appku-aa5b2.firebaseapp.com",
+        databaseURL: "https://appku-aa5b2-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "appku-aa5b2",
+        storageBucket: "appku-aa5b2.firebasestorage.app",
+        messagingSenderId: "431489373226",
+        appId: "1:431489373226:web:1ac51282e3cdb8ccf29f53",
+        measurementId: "G-90LQBNR7RG"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db            = firebase.database();
+      const pesertaRef    = db.ref('peserta');
+      const agendaRef     = db.ref('agenda_ujian');
+      const mapelRef      = db.ref('mata_pelajaran');
+      const bankSoalRef   = db.ref('bank_soal');
+      const monitoringRef = db.ref('monitoring_pengerjaan');
+      const jawabanRef    = db.ref('jawaban_siswa');
+
+      // PETA NAMA SISWA
+      let pesertaNameMap  = {}; 
+
+      let currentAgendaForMapel = '';
+      let currentAgendaForBank  = '';
+      let importBankSoalMapelMap = {}; 
+      let currentMapelForBank   = '';
+      let currentAgendaForKartu = '';
+      let kartuPesertaList      = [];
+      let agendaCache           = {};
+
+      // ====== LOGIN ADMIN ======
+      function checkLoginStatus() {
+  const loggedIn = sessionStorage.getItem('adminLoggedIn');
+  
+  if (loggedIn === 'true') {
+    showApp();
+  } else {
+    showLogin();
+  }
+}
+
+function handleLogin() {
+  const u = document.getElementById('login_username').value;
+  const p = document.getElementById('login_password').value;
+
+  // Credentials
+  if (u === 'Admin' && p === '290192') {
+    sessionStorage.setItem('adminLoggedIn', 'true');
+    showApp();
+  } else {
+    alert('Username atau Password salah!');
+    // Reset password field
+    document.getElementById('login_password').value = '';
+    document.getElementById('login_password').type = 'password';
+    const toggleBtn = document.querySelector('#login_password + .toggle-password');
+    if (toggleBtn) {
+      toggleBtn.textContent = '👁️';
+    }
+    // Fokus kembali ke password field
+    document.getElementById('login_password').focus();
+  }
+}
+
+function handleLogout() {
+  if(confirm('Yakin ingin keluar?')) {
+    sessionStorage.removeItem('adminLoggedIn');
+    showLogin();
+    
+    // Juga reset semua data yang mungkin masih tersimpan
+    pesertaNameMap = {};
+    currentAgendaForMapel = '';
+    currentAgendaForBank = '';
+    importBankSoalMapelMap = {};
+    currentMapelForBank = '';
+    currentAgendaForKartu = '';
+    kartuPesertaList = [];
+    agendaCache = {};
+    
+    // Reset form login untuk keamanan
+    document.getElementById('login_username').value = '';
+    document.getElementById('login_password').value = '';
+    
+    // Tampilkan pesan logout berhasil
+    setTimeout(() => {
+      alert('Anda telah berhasil logout.');
+    }, 100);
+  }
+}
+
+function showApp() {
+  // Sembunyikan login section
+  const loginSection = document.getElementById('login-section');
+  const appShell = document.getElementById('app-shell');
+  
+  loginSection.style.display = 'none';
+  appShell.style.display = 'block';
+  
+  // Init Load Data
+  loadPeserta();
+  loadAgenda();
+  loadAgendaListForPeserta();
+  loadAgendaListForMapelDropdown();
+  loadAgendaListForBankSoalDropdown();
+  loadAgendaListForCetakKartuDropdown();
+  loadMonitoring();
+  loadJawaban();
+  showTab('peserta');
+  
+  // Inisialisasi tombol show/hide password
+  setTimeout(initializePasswordToggles, 500);
+}
+
+function showLogin() {
+  // Sembunyikan app shell dan tampilkan login
+  const loginSection = document.getElementById('login-section');
+  const appShell = document.getElementById('app-shell');
+  
+  loginSection.style.display = 'flex';
+  appShell.style.display = 'none';
+  
+  // Reset form login
+  const usernameInput = document.getElementById('login_username');
+  const passwordInput = document.getElementById('login_password');
+  
+  if (usernameInput) usernameInput.value = '';
+  if (passwordInput) {
+    passwordInput.value = '';
+    passwordInput.type = 'password';
+  }
+  
+  // Reset tombol show/hide password
+  const toggleBtn = document.querySelector('#login_password + .toggle-password');
+  if (toggleBtn) {
+    toggleBtn.textContent = '👁️';
+  }
+  
+  // Fokus ke username field
+  if (usernameInput) {
+    setTimeout(() => {
+      usernameInput.focus();
+    }, 100);
+  }
+}
+
+      // ====== SHOW/HIDE PASSWORD ======
+      function togglePasswordVisibility(inputElement, buttonElement) {
+        const input = typeof inputElement === 'string' 
+          ? document.getElementById(inputElement) 
+          : inputElement;
         
-        // Elemen DOM
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const progressBar = document.getElementById('progressBar');
-        const loadingStatus = document.getElementById('loadingStatus');
-        const contentFrame = document.getElementById('contentFrame');
-        
-        // Simulasi loading dengan progress
-        let currentStep = 0;
-        const totalSteps = loadingSteps.length;
-        
-        function updateLoadingProgress() {
-            if (currentStep < totalSteps) {
-                // Update status teks
-                loadingStatus.innerHTML = `<span>${loadingSteps[currentStep]}</span>`;
-                
-                // Update progress bar
-                const progress = ((currentStep + 1) / totalSteps) * 100;
-                progressBar.style.width = `${progress}%`;
-                
-                currentStep++;
-                
-                // Jadwalkan langkah berikutnya
-                const delay = currentStep === totalSteps ? 800 : 500 + Math.random() * 300;
-                setTimeout(updateLoadingProgress, delay);
-            }
+        if (input.type === 'password') {
+          input.type = 'text';
+          buttonElement.textContent = '🙈';
+          buttonElement.title = 'Sembunyikan password';
+        } else {
+          input.type = 'password';
+          buttonElement.textContent = '👁️';
+          buttonElement.title = 'Tampilkan password';
         }
-        
-        // Mulai progress loading
-        setTimeout(updateLoadingProgress, 300);
-        
-        // Sembunyikan loading setelah iframe dimuat
-        contentFrame.onload = function() {
-            // Tunggu sebentar untuk efek transisi
-            setTimeout(() => {
-                // Selesaikan progress bar
-                progressBar.style.width = '100%';
-                loadingStatus.innerHTML = '<span>Sistem siap! Mengalihkan...</span>';
-                
-                // Tunggu 0.5 detik sebelum menyembunyikan loading
-                setTimeout(() => {
-                    loadingOverlay.style.opacity = '0';
-                    
-                    // Setelah animasi fade out, sembunyikan elemen
-                    setTimeout(() => {
-                        loadingOverlay.style.display = 'none';
-                        contentFrame.classList.add('iframe-loaded');
-                    }, 500);
-                }, 500);
-            }, 300);
-        };
-        
-        // Fallback: sembunyikan loading setelah 8 detik
-        setTimeout(function() {
-            if (loadingOverlay.style.display !== 'none') {
-                loadingOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    loadingOverlay.style.display = 'none';
-                    contentFrame.classList.add('iframe-loaded');
-                }, 500);
-            }
-        }, 8000);
-        
-        // Mencegah perilaku default di mobile
-        document.addEventListener('touchmove', function(e) {
-            if (e.scale !== 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-        
-        // Deteksi perangkat mobile
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-        
-        // Penyesuaian untuk mobile
-        if (isMobile()) {
-            document.body.classList.add('mobile-device');
-            
-            // Pesan untuk orientasi landscape (opsional)
-            window.addEventListener("orientationchange", function() {
-                if (window.orientation === 90 || window.orientation === -90) {
-                    console.log("Mode landscape - cocok untuk tampilan CBT");
-                }
-            });
-        }
-        
-        // Tambahkan keyboard shortcut F11 untuk layar penuh (opsional)
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F11') {
-                e.preventDefault();
-                toggleFullscreen();
-            }
+      }
+
+      // Inisialisasi tombol show/hide password di tabel
+      function initializePasswordToggles() {
+        document.querySelectorAll('.password-wrapper input[type="password"]').forEach(input => {
+          const wrapper = input.closest('.password-wrapper');
+          if (wrapper && !wrapper.querySelector('.toggle-password')) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'toggle-password';
+            button.innerHTML = '👁️';
+            button.onclick = () => togglePasswordVisibility(input, button);
+            wrapper.appendChild(button);
+          }
         });
-        
-        // Fungsi untuk layar penuh
-        function toggleFullscreen() {
-            const iframe = document.getElementById('contentFrame');
-            
-            if (document.fullscreenElement || 
-                document.webkitFullscreenElement || 
-                document.mozFullScreenElement || 
-                document.msFullscreenElement) {
-                
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-            } else {
-                const element = iframe;
-                
-                if (element.requestFullscreen) {
-                    element.requestFullscreen();
-                } else if (element.webkitRequestFullscreen) {
-                    element.webkitRequestFullscreen();
-                } else if (element.mozRequestFullScreen) {
-                    element.mozRequestFullScreen();
-                } else if (element.msRequestFullscreen) {
-                    element.msRequestFullscreen();
-                }
-            }
+      }
+
+      // ====== Modal helpers ======
+      function showModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function hideModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+
+      // helper download CSV
+      function downloadCsvFile(filename, csvContent) {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // helper parse CSV
+      function parseCsv(text) {
+        const lines = text.replace(/\r/g, '').split('\n').filter(l => l.trim() !== '');
+        if (!lines.length) return { headers: [], rows: [] };
+        const headers = lines[0].split(',').map(h => h.trim());
+        const rows = lines.slice(1).map(line => {
+          const cols = line.split(',');
+          const obj = {};
+          headers.forEach((h, i) => {
+            obj[h] = (cols[i] || '').trim();
+          });
+          return obj;
+        });
+        return { headers, rows };
+      }
+
+      // ====== TAB ======
+      function showTab(tab) {
+        const tabs = ['peserta', 'agenda', 'mapel', 'banksoal', 'monitoring', 'jawaban', 'cetakkartu'];
+        tabs.forEach(name => {
+          document.getElementById('tab-' + name).style.display =
+            (tab === name) ? 'block' : 'none';
+          document.getElementById('tab-btn-' + name).classList.toggle('active', tab === name);
+        });
+      }
+
+      // ====== UTIL PESERTA: NIS dari No. WA ======
+      function generateNISFromNoWA(noWa) {
+        if (!noWa) return '';
+        let digits = noWa.replace(/\D/g, '');
+        if (digits.startsWith('0')) {
+          digits = digits.substring(1);
+        } else if (digits.startsWith('62')) {
+          digits = digits.substring(2);
         }
+        return digits;
+      }
+
+      function handleNoWAChange() {
+        const noWa = document.getElementById('No_WA_Peserta').value;
+        const nis = generateNISFromNoWA(noWa);
+        document.getElementById('NIS_Username').value = nis;
+      }
+
+      // ====== UTIL AGENDA: Token ======
+      function generateRandomToken() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const length = 6 + Math.floor(Math.random() * 3);
+        let token = '';
+        for (let i = 0; i < length; i++) {
+          token += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return token;
+      }
+
+      function generateTokenUjian() {
+        const token = generateRandomToken();
+        document.getElementById('Token_Ujian').value = token;
+      }
+
+      // ====== LOAD AGENDA dropdowns ======
+      function loadAgendaListForPeserta() {
+        const select = document.getElementById('ID_Agenda_Peserta');
+        agendaRef.on('value', snapshot => {
+          const currentValue = select.value;
+          select.innerHTML = '<option value="">-- Pilih Agenda --</option>';
+          snapshot.forEach(childSnap => {
+            const id = childSnap.key;
+            const ag = childSnap.val();
+            const opt = document.createElement('option');
+            opt.value = id;
+            let label = ag.Agenda_Ujian || id;
+            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.textContent = label;
+            select.appendChild(opt);
+          });
+          if (currentValue) select.value = currentValue;
+        });
+      }
+
+      function loadAgendaListForMapelDropdown() {
+        const select = document.getElementById('Mapel_Agenda_Select');
+        agendaRef.on('value', snapshot => {
+          const currentValue = select.value;
+          select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
+          snapshot.forEach(childSnap => {
+            const id = childSnap.key;
+            const ag = childSnap.val();
+            const opt = document.createElement('option');
+            opt.value = id;
+            let label = ag.Agenda_Ujian || id;
+            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.textContent = label;
+            select.appendChild(opt);
+          });
+          if (currentValue) select.value = currentValue;
+        });
+      }
+
+      function loadAgendaListForBankSoalDropdown() {
+        const select = document.getElementById('Bank_Agenda_Select');
+        agendaRef.on('value', snapshot => {
+          const currentValue = select.value;
+          select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
+          snapshot.forEach(childSnap => {
+            const id = childSnap.key;
+            const ag = childSnap.val();
+            const opt = document.createElement('option');
+            opt.value = id;
+            let label = ag.Agenda_Ujian || id;
+            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.textContent = label;
+            select.appendChild(opt);
+          });
+          if (currentValue) select.value = currentValue;
+        });
+      }
+
+      function loadAgendaListForCetakKartuDropdown() {
+        const select = document.getElementById('CetakKartu_Agenda_Select');
+        agendaRef.on('value', snapshot => {
+          const currentValue = select.value;
+          select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
+          snapshot.forEach(childSnap => {
+            const id = childSnap.key;
+            const ag = childSnap.val();
+            const opt = document.createElement('option');
+            opt.value = id;
+            let label = ag.Agenda_Ujian || id;
+            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.textContent = label;
+            select.appendChild(opt);
+          });
+          if (currentValue) select.value = currentValue;
+        });
+      }
+
+      // ====== CRUD PESERTA ======
+      function loadPeserta() {
+        pesertaRef.on('value', snapshot => {
+          const tbody = document.querySelector('#pesertaTable tbody');
+          tbody.innerHTML = '';
+          pesertaNameMap = {};
+
+          snapshot.forEach(childSnap => {
+            const firebaseId = childSnap.key;
+            const data = childSnap.val();
+            if (data.NIS_Username) {
+              pesertaNameMap[data.NIS_Username] = data.Nama_Peserta || data.NIS_Username;
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${data.NIS_Username || ''}</td>
+              <td>${data.Nama_Peserta || ''}</td>
+              <td>
+                <div class="password-wrapper" style="position: relative; display: inline-block; width: 120px;">
+                  <input type="password" value="${data.Password || ''}" readonly 
+                         style="width: 100%; padding-right: 30px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 30px 4px 8px;">
+                  <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this.previousElementSibling, this)" 
+                          style="position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; font-size: 11px; padding: 0;">
+                    👁️
+                  </button>
+                </div>
+              </td>
+              <td>${data.Jenjang_Studi || ''}</td>
+              <td>${data.Kelas || ''}</td>
+              <td>${data.Asal_Sekolah || ''}</td>
+              <td>${data.No_WA_Peserta || ''}</td>
+              <td>${data.No_WA_Ortu || ''}</td>
+              <td class="actions">
+                <button onclick="editPeserta('${firebaseId}')">Edit</button>
+                <button onclick="deletePeserta('${firebaseId}')">Hapus</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+          
+          // Inisialisasi tombol show/hide password di tabel
+          initializePasswordToggles();
+          
+        }, error => alert('Gagal membaca data peserta: ' + error.message));
+      }
+
+      function openPesertaModalForCreate() {
+        resetForm();
+        showModal('modal-peserta');
+      }
+
+      function savePeserta() {
+        const firebaseId    = document.getElementById('firebaseId').value;
+        const Nama_Peserta  = document.getElementById('Nama_Peserta').value.trim();
+        const Password      = document.getElementById('Password').value.trim();
+        const Jenjang_Studi = document.getElementById('Jenjang_Studi').value.trim();
+        const Kelas         = document.getElementById('Kelas').value.trim();
+        const Asal_Sekolah  = document.getElementById('Asal_Sekolah').value.trim();
+        const No_WA_Peserta = document.getElementById('No_WA_Peserta').value.trim();
+        const No_WA_Ortu    = document.getElementById('No_WA_Ortu').value.trim();
+        const ID_Agenda     = document.getElementById('ID_Agenda_Peserta').value.trim();
+
+        const NIS_Username  = generateNISFromNoWA(No_WA_Peserta);
+        document.getElementById('NIS_Username').value = NIS_Username;
+
+        if (!Nama_Peserta || !Password || !Jenjang_Studi || !Kelas ||
+            !Asal_Sekolah || !No_WA_Peserta || !No_WA_Ortu || !ID_Agenda || !NIS_Username) {
+          alert('Mohon lengkapi semua field dan pastikan No. WA Peserta valid.');
+          return;
+        }
+
+        const data = {
+          NIS_Username,
+          Nama_Peserta,
+          Password,
+          Jenjang_Studi,
+          Kelas,
+          Asal_Sekolah,
+          No_WA_Peserta,
+          No_WA_Ortu,
+          ID_Agenda
+        };
+
+        if (firebaseId) {
+          const existingId = document.getElementById('ID_Peserta').value || firebaseId;
+          data.ID_Peserta = existingId;
+          pesertaRef.child(firebaseId).update(data)
+            .then(() => {
+              resetForm();
+              hideModal('modal-peserta');
+            })
+            .catch(err => alert('Gagal update peserta: ' + err.message));
+        } else {
+          const newRef = pesertaRef.push();
+          const newId = newRef.key;
+          data.ID_Peserta = newId;
+          newRef.set(data)
+            .then(() => {
+              document.getElementById('ID_Peserta').value = newId;
+              resetForm();
+              hideModal('modal-peserta');
+            })
+            .catch(err => alert('Gagal menyimpan peserta: ' + err.message));
+        }
+      }
+
+      function editPeserta(firebaseId) {
+        pesertaRef.child(firebaseId).once('value')
+          .then(snapshot => {
+            const data = snapshot.val();
+            document.getElementById('firebaseId').value       = firebaseId;
+            document.getElementById('ID_Peserta').value       = data.ID_Peserta || '';
+            document.getElementById('NIS_Username').value     = data.NIS_Username || '';
+            document.getElementById('Nama_Peserta').value     = data.Nama_Peserta || '';
+            document.getElementById('Password').value         = data.Password || '';
+            document.getElementById('Password').type          = 'password';
+            document.getElementById('Jenjang_Studi').value    = data.Jenjang_Studi || '';
+            document.getElementById('Kelas').value            = data.Kelas || '';
+            document.getElementById('Asal_Sekolah').value     = data.Asal_Sekolah || '';
+            document.getElementById('No_WA_Peserta').value    = data.No_WA_Peserta || '';
+            document.getElementById('No_WA_Ortu').value       = data.No_WA_Ortu || '';
+            document.getElementById('ID_Agenda_Peserta').value= data.ID_Agenda || '';
+            
+            // Reset tombol show/hide password
+            const toggleBtn = document.querySelector('#Password + .toggle-password');
+            if (toggleBtn) {
+              toggleBtn.textContent = '👁️';
+            }
+            
+            showModal('modal-peserta');
+          })
+          .catch(err => alert('Gagal mengambil data peserta: ' + err.message));
+      }
+
+      function deletePeserta(firebaseId) {
+        if (!confirm('Yakin ingin menghapus data peserta ini?')) return;
+        pesertaRef.child(firebaseId).remove()
+          .catch(err => alert('Gagal menghapus peserta: ' + err.message));
+      }
+
+      function resetForm() {
+        document.getElementById('firebaseId').value   = '';
+        document.getElementById('pesertaForm').reset();
+        document.getElementById('ID_Peserta').value   = '';
+        document.getElementById('NIS_Username').value = '';
+        document.getElementById('Password').type = 'password';
+        
+        // Reset tombol show/hide password
+        const toggleBtn = document.querySelector('#Password + .toggle-password');
+        if (toggleBtn) {
+          toggleBtn.textContent = '👁️';
+        }
+      }
+
+      function exportPesertaToCsv() {
+        pesertaRef.once('value')
+          .then(snapshot => {
+            const rows = [];
+            const header = [
+              'ID_Peserta',
+              'NIS_Username',
+              'Nama_Peserta',
+              'Password',
+              'Jenjang_Studi',
+              'Kelas',
+              'Asal_Sekolah',
+              'No_WA_Peserta',
+              'No_WA_Ortu',
+              'ID_Agenda'
+            ];
+            rows.push(header);
+
+            snapshot.forEach(childSnap => {
+              const d = childSnap.val() || {};
+              rows.push([
+                d.ID_Peserta || childSnap.key,
+                d.NIS_Username || '',
+                d.Nama_Peserta || '',
+                d.Password || '',
+                d.Jenjang_Studi || '',
+                d.Kelas || '',
+                d.Asal_Sekolah || '',
+                d.No_WA_Peserta || '',
+                d.No_WA_Ortu || '',
+                d.ID_Agenda || ''
+              ]);
+            });
+
+            if (rows.length <= 1) {
+              alert('Tidak ada data peserta untuk diexport.');
+              return;
+            }
+            const csv = rows.map(r =>
+              r.map(v => String(v).replace(/"/g, '""')).map(v => `"${v}"`).join(',')
+            ).join('\r\n');
+            downloadCsvFile('peserta_export.csv', csv);
+          })
+          .catch(err => alert('Gagal export peserta: ' + err.message));
+      }
+
+      function downloadTemplatePeserta() {
+        const header = [
+          'Nama_Peserta',
+          'Password',
+          'Jenjang_Studi',
+          'Kelas',
+          'Asal_Sekolah',
+          'No_WA_Peserta',
+          'No_WA_Ortu',
+          'ID_Agenda'
+        ];
+        const example = [
+          'Budi Setiawan',
+          'pass123',
+          'SMP',
+          '8A',
+          'SMPN 1 Contoh',
+          '08123456789',
+          '081298765432',
+          'ID_AGENDA_CONTOH'
+        ];
+        const csv = [
+          header.join(','),
+          example.map(v => String(v).replace(/"/g, '""')).join(',')
+        ].join('\r\n');
+        downloadCsvFile('template_peserta.csv', csv);
+      }
+
+      function importPesertaFromFile() {
+        const input = document.getElementById('file_import_peserta');
+        const file = input.files[0];
+        if (!file) {
+          alert('Pilih file CSV terlebih dahulu.');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const text = e.target.result;
+          const parsed = parseCsv(text);
+          if (!parsed.rows.length) {
+            alert('File kosong atau format tidak sesuai.');
+            return;
+          }
+          const headers = parsed.headers;
+          const required = [
+            'Nama_Peserta',
+            'Password',
+            'Jenjang_Studi',
+            'Kelas',
+            'Asal_Sekolah',
+            'No_WA_Peserta',
+            'No_WA_Ortu',
+            'ID_Agenda'
+          ];
+          for (const r of required) {
+            if (!headers.includes(r)) {
+              alert('Header CSV harus mengandung kolom: ' + required.join(', '));
+              return;
+            }
+          }
+          const promises = [];
+          let inserted = 0;
+          parsed.rows.forEach(row => {
+            if (!row.Nama_Peserta || !row.Password || !row.No_WA_Peserta || !row.ID_Agenda) return;
+            const NIS_Username = generateNISFromNoWA(row.No_WA_Peserta);
+            if (!NIS_Username) return;
+            const newRef = pesertaRef.push();
+            const newId = newRef.key;
+            const data = {
+              ID_Peserta: newId,
+              NIS_Username,
+              Nama_Peserta: row.Nama_Peserta,
+              Password: row.Password,
+              Jenjang_Studi: row.Jenjang_Studi || '',
+              Kelas: row.Kelas || '',
+              Asal_Sekolah: row.Asal_Sekolah || '',
+              No_WA_Peserta: row.No_WA_Peserta,
+              No_WA_Ortu: row.No_WA_Ortu || '',
+              ID_Agenda: row.ID_Agenda
+            };
+            inserted++;
+            promises.push(newRef.set(data));
+          });
+          if (!inserted) {
+            alert('Tidak ada baris valid untuk diimport.');
+            return;
+          }
+          Promise.all(promises)
+            .then(() => {
+              alert('Import peserta selesai. Baris berhasil ditambahkan: ' + inserted);
+              input.value = '';
+              hideModal('modal-import-peserta');
+            })
+            .catch(err => alert('Terjadi kesalahan saat import peserta: ' + err.message));
+        };
+        reader.onerror = err => alert('Gagal membaca file: ' + err);
+        reader.readAsText(file);
+      }
+
+      // ====== CRUD AGENDA ======
+      function loadAgenda() {
+        agendaRef.on('value', snapshot => {
+          const tbody = document.querySelector('#agendaTable tbody');
+          tbody.innerHTML = '';
+          agendaCache = {};
+          snapshot.forEach(childSnap => {
+            const firebaseId = childSnap.key;
+            const data = childSnap.val();
+            agendaCache[firebaseId] = data;
+            const mulai   = data.TglJam_Mulai   ? data.TglJam_Mulai.replace('T', ' ')   : '';
+            const selesai = data.TglJam_Selesai ? data.TglJam_Selesai.replace('T', ' ') : '';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${data.Agenda_Ujian || ''}</td>
+              <td>${data.Deskripsi_Ujian || ''}</td>
+              <td>${data.Jenjang_Studi || ''}</td>
+              <td>${data.Jenis_Tes || ''}</td>
+              <td>${mulai}</td>
+              <td>${selesai}</td>
+              <td>${data.Token_Ujian || ''}</td>
+              <td class="actions">
+                <button onclick="editAgenda('${firebaseId}')">Edit</button>
+                <button onclick="deleteAgenda('${firebaseId}')">Hapus</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }, error => alert('Gagal membaca data agenda: ' + error.message));
+      }
+
+      function openAgendaModalForCreate() {
+        resetAgendaForm();
+        showModal('modal-agenda');
+      }
+
+      function saveAgenda() {
+        const firebaseAgendaId = document.getElementById('firebaseAgendaId').value;
+        const Agenda_Ujian     = document.getElementById('Agenda_Ujian').value.trim();
+        const Deskripsi_Ujian  = document.getElementById('Deskripsi_Ujian').value.trim();
+        const Jenjang_Studi    = document.getElementById('Jenjang_Studi_Agenda').value.trim();
+        const Jenis_Tes        = document.getElementById('Jenis_Tes').value.trim();
+        const TglJam_Mulai     = document.getElementById('TglJam_Mulai').value;
+        const TglJam_Selesai   = document.getElementById('TglJam_Selesai').value;
+        let   Token_Ujian      = document.getElementById('Token_Ujian').value.trim().toUpperCase();
+
+        if (!Agenda_Ujian || !Deskripsi_Ujian || !Jenjang_Studi || !Jenis_Tes || !TglJam_Mulai || !TglJam_Selesai) {
+          alert('Mohon lengkapi semua field agenda ujian.');
+          return;
+        }
+
+        Token_Ujian = Token_Ujian.replace(/[^A-Z0-9]/g, '');
+        if (Token_Ujian.length < 6 || Token_Ujian.length > 8) {
+          Token_Ujian = generateRandomToken();
+        }
+        document.getElementById('Token_Ujian').value = Token_Ujian;
+
+        const data = {
+          Agenda_Ujian,
+          Deskripsi_Ujian,
+          Jenjang_Studi,
+          Jenis_Tes,
+          TglJam_Mulai,
+          TglJam_Selesai,
+          Token_Ujian
+        };
+
+        if (firebaseAgendaId) {
+          const existingId = document.getElementById('ID_Agenda_Agenda').value || firebaseAgendaId;
+          data.ID_Agenda = existingId;
+          agendaRef.child(firebaseAgendaId).update(data)
+            .then(() => {
+              resetAgendaForm();
+              hideModal('modal-agenda');
+            })
+            .catch(err => alert('Gagal update agenda: ' + err.message));
+        } else {
+          const newRef = agendaRef.push();
+          const newId  = newRef.key;
+          data.ID_Agenda = newId;
+          newRef.set(data)
+            .then(() => {
+              document.getElementById('ID_Agenda_Agenda').value = newId;
+              resetAgendaForm();
+              hideModal('modal-agenda');
+            })
+            .catch(err => alert('Gagal menyimpan agenda: ' + err.message));
+        }
+      }
+
+      function editAgenda(firebaseAgendaId) {
+        agendaRef.child(firebaseAgendaId).once('value')
+          .then(snapshot => {
+            const data = snapshot.val();
+            document.getElementById('firebaseAgendaId').value  = firebaseAgendaId;
+            document.getElementById('ID_Agenda_Agenda').value  = data.ID_Agenda || '';
+            document.getElementById('Agenda_Ujian').value      = data.Agenda_Ujian || '';
+            document.getElementById('Deskripsi_Ujian').value   = data.Deskripsi_Ujian || '';
+            document.getElementById('Jenjang_Studi_Agenda').value = data.Jenjang_Studi || '';
+            document.getElementById('Jenis_Tes').value         = data.Jenis_Tes || '';
+            document.getElementById('TglJam_Mulai').value      = data.TglJam_Mulai || '';
+            document.getElementById('TglJam_Selesai').value    = data.TglJam_Selesai || '';
+            document.getElementById('Token_Ujian').value       = data.Token_Ujian || '';
+            showModal('modal-agenda');
+          })
+          .catch(err => alert('Gagal mengambil data agenda: ' + err.message));
+      }
+
+      function deleteAgenda(firebaseAgendaId) {
+        if (!confirm('Yakin ingin menghapus agenda ujian ini?')) return;
+        agendaRef.child(firebaseAgendaId).remove()
+          .catch(err => alert('Gagal menghapus agenda: ' + err.message));
+      }
+
+      function resetAgendaForm() {
+        document.getElementById('firebaseAgendaId').value   = '';
+        document.getElementById('agendaForm').reset();
+        document.getElementById('ID_Agenda_Agenda').value   = '';
+        document.getElementById('Token_Ujian').value        = '';
+      }
+
+      // ====== CRUD MAPEL ======
+      function onChangeAgendaMapel() {
+        currentAgendaForMapel = document.getElementById('Mapel_Agenda_Select').value;
+        document.getElementById('ID_Agenda_Mapel').value = currentAgendaForMapel || '';
+        resetMapelForm(false);
+        loadMapelTable();
+      }
+
+      function loadMapelTable() {
+        const tbody = document.querySelector('#mapelTable tbody');
+        tbody.innerHTML = '';
+        if (!currentAgendaForMapel) return;
+        mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForMapel).once('value')
+          .then(snapshot => {
+            snapshot.forEach(childSnap => {
+              const firebaseId = childSnap.key;
+              const data = childSnap.val();
+              const isSiap = data.Status_Mapel === 'Siap';
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td>${data.Nama_Mata_Pelajaran || ''}</td>
+                <td>${data.Jumlah_Soal || ''}</td>
+                <td>${data.Durasi_Ujian || ''}</td>
+                <td>
+                  <label style="display:flex; align-items:center; gap:4px; font-weight:400;">
+                    <input type="checkbox" ${isSiap ? 'checked' : ''} 
+                           onchange="toggleStatusMapel('${firebaseId}', this.checked)">
+                    <span>${isSiap ? 'Siap' : 'Draft'}</span>
+                  </label>
+                </td>
+                <td class="actions">
+                  <button onclick="editMapel('${firebaseId}')">Edit</button>
+                  <button onclick="deleteMapel('${firebaseId}')">Hapus</button>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            });
+          })
+          .catch(err => alert('Gagal membaca data mapel: ' + err.message));
+      }
+
+      function openMapelModalForCreate() {
+        if (!currentAgendaForMapel) {
+          alert('Pilih Agenda Ujian terlebih dahulu.');
+          return;
+        }
+        resetMapelForm(false);
+        showModal('modal-mapel');
+      }
+
+      function saveMapel() {
+        const firebaseMapelId = document.getElementById('firebaseMapelId').value;
+        const ID_Agenda       = currentAgendaForMapel;
+        if (!ID_Agenda) {
+          alert('Pilih Agenda Ujian terlebih dahulu.');
+          return;
+        }
+        const Nama_Mata_Pelajaran = document.getElementById('Nama_Mata_Pelajaran').value.trim();
+        const Jumlah_Soal         = document.getElementById('Jumlah_Soal').value.trim();
+        const Durasi_Ujian        = document.getElementById('Durasi_Ujian').value.trim();
+        let   Status_Mapel        = document.getElementById('Status_Mapel').value || 'Draft';
+
+        if (!Nama_Mata_Pelajaran || !Jumlah_Soal || !Durasi_Ujian) {
+          alert('Mohon lengkapi Nama Mata Pelajaran, Jumlah Soal, dan Durasi Ujian.');
+          return;
+        }
+        const data = {
+          ID_Agenda,
+          Nama_Mata_Pelajaran,
+          Jumlah_Soal,
+          Durasi_Ujian,
+          Status_Mapel
+        };
+        if (firebaseMapelId) {
+          const existingId = document.getElementById('ID_Mapel_Mapel').value || firebaseMapelId;
+          data.ID_Mapel = existingId;
+          mapelRef.child(firebaseMapelId).update(data)
+            .then(() => {
+              resetMapelForm(false);
+              loadMapelTable();
+              hideModal('modal-mapel');
+            })
+            .catch(err => alert('Gagal update mapel: ' + err.message));
+        } else {
+          const newRef = mapelRef.push();
+          const newId  = newRef.key;
+          data.ID_Mapel = newId;
+          newRef.set(data)
+            .then(() => {
+              document.getElementById('ID_Mapel_Mapel').value = newId;
+              resetMapelForm(false);
+              loadMapelTable();
+              hideModal('modal-mapel');
+            })
+            .catch(err => alert('Gagal menyimpan mapel: ' + err.message));
+        }
+      }
+
+      function editMapel(firebaseMapelId) {
+        mapelRef.child(firebaseMapelId).once('value')
+          .then(snapshot => {
+            const data = snapshot.val();
+            document.getElementById('firebaseMapelId').value   = firebaseMapelId;
+            currentAgendaForMapel = data.ID_Agenda || '';
+            document.getElementById('Mapel_Agenda_Select').value = currentAgendaForMapel;
+            document.getElementById('ID_Agenda_Mapel').value  = currentAgendaForMapel;
+            document.getElementById('ID_Mapel_Mapel').value   = data.ID_Mapel || '';
+            document.getElementById('Nama_Mata_Pelajaran').value = data.Nama_Mata_Pelajaran || '';
+            document.getElementById('Jumlah_Soal').value      = data.Jumlah_Soal || '';
+            document.getElementById('Durasi_Ujian').value     = data.Durasi_Ujian || '';
+            document.getElementById('Status_Mapel').value     = data.Status_Mapel || 'Draft';
+            showModal('modal-mapel');
+          })
+          .catch(err => alert('Gagal mengambil data mapel: ' + err.message));
+      }
+
+      function deleteMapel(firebaseMapelId) {
+        if (!confirm('Yakin ingin menghapus mata pelajaran ini?')) return;
+        mapelRef.child(firebaseMapelId).remove()
+          .then(loadMapelTable)
+          .catch(err => alert('Gagal menghapus mapel: ' + err.message));
+      }
+
+      function toggleStatusMapel(firebaseMapelId, isSiap) {
+        const newStatus = isSiap ? 'Siap' : 'Draft';
+        mapelRef.child(firebaseMapelId).update({ Status_Mapel: newStatus })
+          .then(loadMapelTable)
+          .catch(err => alert('Gagal mengubah status mapel: ' + err.message));
+      }
+
+      function resetMapelForm(resetAgenda = true) {
+        document.getElementById('firebaseMapelId').value = '';
+        document.getElementById('mapelForm').reset();
+        document.getElementById('ID_Mapel_Mapel').value  = '';
+        document.getElementById('Status_Mapel').value    = 'Draft';
+        if (resetAgenda) {
+          currentAgendaForMapel = '';
+          document.getElementById('Mapel_Agenda_Select').value = '';
+          document.getElementById('ID_Agenda_Mapel').value = '';
+        } else {
+          document.getElementById('ID_Agenda_Mapel').value = currentAgendaForMapel || '';
+        }
+      }
+
+      // ====== BANK SOAL ======
+      function onTypeSoalChange() {
+        const type = document.getElementById('Type_Soal').value;
+        const pg        = document.getElementById('group-pg');
+        const perny     = document.getElementById('group-pernyataan');
+        const pejodohan = document.getElementById('group-pejodohan');
+        pg.style.display = 'none';
+        perny.style.display = 'none';
+        pejodohan.style.display = 'none';
+
+        if (type === 'Pilihan Ganda Tunggal' || type === 'Pilihan Ganda Kompleks') {
+          pg.style.display = 'block';
+        } else if (type === 'Pilihan Benar/Salah' || type === 'Pilihan Setuju/Tidak') {
+          perny.style.display = 'block';
+        } else if (type === 'Pilihan Pejodohan') {
+          pejodohan.style.display = 'block';
+        }
+      }
+
+      function setAutoNoSoal() {
+        if (!currentAgendaForBank) return;
+        bankSoalRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
+          .then(snapshot => {
+            let maxNo = 0;
+            snapshot.forEach(childSnap => {
+              const d = childSnap.val();
+              const n = parseInt(d.No_Soal, 10);
+              if (!isNaN(n) && n > maxNo) maxNo = n;
+            });
+            document.getElementById('No_Soal').value = maxNo + 1;
+          })
+          .catch(err => {
+            console.error('Gagal menghitung No_Soal:', err);
+          });
+      }
+
+      function onChangeAgendaBankSoal() {
+        currentAgendaForBank = document.getElementById('Bank_Agenda_Select').value;
+        document.getElementById('ID_Agenda_Bank').value = currentAgendaForBank || '';
+        currentMapelForBank = '';
+        document.getElementById('Bank_Mapel_Select').innerHTML =
+          '<option value="">-- Pilih Mata Pelajaran --</option>';
+        document.getElementById('ID_Mapel_Bank').value = '';
+        document.getElementById('Nama_Mata_Pelajaran_Bank').value = '';
+        document.querySelector('#bankSoalTable tbody').innerHTML = '';
+        document.getElementById('No_Soal').value = '';
+        if (!currentAgendaForBank) return;
+        const select = document.getElementById('Bank_Mapel_Select');
+        mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
+          .then(snapshot => {
+            snapshot.forEach(childSnap => {
+              const id = childSnap.key;
+              const data = childSnap.val();
+              const opt = document.createElement('option');
+              opt.value = id;
+              opt.textContent = data.Nama_Mata_Pelajaran || id;
+              opt.dataset.nama = data.Nama_Mata_Pelajaran || '';
+              select.appendChild(opt);
+            });
+          })
+          .catch(err => alert('Gagal membaca mapel untuk agenda ini: ' + err.message));
+      }
+
+      function onChangeMapelBankSoal() {
+        const select = document.getElementById('Bank_Mapel_Select');
+        currentMapelForBank = select.value;
+        document.getElementById('ID_Mapel_Bank').value = currentMapelForBank || '';
+        let nama = '';
+        if (select && select.selectedIndex >= 0) {
+          const opt = select.options[select.selectedIndex];
+          if (opt && opt.dataset) nama = opt.dataset.nama || '';
+        }
+        document.getElementById('Nama_Mata_Pelajaran_Bank').value = nama;
+        resetBankSoalForm(false);
+        loadBankSoalTable();
+      }
+
+      function loadBankSoalTable() {
+  const tbody = document.querySelector('#bankSoalTable tbody');
+  tbody.innerHTML = '';
+  if (!currentMapelForBank) return;
+  
+  bankSoalRef.orderByChild('ID_Mapel').equalTo(currentMapelForBank).once('value')
+    .then(snapshot => {
+      const list = [];
+      snapshot.forEach(childSnap => {
+        const data = childSnap.val();
+        list.push({ id: childSnap.key, ...data });
+      });
+      list.sort((a, b) => Number(a.No_Soal || 0) - Number(b.No_Soal || 0));
+      
+      list.forEach(item => {
+        const tr = document.createElement('tr');
+        const pertSingkat = (item.Pertanyaan || '').length > 80
+          ? item.Pertanyaan.substring(0, 80) + '...'
+          : (item.Pertanyaan || '');
+        const gambarCell = item.Gambar
+          ? `<a href="${item.Gambar}" target="_blank">Lihat</a>` : '';
+        
+        tr.innerHTML = `
+          <!-- TAMBAHKAN CHECKBOX DI SETIAP BARIS -->
+          <td><input type="checkbox" class="banksoal-checkbox" value="${item.id}"></td>
+          <td>${item.No_Soal || ''}</td>
+          <td>${item.Type_Soal || ''}</td>
+          <td>${pertSingkat}</td>
+          <td>${gambarCell}</td>
+          <td class="actions">
+            <button onclick="editSoal('${item.id}')">Edit</button>
+            <button onclick="deleteSoal('${item.id}')">Hapus</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    })
+    .catch(err => alert('Gagal membaca bank soal: ' + err.message));
+}
+
+// ====== FUNGSI CHECKBOX BANK SOAL ======
+
+function toggleSelectAllBankSoal(src) {
+  const cbs = document.querySelectorAll('.banksoal-checkbox');
+  cbs.forEach(cb => cb.checked = src.checked);
+}
+
+function selectAllBankSoal() {
+  const cbs = document.querySelectorAll('.banksoal-checkbox');
+  cbs.forEach(cb => cb.checked = true);
+  document.getElementById('bankSoal_select_all').checked = true;
+}
+
+function deselectAllBankSoal() {
+  const cbs = document.querySelectorAll('.banksoal-checkbox');
+  cbs.forEach(cb => cb.checked = false);
+  document.getElementById('bankSoal_select_all').checked = false;
+}
+
+function deleteSelectedBankSoal() {
+  const checked = document.querySelectorAll('.banksoal-checkbox:checked');
+  if (!checked.length) {
+    alert('Pilih soal yang akan dihapus.');
+    return;
+  }
+  
+  if (!confirm(`Yakin akan menghapus ${checked.length} soal terpilih?`)) return;
+  
+  const promises = [];
+  checked.forEach(cb => {
+    promises.push(bankSoalRef.child(cb.value).remove());
+  });
+  
+  Promise.all(promises)
+    .then(() => {
+      alert(`${checked.length} soal berhasil dihapus.`);
+      loadBankSoalTable();
+    })
+    .catch(err => {
+      alert('Gagal menghapus sebagian soal: ' + err.message);
+    });
+}
+
+// Fungsi untuk menghapus semua soal pada mapel yang sedang dipilih
+function deleteAllBankSoal() {
+  if (!currentMapelForBank) {
+    alert('Pilih mata pelajaran terlebih dahulu.');
+    return;
+  }
+  
+  if (!confirm('Yakin akan menghapus SEMUA soal pada mata pelajaran ini? Tindakan ini tidak dapat dibatalkan!')) return;
+  
+  bankSoalRef.orderByChild('ID_Mapel').equalTo(currentMapelForBank).once('value')
+    .then(snapshot => {
+      const promises = [];
+      let count = 0;
+      
+      snapshot.forEach(childSnap => {
+        promises.push(bankSoalRef.child(childSnap.key).remove());
+        count++;
+      });
+      
+      if (count === 0) {
+        alert('Tidak ada soal untuk dihapus.');
+        return;
+      }
+      
+      Promise.all(promises)
+        .then(() => {
+          alert(`${count} soal berhasil dihapus.`);
+          loadBankSoalTable();
+        })
+        .catch(err => {
+          alert('Gagal menghapus soal: ' + err.message);
+        });
+    })
+    .catch(err => alert('Gagal membaca data soal: ' + err.message));
+}
+
+
+
+      function openBankSoalModalForCreate() {
+        if (!currentAgendaForBank || !currentMapelForBank) {
+          alert('Pilih Agenda Ujian dan Mata Pelajaran terlebih dahulu.');
+          return;
+        }
+        resetBankSoalForm(false);
+        showModal('modal-banksoal');
+      }
+
+      function openImportBankSoalModal() {
+        if (!currentAgendaForBank) {
+          alert('Pilih Agenda Ujian terlebih dahulu di Tab Bank Soal.');
+          return;
+        }
+        const listDiv = document.getElementById('import-banksoal-mapel-list');
+        listDiv.innerHTML = 'Memuat daftar mata pelajaran...';
+        importBankSoalMapelMap = {};
+        mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
+          .then(snapshot => {
+            let html = '';
+            let count = 0;
+            snapshot.forEach(childSnap => {
+              const id   = childSnap.key;
+              const data = childSnap.val() || {};
+              const name = data.Nama_Mata_Pelajaran || id;
+              const key  = name.toLowerCase().trim();
+              importBankSoalMapelMap[key] = { id, name };
+              count++;
+              html += `
+                <label style="display:inline-flex; align-items:center; gap:4px; margin:2px 8px 2px 0;">
+                  <input type="checkbox" class="import-banksoal-mapel-cb" value="${id}" data-name="${name}" checked>
+                  <span>${name}</span>
+                </label>
+              `;
+            });
+            if (!count) {
+              html = '<em>Belum ada mata pelajaran untuk agenda ini. Tambah mapel terlebih dahulu di Tab Mata Pelajaran.</em>';
+            } else {
+              html = '<div style="margin-bottom:4px; font-weight:600;">Pilih Mata Pelajaran yang akan di-import:</div>' + html;
+            }
+            listDiv.innerHTML = html;
+          })
+          .catch(err => {
+            listDiv.innerHTML = '<span style="color:#b91c1c;">Gagal memuat mata pelajaran: ' + err.message + '</span>';
+          });
+        document.getElementById('file_import_banksoal').value = '';
+        showModal('modal-import-banksoal');
+      }
+
+      function saveSoal() {
+  if (!currentAgendaForBank || !currentMapelForBank) {
+    alert('Pilih Agenda Ujian dan Mata Pelajaran terlebih dahulu.');
+    return;
+  }
+  
+  const firebaseSoalId = document.getElementById('firebaseSoalId').value;
+  const ID_Agenda = currentAgendaForBank;
+  const ID_Mapel = currentMapelForBank;
+  const Nama_Mata_Pelajaran = document.getElementById('Nama_Mata_Pelajaran_Bank').value || '';
+  const No_Soal = document.getElementById('No_Soal').value.trim();
+  const Pertanyaan = document.getElementById('Pertanyaan').value.trim();
+  const Type_Soal = document.getElementById('Type_Soal').value;
+  
+  if (!No_Soal || !Pertanyaan || !Type_Soal) {
+    alert('No Soal, Pertanyaan, dan Type Soal wajib diisi.');
+    return;
+  }
+  
+  const data = {
+    ID_Agenda: ID_Agenda,
+    ID_Mapel: ID_Mapel,
+    Nama_Mata_Pelajaran: Nama_Mata_Pelajaran,
+    No_Soal: No_Soal,
+    Pertanyaan: Pertanyaan,
+    Type_Soal: Type_Soal
+  };
+  
+  // Data untuk pilihan ganda
+  data.Pilihan_A = document.getElementById('Pilihan_A').value.trim();
+  data.Pilihan_B = document.getElementById('Pilihan_B').value.trim();
+  data.Pilihan_C = document.getElementById('Pilihan_C').value.trim();
+  data.Pilihan_D = document.getElementById('Pilihan_D').value.trim();
+  data.Pilihan_E = document.getElementById('Pilihan_E').value.trim();
+  
+  // Data untuk pernyataan
+  for (let i = 1; i <= 10; i++) {
+    const pEl = document.getElementById('Pernyataan_' + i);
+    data['Pernyataan_' + i] = pEl ? pEl.value.trim() : '';
+  }
+  
+  // Data untuk pejodohan
+  for (let j = 1; j <= 10; j++) {
+    const kiriEl = document.getElementById('Pasangan_kiri_' + j);
+    const kananEl = document.getElementById('Pasangan_kanan_' + j);
+    data['Pasangan_kiri_' + j] = kiriEl ? kiriEl.value.trim() : '';
+    data['Pasangan_kanan_' + j] = kananEl ? kananEl.value.trim() : '';
+  }
+  
+  const fileInput = document.getElementById('Gambar');
+  const file = fileInput.files[0];
+  const existingUrl = document.getElementById('Gambar_Url').value || '';
+  
+  // Fungsi untuk menyimpan data setelah upload gambar
+  const doSave = (finalUrl) => {
+    data.Gambar = finalUrl || '';
+    
+    if (firebaseSoalId) {
+      bankSoalRef.child(firebaseSoalId).update(data)
+        .then(() => {
+          showNotification('success', 'Berhasil', 'Soal berhasil diperbarui.');
+          resetBankSoalForm(false);
+          loadBankSoalTable();
+          hideModal('modal-banksoal');
+        })
+        .catch((err) => {
+          showNotification('error', 'Gagal', 'Gagal update soal: ' + err.message);
+        });
+    } else {
+      bankSoalRef.push(data)
+        .then(() => {
+          showNotification('success', 'Berhasil', 'Soal berhasil disimpan.');
+          resetBankSoalForm(false);
+          loadBankSoalTable();
+          hideModal('modal-banksoal');
+        })
+        .catch((err) => {
+          showNotification('error', 'Gagal', 'Gagal menyimpan soal: ' + err.message);
+        });
+    }
+  };
+  
+  // Jika ada file gambar yang diupload
+  if (file) {
+    // Tampilkan loading
+    showNotification('info', 'Mengunggah', 'Mengunggah gambar...', 0);
+    
+    // Baca file sebagai base64
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      const base64Data = dataUrl.split(',')[1];
+      const mimeType = file.type || 'image/png';
+      
+      // Generate nama file yang unik
+      const agendaSelect = document.getElementById('Bank_Agenda_Select');
+      let agendaText = '';
+      if (agendaSelect && agendaSelect.selectedIndex >= 0) {
+        const optAg = agendaSelect.options[agendaSelect.selectedIndex];
+        if (optAg) agendaText = optAg.text || '';
+      }
+      
+      const rawAgendaName = agendaText.replace(/\s*\([^)]*\)\s*$/, '');
+      
+      const sanitizeName = (str, fallback) => {
+        const s = (str || '').toString()
+          .trim()
+          .replace(/[^A-Za-z0-9]+/g, '_')
+          .replace(/^_+|_+$/g, '')
+          .substring(0, 50);
+        return s || fallback;
+      };
+      
+      const safeAgenda = sanitizeName(rawAgendaName, 'Agenda');
+      const safeMapel = sanitizeName(Nama_Mata_Pelajaran, 'Mapel');
+      const safeNo = (No_Soal || '0').toString().replace(/[^0-9]+/g, '');
+      const timestamp = new Date().getTime();
+      const fileName = `${safeAgenda}_${safeMapel}_${safeNo}_${timestamp}.${file.name.split('.').pop()}`;
+      
+      // Panggil Google Apps Script untuk upload ke Google Drive
+      google.script.run
+        .withSuccessHandler((driveLink) => {
+          // Hide loading notification
+          hideAllNotifications();
+          
+          if (driveLink && driveLink.startsWith('https://')) {
+            showNotification('success', 'Gambar Terunggah', 'Gambar berhasil diupload ke Google Drive');
+            doSave(driveLink);
+          } else {
+            showNotification('error', 'Gagal Upload', 'Gagal mengupload gambar: ' + driveLink);
+            doSave(''); // Save tanpa gambar
+          }
+        })
+        .withFailureHandler((error) => {
+          hideAllNotifications();
+          showNotification('error', 'Gagal Upload', 'Gagal mengupload gambar: ' + error.message);
+          doSave(''); // Save tanpa gambar
+        })
+        .uploadImageToDrive(base64Data, fileName, mimeType);
+    };
+    
+    reader.onerror = (err) => {
+      hideAllNotifications();
+      showNotification('error', 'Gagal', 'Gagal membaca file gambar: ' + err);
+      doSave(existingUrl); // Gunakan URL yang sudah ada jika ada
+    };
+    
+    reader.readAsDataURL(file);
+  } else {
+    // Jika tidak ada file baru, gunakan URL yang sudah ada
+    doSave(existingUrl);
+  }
+}
+
+// Fungsi untuk menampilkan notifikasi
+function showNotification(type, title, message, duration = 5000) {
+  const container = document.getElementById('notificationContainer');
+  const id = 'notification-' + Date.now();
+  
+  const iconMap = {
+    success: '✓',
+    error: '✗',
+    warning: '⚠',
+    info: 'ℹ'
+  };
+  
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.id = id;
+  
+  notification.innerHTML = `
+    <div class="notification-icon">${iconMap[type] || 'ℹ'}</div>
+    <div class="notification-content">
+      <div class="notification-title">${title}</div>
+      <div class="notification-message">${message}</div>
+    </div>
+    <button class="notification-close" onclick="closeNotification('${id}')">&times;</button>
+    <div class="notification-progress">
+      <div class="notification-progress-bar" style="transform: scaleX(1); transition: transform ${duration}ms linear;"></div>
+    </div>
+  `;
+  
+  container.appendChild(notification);
+  
+  // Trigger animation
+  setTimeout(() => {
+    notification.classList.add('show');
+    
+    // Start progress bar
+    setTimeout(() => {
+      const progressBar = notification.querySelector('.notification-progress-bar');
+      if (progressBar) {
+        progressBar.style.transform = 'scaleX(0)';
+      }
+    }, 10);
+  }, 10);
+  
+  // Auto remove after duration
+  if (duration > 0) {
+    setTimeout(() => {
+      closeNotification(id);
+    }, duration);
+  }
+  
+  return id;
+}
+
+// Fungsi untuk menutup notifikasi
+function closeNotification(id) {
+  const notification = document.getElementById(id);
+  if (notification) {
+    notification.classList.remove('show');
+    notification.classList.add('hide');
+    
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 400);
+  }
+}
+
+// Fungsi untuk menyembunyikan semua notifikasi
+function hideAllNotifications() {
+  const notifications = document.querySelectorAll('.notification');
+  notifications.forEach(notification => {
+    notification.classList.remove('show');
+    notification.classList.add('hide');
+    
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 400);
+  });
+}
+
+function editSoal(firebaseSoalId) {
+  bankSoalRef.child(firebaseSoalId).once('value')
+    .then(snapshot => {
+      const data = snapshot.val();
+      document.getElementById('firebaseSoalId').value = firebaseSoalId;
+      currentAgendaForBank = data.ID_Agenda || '';
+      currentMapelForBank = data.ID_Mapel || '';
+      document.getElementById('ID_Agenda_Bank').value = currentAgendaForBank;
+      document.getElementById('ID_Mapel_Bank').value = currentMapelForBank;
+      document.getElementById('Nama_Mata_Pelajaran_Bank').value = data.Nama_Mata_Pelajaran || '';
+      document.getElementById('No_Soal').value = data.No_Soal || '';
+      document.getElementById('Pertanyaan').value = data.Pertanyaan || '';
+      document.getElementById('Type_Soal').value = data.Type_Soal || '';
+      document.getElementById('Gambar_Url').value = data.Gambar || '';
+      
+      // Tampilkan preview gambar jika ada
+      if (data.Gambar) {
+        const gambarContainer = document.getElementById('gambarPreviewContainer');
+        if (!gambarContainer) {
+          // Buat container preview jika belum ada
+          const inputGambar = document.getElementById('Gambar');
+          const container = document.createElement('div');
+          container.id = 'gambarPreviewContainer';
+          container.style.marginTop = '8px';
+          inputGambar.parentNode.insertBefore(container, inputGambar.nextSibling);
+        }
+        
+        const gambarPreview = document.getElementById('gambarPreview');
+        if (gambarPreview) {
+          gambarPreview.src = data.Gambar;
+        } else {
+          const preview = document.createElement('img');
+          preview.id = 'gambarPreview';
+          preview.src = data.Gambar;
+          preview.style.maxWidth = '200px';
+          preview.style.maxHeight = '150px';
+          preview.style.marginTop = '8px';
+          preview.style.border = '1px solid #e5e7eb';
+          preview.style.borderRadius = '4px';
+          preview.style.display = 'block';
+          
+          // Tambahkan link untuk melihat gambar
+          const link = document.createElement('a');
+          link.href = data.Gambar;
+          link.target = '_blank';
+          link.textContent = 'Lihat gambar asli';
+          link.style.display = 'block';
+          link.style.fontSize = '12px';
+          link.style.marginTop = '4px';
+          link.style.color = '#2563eb';
+          
+          const container = document.getElementById('gambarPreviewContainer');
+          container.innerHTML = '';
+          container.appendChild(preview);
+          container.appendChild(link);
+        }
+      } else {
+        // Hapus preview jika tidak ada gambar
+        const container = document.getElementById('gambarPreviewContainer');
+        if (container) {
+          container.innerHTML = '';
+        }
+      }
+      
+      // Reset input file
+      document.getElementById('Gambar').value = '';
+      
+      // Isi data lainnya...
+      document.getElementById('Pilihan_A').value = data.Pilihan_A || '';
+      document.getElementById('Pilihan_B').value = data.Pilihan_B || '';
+      document.getElementById('Pilihan_C').value = data.Pilihan_C || '';
+      document.getElementById('Pilihan_D').value = data.Pilihan_D || '';
+      document.getElementById('Pilihan_E').value = data.Pilihan_E || '';
+      
+      for (let i = 1; i <= 10; i++) {
+        const el = document.getElementById('Pernyataan_' + i);
+        if (el) el.value = data['Pernyataan_' + i] || '';
+      }
+      
+      for (let i = 1; i <= 10; i++) {
+        const lk = document.getElementById('Pasangan_kiri_' + i);
+        const rk = document.getElementById('Pasangan_kanan_' + i);
+        if (lk) lk.value = data['Pasangan_kiri_' + i] || '';
+        if (rk) rk.value = data['Pasangan_kanan_' + i] || '';
+      }
+      
+      // Update dropdowns
+      const agSelect = document.getElementById('Bank_Agenda_Select');
+      agSelect.value = currentAgendaForBank;
+      
+      const mpSelect = document.getElementById('Bank_Mapel_Select');
+      mpSelect.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+      mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
+        .then(snap => {
+          snap.forEach(child => {
+            const id = child.key;
+            const d = child.val();
+            const opt = document.createElement('option');
+            opt.value = id;
+            opt.textContent = d.Nama_Mata_Pelajaran || id;
+            opt.dataset.nama = d.Nama_Mata_Pelajaran || '';
+            mpSelect.appendChild(opt);
+          });
+          mpSelect.value = currentMapelForBank;
+        });
+      
+      onTypeSoalChange();
+      showModal('modal-banksoal');
+    })
+    .catch(err => {
+      showNotification('error', 'Gagal', 'Gagal mengambil soal: ' + err.message);
+    });
+}
+
+      function deleteSoal(firebaseSoalId) {
+        if (!confirm('Yakin ingin menghapus soal ini?')) return;
+        bankSoalRef.child(firebaseSoalId).remove()
+          .then(loadBankSoalTable)
+          .catch(err => alert('Gagal menghapus soal: ' + err.message));
+      }
+
+function resetBankSoalForm(resetContext = true) {
+  document.getElementById('firebaseSoalId').value = '';
+  document.getElementById('Gambar_Url').value = '';
+  document.getElementById('Gambar').value = '';
+  
+  // Hapus preview gambar
+  const container = document.getElementById('gambarPreviewContainer');
+  if (container) {
+    container.innerHTML = '';
+  }
+  
+  if (resetContext) {
+    document.getElementById('bankSoalForm').reset();
+    onTypeSoalChange();
+    currentAgendaForBank = '';
+    currentMapelForBank = '';
+    document.getElementById('Bank_Agenda_Select').value = '';
+    document.getElementById('Bank_Mapel_Select').innerHTML =
+      '<option value="">-- Pilih Mata Pelajaran --</option>';
+    document.getElementById('ID_Agenda_Bank').value = '';
+    document.getElementById('ID_Mapel_Bank').value = '';
+    document.getElementById('Nama_Mata_Pelajaran_Bank').value = '';
+    document.querySelector('#bankSoalTable tbody').innerHTML = '';
+    document.getElementById('No_Soal').value = '';
+  } else {
+    document.getElementById('Pertanyaan').value = '';
+    document.getElementById('Type_Soal').value = '';
+    document.getElementById('Pilihan_A').value = '';
+    document.getElementById('Pilihan_B').value = '';
+    document.getElementById('Pilihan_C').value = '';
+    document.getElementById('Pilihan_D').value = '';
+    document.getElementById('Pilihan_E').value = '';
+    
+    for (let i = 1; i <= 10; i++) {
+      const el = document.getElementById('Pernyataan_' + i);
+      if (el) el.value = '';
+    }
+    
+    for (let i = 1; i <= 10; i++) {
+      const lk = document.getElementById('Pasangan_kiri_' + i);
+      const rk = document.getElementById('Pasangan_kanan_' + i);
+      if (lk) lk.value = '';
+      if (rk) rk.value = '';
+    }
+    
+    onTypeSoalChange();
+    document.getElementById('ID_Agenda_Bank').value = currentAgendaForBank || '';
+    document.getElementById('ID_Mapel_Bank').value = currentMapelForBank || '';
+    setAutoNoSoal();
+  }
+}
+
+      function downloadTemplateBankSoal() {
+        const headers = [
+          'No_Soal',
+          'Mata_Pelajaran', 
+          'Pertanyaan',
+          'Type_Soal',
+          'Gambar_URL',     
+          'Pilihan_A',
+          'Pilihan_B',
+          'Pilihan_C',
+          'Pilihan_D',
+          'Pilihan_E'
+        ];
+        for (let i = 1; i <= 10; i++) headers.push('Pernyataan_' + i);
+        for (let i = 1; i <= 10; i++) headers.push('Pasangan_kiri_' + i);
+        for (let i = 1; i <= 10; i++) headers.push('Pasangan_kanan_' + i);
+        const sample = [
+          '1',
+          'Bahasa Indonesia',                   
+          'Contoh pertanyaan Dimana Ibu kota Indonesia ?',
+          'Pilihan Ganda Tunggal/Pilihan Ganda Kompleks/Pilihan Benar/Salah/Pilihan Setuju/Tidak/Pilihan Pejodohan/Uraian',
+          'https://drive.google.com/thumbnail?id=(isikan ID gambar dari google drive)&sz=w1200', 
+          'Pilihan 1',
+          'Pilihan 2',
+          'Pilihan 3',
+          'Pilihan 4',
+          'Pilihan 5'
+        ];
+        while (sample.length < headers.length) sample.push('');
+        const csv = [
+          headers.join(','),
+          sample.map(v => String(v).replace(/"/g, '""')).join(',')
+        ].join('\r\n');
+        downloadCsvFile('template_bank_soal.csv', csv);
+      }
+
+      function importBankSoalFromFile() {
+        if (!currentAgendaForBank) {
+          alert('Pilih Agenda Ujian terlebih dahulu di Tab Bank Soal.');
+          return;
+        }
+        const input = document.getElementById('file_import_banksoal');
+        const file = input.files[0];
+        if (!file) {
+          alert('Pilih file CSV terlebih dahulu.');
+          return;
+        }
+        const checked = document.querySelectorAll('.import-banksoal-mapel-cb:checked');
+        if (!checked.length) {
+          alert('Pilih minimal satu Mata Pelajaran yang akan di-import.');
+          return;
+        }
+        const allowedMapelIds = new Set();
+        checked.forEach(cb => allowedMapelIds.add(cb.value));
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const text = e.target.result;
+          const parsed = parseCsv(text);
+          if (!parsed.rows.length) {
+            alert('File kosong atau format tidak sesuai.');
+            return;
+          }
+          const headers = parsed.headers;
+          const required = ['No_Soal', 'Mata_Pelajaran', 'Pertanyaan', 'Type_Soal'];
+          for (const r of required) {
+            if (!headers.includes(r)) {
+              alert('Header CSV harus mengandung kolom: ' + required.join(', '));
+              return;
+            }
+          }
+          const promises = [];
+          let inserted = 0;
+          let skippedMapelTidakDikenal = 0;
+          let skippedMapelTidakDipilih = 0;
+          parsed.rows.forEach(row => {
+            const no = (row.No_Soal || '').trim();
+            const pertanyaan = (row.Pertanyaan || '').trim();
+            const type = (row.Type_Soal || '').trim();
+            const namaMapel = (row.Mata_Pelajaran || '').trim();
+            const gambarUrl = (row.Gambar_URL || '').trim();
+            if (!no || !pertanyaan || !type || !namaMapel) return;
+            const key = namaMapel.toLowerCase();
+            const mpInfo = importBankSoalMapelMap[key];
+            if (!mpInfo) {
+              skippedMapelTidakDikenal++;
+              return; 
+            }
+            if (!allowedMapelIds.has(mpInfo.id)) {
+              skippedMapelTidakDipilih++;
+              return; 
+            }
+            const data = {
+              ID_Agenda: currentAgendaForBank,
+              ID_Mapel: mpInfo.id,
+              Nama_Mata_Pelajaran: mpInfo.name,
+              No_Soal: no,
+              Pertanyaan: pertanyaan,
+              Type_Soal: type,
+              Gambar: gambarUrl || ''
+            };
+            data.Pilihan_A = row.Pilihan_A || '';
+            data.Pilihan_B = row.Pilihan_B || '';
+            data.Pilihan_C = row.Pilihan_C || '';
+            data.Pilihan_D = row.Pilihan_D || '';
+            data.Pilihan_E = row.Pilihan_E || '';
+            for (let i = 1; i <= 10; i++) {
+              data['Pernyataan_' + i] = row['Pernyataan_' + i] || '';
+            }
+            for (let i = 1; i <= 10; i++) {
+              data['Pasangan_kiri_'  + i] = row['Pasangan_kiri_'  + i] || '';
+              data['Pasangan_kanan_' + i] = row['Pasangan_kanan_' + i] || '';
+            }
+            inserted++;
+            promises.push(bankSoalRef.push(data));
+          });
+          if (!inserted) {
+            let msg = 'Tidak ada baris valid untuk diimport.';
+            if (skippedMapelTidakDikenal || skippedMapelTidakDipilih) {
+              msg += '\nCatatan:\n';
+              if (skippedMapelTidakDikenal)
+                msg += '- ' + skippedMapelTidakDikenal + ' baris di-skip karena Mata_Pelajaran tidak ditemukan di data mapel.\n';
+              if (skippedMapelTidakDipilih)
+                msg += '- ' + skippedMapelTidakDipilih + ' baris di-skip karena Mata_Pelajaran tidak dicentang di modal.\n';
+            }
+            alert(msg);
+            return;
+          }
+          Promise.all(promises)
+            .then(() => {
+              let msg = 'Import bank soal selesai.\nBaris berhasil ditambahkan: ' + inserted;
+              if (skippedMapelTidakDikenal || skippedMapelTidakDipilih) {
+                msg += '\n\nBaris yang di-skip:\n';
+                if (skippedMapelTidakDikenal)
+                  msg += '- ' + skippedMapelTidakDikenal + ' baris: Mata_Pelajaran tidak ditemukan di data mapel.\n';
+                if (skippedMapelTidakDipilih)
+                  msg += '- ' + skippedMapelTidakDipilih + ' baris: Mata_Pelajaran tidak dicentang di modal.\n';
+              }
+              alert(msg);
+              input.value = '';
+              hideModal('modal-import-banksoal');
+              loadBankSoalTable();
+            })
+            .catch(err => alert('Terjadi kesalahan saat import bank soal: ' + err.message));
+        };
+        reader.onerror = err => alert('Gagal membaca file: ' + err);
+        reader.readAsText(file);
+      }
+
+      // ====== MONITORING ======
+function loadMonitoring() {
+  // Ganti .once('value') dengan .on('value') untuk real-time updates
+  monitoringRef.orderByChild('TglJam_Mulai').on('value', snapshot => {
+    const tbody = document.querySelector('#monitoringTable tbody');
+    tbody.innerHTML = '';
+    
+    // Mengumpulkan semua data ke dalam array
+    const dataArray = [];
+    snapshot.forEach(childSnap => {
+      const id = childSnap.key;
+      const data = childSnap.val();
+      dataArray.push({ id, data });
+    });
+    
+    // Urutkan berdasarkan TglJam_Mulai secara descending (terbaru ke terlama)
+    dataArray.sort((a, b) => {
+      const dateA = new Date(a.data.TglJam_Mulai || 0);
+      const dateB = new Date(b.data.TglJam_Mulai || 0);
+      return dateB - dateA; // Descending
+    });
+    
+    // Tampilkan data yang sudah diurutkan
+    dataArray.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="checkbox" class="monitoring-checkbox" value="${item.id}"></td>
+        <td>${item.data.NIS_Username || ''}</td>
+        <td>${item.data.Nama_Peserta || ''}</td>
+        <td>${item.data.Aktivitas_Login || ''}</td>
+        <td>${item.data.Judul_Ujian || ''}</td>
+        <td>${item.data.Mata_Pelajaran || ''}</td>
+        <td>${item.data.Status_Pengerjaan || ''}</td>
+        <td>${item.data.TglJam_Mulai || ''}</td>
+        <td>${item.data.Last_Update || ''}</td>
+        <td>${item.data.TglJam_Selesai || ''}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }, error => {
+    showNotification('error', 'Error', 'Gagal membaca Monitoring Pengerjaan: ' + error.message);
+  });
+}
+
+      function toggleSelectAllMonitoring(src) {
+        const cbs = document.querySelectorAll('.monitoring-checkbox');
+        cbs.forEach(cb => cb.checked = src.checked);
+      }
+
+      function deleteSelectedMonitoring() {
+        const checked = document.querySelectorAll('.monitoring-checkbox:checked');
+        if (!checked.length) {
+          alert('Pilih data monitoring yang akan dihapus.');
+          return;
+        }
+        if (!confirm('Yakin akan menghapus ' + checked.length + ' data Monitoring Pengerjaan?')) return;
+        const promises = [];
+        checked.forEach(cb => {
+          promises.push(monitoringRef.child(cb.value).remove());
+        });
+        Promise.all(promises)
+          .catch(err => alert('Gagal menghapus sebagian data monitoring: ' + err.message));
+      }
+
+      // ====== JAWABAN SISWA ======
+function loadJawaban() {
+  // Ganti .once('value') dengan .on('value') untuk real-time updates
+  jawabanRef.orderByChild('TglJam_Mulai').on('value', snapshot => {
+    const tbody = document.querySelector('#jawabanTable tbody');
+    const headerTr = document.getElementById('jawabanHeaderRow');
+    tbody.innerHTML = '';
+    headerTr.innerHTML = '';
+    
+    // Mengumpulkan semua data ke dalam array
+    const rows = [];
+    snapshot.forEach(childSnap => {
+      rows.push({ id: childSnap.key, data: childSnap.val() });
+    });
+    
+    // Urutkan berdasarkan TglJam_Mulai secara descending (terbaru ke terlama)
+    rows.sort((a, b) => {
+      const dateA = new Date(a.data.TglJam_Mulai || 0);
+      const dateB = new Date(b.data.TglJam_Mulai || 0);
+      return dateB - dateA; // Descending
+    });
+    
+    // Cari jumlah maksimal kolom jawaban
+    let maxJ = 0;
+    rows.forEach(r => {
+      const d = r.data;
+      for (const key in d) {
+        if (key.indexOf('Jwb') === 0) {
+          const num = parseInt(key.substring(3), 10);
+          if (!isNaN(num) && num > maxJ) maxJ = num;
+        }
+      }
+    });
+    
+    // Buat header
+    let headerHtml = `
+      <th><input type="checkbox" id="jawaban_select_all" onclick="toggleSelectAllJawaban(this)"></th>
+      <th>Nama Siswa</th>
+      <th>Agenda Ujian</th>
+      <th>Mata Pelajaran</th>
+      <th>Jenis Tes</th>
+    `;
+    
+    for (let i = 1; i <= maxJ; i++) {
+      headerHtml += `<th>Jwb${i}</th>`;
+    }
+    
+    headerHtml += `
+      <th>Status</th>
+      <th>TglJam_Mulai</th>
+      <th>EndAt</th>
+      <th>TglJam_Selesai</th>
+    `;
+    headerTr.innerHTML = headerHtml;
+    
+    // Load data agenda untuk mendapatkan Jenis_Tes
+    agendaRef.once('value').then(agendaSnapshot => {
+      const agendaMap = {};
+      agendaSnapshot.forEach(child => {
+        agendaMap[child.key] = child.val();
+      });
+      
+      // Tampilkan data yang sudah diurutkan
+      rows.forEach(r => {
+        const d = r.data;
+        const nis = d.NIS_Username || '';
+        const namaSiswa = pesertaNameMap[nis] || nis;
+        
+        // Ambil Jenis_Tes dari data agenda berdasarkan ID_Agenda
+        let jenisTes = '';
+        const agendaId = d.ID_Agenda || '';
+        if (agendaId && agendaMap[agendaId]) {
+          jenisTes = agendaMap[agendaId].Jenis_Tes || '';
+        }
+        
+        let rowHtml = `
+          <td><input type="checkbox" class="jawaban-checkbox" value="${r.id}"></td>
+          <td>${namaSiswa}</td>
+          <td>${d.Judul_Ujian || ''}</td>
+          <td>${d.Mata_Pelajaran || ''}</td>
+          <td>${jenisTes}</td>
+        `;
+        
+        for (let i = 1; i <= maxJ; i++) {
+          rowHtml += `<td>${d['Jwb' + i] || ''}</td>`;
+        }
+        
+        rowHtml += `
+          <td>${d.Status || ''}</td>
+          <td>${d.TglJam_Mulai || ''}</td>
+          <td>${d.EndAt || ''}</td>
+          <td>${d.TglJam_Selesai || ''}</td>
+        `;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = rowHtml;
+        tbody.appendChild(tr);
+      });
+      
+      // Inisialisasi tombol show/hide password
+      initializePasswordToggles();
+      
+    }).catch(error => {
+      showNotification('error', 'Error', 'Gagal membaca data agenda: ' + error.message);
+    });
+    
+  }, error => {
+    showNotification('error', 'Error', 'Gagal membaca Jawaban Siswa: ' + error.message);
+  });
+}
+
+      function toggleSelectAllJawaban(src) {
+        const cbs = document.querySelectorAll('.jawaban-checkbox');
+        cbs.forEach(cb => cb.checked = src.checked);
+      }
+
+      function deleteSelectedJawaban() {
+        const checked = document.querySelectorAll('.jawaban-checkbox:checked');
+        if (!checked.length) {
+          alert('Pilih data jawaban yang akan dihapus.');
+          return;
+        }
+        if (!confirm('Yakin akan menghapus ' + checked.length + ' data Jawaban Siswa?')) return;
+        const promises = [];
+        checked.forEach(cb => {
+          promises.push(jawabanRef.child(cb.value).remove());
+        });
+        Promise.all(promises)
+          .catch(err => alert('Gagal menghapus sebagian data jawaban: ' + err.message));
+      }
+
+      function exportJawabanToCsv() {
+        jawabanRef.once('value')
+          .then(snapshot => {
+            const list = [];
+            snapshot.forEach(childSnap => list.push(childSnap.val() || {}));
+            if (!list.length) {
+              alert('Tidak ada data jawaban untuk diexport.');
+              return;
+            }
+            let maxJ = 0;
+            list.forEach(d => {
+              for (const key in d) {
+                if (key.indexOf('Jwb') === 0) {
+                  const num = parseInt(key.substring(3), 10);
+                  if (!isNaN(num) && num > maxJ) maxJ = num;
+                }
+              }
+            });
+            const header = ['Nama Siswa', 'Agenda Ujian', 'Mata Pelajaran', 'Jenis Tes'];
+            for (let i = 1; i <= maxJ; i++) header.push('Jwb' + i);
+            header.push('Status', 'TglJam_Mulai', 'EndAt', 'TglJam_Selesai');
+            const rows = [header];
+            list.forEach(d => {
+              const nis = d.NIS_Username || '';
+              const namaSiswa = pesertaNameMap[nis] || nis;
+              
+              // Ambil Jenis_Tes dari data agenda
+              let jenisTes = '';
+              const agendaId = d.ID_Agenda || '';
+              if (agendaId && agendaCache[agendaId]) {
+                jenisTes = agendaCache[agendaId].Jenis_Tes || '';
+              }
+              
+              const row = [
+                namaSiswa,
+                d.Judul_Ujian || '',
+                d.Mata_Pelajaran || '',
+                jenisTes
+              ];
+              for (let i = 1; i <= maxJ; i++) {
+                row.push(d['Jwb' + i] || '');
+              }
+              row.push(d.Status || '', d.TglJam_Mulai || '', d.EndAt || '', d.TglJam_Selesai || '');
+              rows.push(row);
+            });
+            const csv = rows.map(r =>
+              r.map(v => String(v).replace(/"/g, '""')).map(v => `"${v}"`).join(',')
+            ).join('\r\n');
+            downloadCsvFile('jawaban_siswa_export.csv', csv);
+          })
+          .catch(err => alert('Gagal export jawaban: ' + err.message));
+      }
+
+      // ====== CETAK KARTU ======
+      function onChangeAgendaCetakKartu() {
+        currentAgendaForKartu = document.getElementById('CetakKartu_Agenda_Select').value;
+        loadKartuPesertaTable();
+      }
+
+      function loadKartuPesertaTable() {
+        const tbody = document.querySelector('#cetakKartuTable tbody');
+        tbody.innerHTML = '';
+        kartuPesertaList = [];
+        if (!currentAgendaForKartu) return;
+        pesertaRef.orderByChild('ID_Agenda').equalTo(currentAgendaForKartu).once('value')
+          .then(snapshot => {
+            let idx = 0;
+            snapshot.forEach(childSnap => {
+              const data = childSnap.val();
+              kartuPesertaList.push(data);
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td><input type="checkbox" class="kartu-checkbox" data-index="${idx}"></td>
+                <td>${data.NIS_Username || ''}</td>
+                <td>${data.Nama_Peserta || ''}</td>
+                <td>
+                  <div class="password-wrapper" style="position: relative; display: inline-block; width: 100px;">
+                    <input type="password" value="${data.Password || ''}" readonly 
+                           style="width: 100%; padding-right: 30px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px 30px 4px 8px;">
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this.previousElementSibling, this)" 
+                            style="position: absolute; right: 2px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; font-size: 11px; padding: 0;">
+                      👁️
+                    </button>
+                  </div>
+                </td>
+                <td class="actions">
+                  <button type="button" onclick="printKartuSingle(${idx})">Print</button>
+                </td>
+              `;
+              tbody.appendChild(tr);
+              idx++;
+            });
+            
+            // Inisialisasi tombol show/hide password
+            initializePasswordToggles();
+            
+          })
+          .catch(err => alert('Gagal membaca peserta untuk Cetak Kartu: ' + err.message));
+      }
+
+      function toggleSelectAllKartu(src) {
+        const cbs = document.querySelectorAll('.kartu-checkbox');
+        cbs.forEach(cb => cb.checked = src.checked);
+      }
+
+      function buildKartuHtml(peserta, agendaData) {
+        const agendaName = (agendaData && agendaData.Agenda_Ujian) ? agendaData.Agenda_Ujian : (peserta.ID_Agenda || '');
+        const token = (agendaData && agendaData.Token_Ujian) ? agendaData.Token_Ujian : '';
+        const nama = peserta.Nama_Peserta || '';
+        const sekolah = peserta.Asal_Sekolah || '';
+        const kelas = peserta.Kelas || '';
+        const username = peserta.NIS_Username || '';
+        const password = peserta.Password || '';
+        const jenjang = peserta.Jenjang_Studi || '';
+        const deskripsi = (agendaData && agendaData.Deskripsi_Ujian) ? agendaData.Deskripsi_Ujian : '';
+        const jenisTes = (agendaData && agendaData.Jenis_Tes) ? agendaData.Jenis_Tes : '';
+        
+        return `
+          <div class="kartu-container">
+            <div class="kartu-logo">CBT 2026</div>
+            <div class="kartu-header">KARTU PESERTA UJIAN</div>
+            <div class="kartu-title">${agendaName}</div>
+            ${deskripsi ? `<div style="text-align:center; font-size:11px; color:#4b5563; margin-bottom:10px;">${deskripsi}</div>` : ''}
+            ${jenisTes ? `<div style="text-align:center; font-size:11px; color:#2563eb; font-weight:600; margin-bottom:8px;">${jenisTes}</div>` : ''}
+            
+            <table class="kartu-table">
+              <tr><td class="label">Nama Peserta</td><td>: ${nama}</td></tr>
+              <tr><td class="label">Jenjang</td><td>: ${jenjang} - ${kelas}</td></tr>
+              <tr><td class="label">Asal Sekolah</td><td>: ${sekolah}</td></tr>
+              <tr><td class="label">Username</td><td>: ${username}</td></tr>
+              <tr><td class="label">Password</td><td>: ${password}</td></tr>
+              <tr><td class="label">Token Ujian</td><td>: <strong style="color:#2563eb;">${token}</strong></td></tr>
+            </table>
+            
+            <div style="margin: 10px 0; padding: 8px; background: #f0f9ff; border-radius: 6px; border-left: 4px solid #2563eb;">
+              <div style="font-size: 11px; font-weight: 600; color: #1e40af; margin-bottom: 4px;">Petunjuk:</div>
+              <div style="font-size: 9px; color: #374151;">
+                1. Bawa kartu ini saat ujian<br>
+                2. Jaga kerahasiaan username & password<br>
+                3. Masukkan token saat memulai ujian<br>
+                4. Login 15 menit sebelum ujian dimulai
+              </div>
+            </div>
+            
+            <div class="kartu-footer">
+              Kartu ini berlaku untuk satu peserta ujian. Dilarang memperbanyak tanpa izin.
+            </div>
+            <div class="kartu-watermark">CBT2026-Developed by D14nr © 2026</div>
+          </div>
+        `;
+      }
+
+      function doPrintCards(html) {
+        const area = document.getElementById('printArea');
+        
+        // Tambahkan header untuk print
+        const printHeader = `
+          <style>
+            @media print {
+              @page {
+                margin: 15mm;
+                size: A4 portrait;
+              }
+              body {
+                margin: 0;
+                padding: 0;
+                font-family: "Segoe UI", system-ui, sans-serif;
+              }
+            }
+          </style>
+        `;
+        
+        area.innerHTML = printHeader + html;
+        area.style.display = 'block';
+        
+        // Delay sedikit sebelum print
+        setTimeout(() => {
+          window.print();
+          
+          // Kembalikan setelah print
+          setTimeout(() => {
+            area.innerHTML = '';
+            area.style.display = 'none';
+          }, 500);
+        }, 100);
+      }
+
+      function printKartuSingle(index) {
+        if (!currentAgendaForKartu) {
+          alert('Pilih Agenda Ujian terlebih dahulu.');
+          return;
+        }
+        const peserta = kartuPesertaList[index];
+        if (!peserta) return;
+        const agendaData = agendaCache[currentAgendaForKartu] || {};
+        const html = buildKartuHtml(peserta, agendaData);
+        doPrintCards(html);
+      }
+
+      function printKartuSelected() {
+        if (!currentAgendaForKartu) {
+          alert('Pilih Agenda Ujian terlebih dahulu.');
+          return;
+        }
+        const checked = document.querySelectorAll('.kartu-checkbox:checked');
+        if (!checked.length) {
+          alert('Pilih peserta yang akan dicetak kartunya.');
+          return;
+        }
+        const agendaData = agendaCache[currentAgendaForKartu] || {};
+        let html = '';
+        checked.forEach(cb => {
+          const idx = parseInt(cb.getAttribute('data-index'), 10);
+          const peserta = kartuPesertaList[idx];
+          if (peserta) {
+            html += buildKartuHtml(peserta, agendaData);
+          }
+        });
+        doPrintCards(html);
+      }
+
+      // ====== INIT ======
+      document.addEventListener('DOMContentLoaded', () => {
+        checkLoginStatus(); // Cek dulu login, baru load data
+      });
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Event listener untuk preview gambar saat memilih file
+  const gambarInput = document.getElementById('Gambar');
+  if (gambarInput) {
+    gambarInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Hapus preview sebelumnya
+        const existingPreview = document.getElementById('gambarPreview');
+        if (existingPreview) {
+          existingPreview.parentNode.removeChild(existingPreview);
+        }
+        
+        // Buat preview baru
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.createElement('img');
+          preview.id = 'gambarPreview';
+          preview.src = e.target.result;
+          preview.style.maxWidth = '200px';
+          preview.style.maxHeight = '150px';
+          preview.style.marginTop = '8px';
+          preview.style.border = '1px solid #e5e7eb';
+          preview.style.borderRadius = '4px';
+          preview.style.display = 'block';
+          
+          // Tempatkan preview setelah input file
+          const container = document.getElementById('gambarPreviewContainer');
+          if (!container) {
+            const newContainer = document.createElement('div');
+            newContainer.id = 'gambarPreviewContainer';
+            newContainer.style.marginTop = '8px';
+            gambarInput.parentNode.insertBefore(newContainer, gambarInput.nextSibling);
+            newContainer.appendChild(preview);
+          } else {
+            container.innerHTML = '';
+            container.appendChild(preview);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+});
     </script>
-</body>
+  </body>
 </html>
