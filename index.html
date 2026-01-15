@@ -2023,7 +2023,7 @@ let agendaRef;
 let mapelRef;
 let bankSoalRef;
 let monitoringRef;
-let jawabanPermapelRef; // Ganti dari jawabanRef ke jawabanPermapelRef
+let jawabanPermapelRef;
 let storage;
 
 try {
@@ -4182,7 +4182,7 @@ function exportJawabanPermapelToCsv() {
                 
                 for (const [nis, siswa] of siswaMap) {
                   for (const mapel of selectedMapels) {
-                    const snapshot = await jawabanRef.orderByChild('NIS_Username').equalTo(nis).once('value');
+                    const snapshot = await jawabanPermapelRef.orderByChild('NIS_Username').equalTo(nis).once('value');
                     
                     snapshot.forEach(childSnap => {
                       const data = childSnap.val();
@@ -4209,7 +4209,7 @@ function exportJawabanPermapelToCsv() {
                 }
                 
                 if (Object.keys(updates).length > 0) {
-                  await jawabanRef.update(updates);
+                  await jawabanPermapelRef.update(updates);
                 }
                 
                 hideModal('modal-reset-jawaban');
@@ -4438,7 +4438,7 @@ function exportJawabanPermapelToCsv() {
       document.addEventListener('DOMContentLoaded', function() {
         checkLoginStatus();
         
-        if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes('YOUR_WEB_APP_URL')) {
+        if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes('https://script.google.com/macros/s/AKfycbwOXJ-kL-ywDQv-GAe4bDlngnTN7ljOr6fTdtz3a6O0x-JTgyo/execL')) {
           showNotification('warning', 'Konfigurasi', 'URL Google Apps Script belum dikonfigurasi. Upload gambar akan menggunakan fallback ke base64.', 10000);
         }
       });
