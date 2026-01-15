@@ -1215,7 +1215,7 @@
 
         <div style="margin-bottom:8px; display:flex; flex-wrap:wrap; gap:6px;">
           <button type="button" onclick="openPesertaModalForCreate()">+ Tambah Peserta</button>
-          <button type="button" onclick="showModal('modal-import-peserta')">Import Data</button>
+          <button type="button" onclick="showModal('modal-import-peserta')">Import Peserta</button>
           <button type="button" onclick="exportPesertaToCsv()">Export Data</button>
         </div>
 
@@ -1347,7 +1347,7 @@
 
         <div style="margin:8px 0 10px; display:flex; flex-wrap:wrap; gap:6px;">
           <button type="button" onclick="openBankSoalModalForCreate()">+ Tambah Soal</button>
-          <button type="button" onclick="openImportBankSoalModal()">Import Data</button>
+          <button type="button" onclick="openImportBankSoalModal()">Import Soal</button>
           <button type="button" onclick="deleteSelectedBankSoal()" style="background: var(--danger);">Hapus Terpilih</button>
           <button type="button" onclick="selectAllBankSoal()">Pilih Semua</button>
           <button type="button" onclick="deselectAllBankSoal()">Batal Pilih</button>
@@ -3150,6 +3150,281 @@
           }
         );
       }
+
+      // ====== IMPORT BANK SOAL FUNCTIONS ======
+
+function openImportBankSoalModal() {
+  if (!currentAgendaForBank) {
+    showNotification('error', 'Error', 'Pilih Agenda Ujian terlebih dahulu di Tab Bank Soal');
+    return;
+  }
+  
+  const container = document.getElementById('import-banksoal-mapel-list');
+  container.innerHTML = 'Memuat daftar mata pelajaran...';
+  
+  // Load daftar mata pelajaran untuk agenda ini
+  if (!mapelRef) return;
+  
+  mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
+    .then(snapshot => {
+      importBankSoalMapelMap = {};
+      let html = '<strong>Mata Pelajaran dalam Agenda Ini:</strong><br>';
+      
+      if (!snapshot.exists()) {
+        html += '<p style="color:var(--text-muted); font-size:11px; margin-top:4px;">Tidak ada mata pelajaran. Buat dulu di Tab Mata Pelajaran.</p>';
+      } else {
+        html += '<div style="max-height:150px; overflow-y:auto; margin-top:6px;">';
+        snapshot.forEach(childSnap => {
+          const data = childSnap.val();
+          const mapelName = data.Nama_Mata_Pelajaran || '';
+          const mapelId = childSnap.key;
+          
+          if (mapelName) {
+            importBankSoalMapelMap[mapelName] = mapelId;
+            html += `
+              <div style="font-size:12px; padding:4px 6px; background:var(--surface-alt); border-radius:4px; margin-bottom:4px;">
+                ✓ ${mapelName}
+              </div>
+            `;
+          }
+        });
+        html += '</div>';
+      }
+      
+      container.innerHTML = html;
+      showModal('modal-import-banksoal');
+    })
+    .catch(err => {
+      container.innerHTML = `<p style="color:var(--danger);">Error: ${err.message}</p>`;
+      showModal('modal-import-banksoal');
+    });
+}
+
+function importBankSoalFromFile() {
+  const fileInput = document.getElementById('file_import_banksoal');
+  const file = fileInput.files[0];
+  
+  if (!file) {
+    showNotification('error', 'Error', 'Pilih file CSV terlebih dahulu');
+    return;
+  }
+  
+  if (!currentAgendaForBank) {
+    showNotification('error', 'Error', 'Pilih Agenda Ujian terlebih dahulu');
+    return;
+  }
+  
+  if (Object.keys(importBankSoalMapelMap).length === 0) {
+    showNotification('error', 'Error', 'Tidak ada mata pelajaran yang tersedia. Buat dulu di Tab Mata Pelajaran.');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const csvContent = e.target.result;
+      const rows = csvContent.split('\n');
+      
+      if (rows.length < 2) {
+        showNotification('error', 'Error', 'File CSV kosong atau format salah');
+        return;
+      }
+      
+      // Parse header
+      const headers = rows[0].split(',').map(h => h.trim());
+      
+      // Cek kolom wajib
+      const requiredCols = ['No_Soal', 'Mata_Pelajaran', 'Pertanyaan'];
+      const missingCols = requiredCols.filter(col => !headers.includes(col));
+      
+      if (missingCols.length > 0) {
+        showNotification('error', 'Format Error', `Kolom wajib tidak ditemukan: ${missingCols.join(', ')}`);
+        return;
+      }
+      
+      showNotification('info', 'Memproses', `Membaca ${rows.length - 1} baris data...`, 0);
+      
+      let successCount = 0;
+      let errorCount = 0;
+      let promises = [];
+      
+      // Process each row
+      for (let i = 1; i < rows.length; i++) {
+        if (!rows[i].trim()) continue;
+        
+        const cols = rows[i].split(',').map(c => c.trim());
+        if (cols.length < 3) continue;
+        
+        const rowData = {};
+        headers.forEach((header, index) => {
+          if (index < cols.length) {
+            rowData[header] = cols[index];
+          }
+        });
+        
+        // Validasi data
+        const noSoal = rowData.No_Soal || '';
+        const mapelName = rowData.Mata_Pelajaran || '';
+        const pertanyaan = rowData.Pertanyaan || '';
+        const typeSoal = rowData.Type_Soal || 'Pilihan Ganda Tunggal';
+        
+        if (!noSoal || !mapelName || !pertanyaan) {
+          errorCount++;
+          continue;
+        }
+        
+        // Cek apakah mapel ada di sistem
+        const mapelId = importBankSoalMapelMap[mapelName];
+        if (!mapelId) {
+          errorCount++;
+          continue;
+        }
+        
+        // Prepare soal data
+        const soalData = {
+          ID_Agenda: currentAgendaForBank,
+          ID_Mapel: mapelId,
+          Nama_Mata_Pelajaran: mapelName,
+          No_Soal: noSoal,
+          Pertanyaan: pertanyaan,
+          Type_Soal: typeSoal,
+          Gambar: rowData.Gambar_URL || rowData.Gambar || '',
+          Pilihan_A: rowData.Pilihan_A || rowData.A || '',
+          Pilihan_B: rowData.Pilihan_B || rowData.B || '',
+          Pilihan_C: rowData.Pilihan_C || rowData.C || '',
+          Pilihan_D: rowData.Pilihan_D || rowData.D || '',
+          Pilihan_E: rowData.Pilihan_E || rowData.E || ''
+        };
+        
+        // Add pernyataan if exists
+        for (let j = 1; j <= 10; j++) {
+          const key = `Pernyataan_${j}`;
+          if (rowData[key]) {
+            soalData[key] = rowData[key];
+          }
+        }
+        
+        // Add pejodohan if exists
+        for (let j = 1; j <= 10; j++) {
+          const kiriKey = `Pasangan_kiri_${j}`;
+          const kananKey = `Pasangan_kanan_${j}`;
+          if (rowData[kiriKey]) soalData[kiriKey] = rowData[kiriKey];
+          if (rowData[kananKey]) soalData[kananKey] = rowData[kananKey];
+        }
+        
+        // Save to Firebase
+        promises.push(
+          bankSoalRef.push(soalData).then(() => {
+            successCount++;
+          }).catch(err => {
+            errorCount++;
+            console.error('Error saving soal:', err);
+          })
+        );
+      }
+      
+      // Wait for all saves
+      Promise.all(promises).then(() => {
+        hideAllNotifications();
+        
+        if (successCount > 0) {
+          showNotification('success', 'Import Berhasil', 
+            `${successCount} soal berhasil diimport. ${errorCount > 0 ? `(${errorCount} gagal)` : ''}`);
+          
+          // Refresh table
+          if (currentMapelForBank) {
+            loadBankSoalTable();
+          }
+        } else {
+          showNotification('error', 'Import Gagal', 
+            `Tidak ada soal yang berhasil diimport. ${errorCount} error.`);
+        }
+        
+        hideModal('modal-import-banksoal');
+        document.getElementById('file_import_banksoal').value = '';
+        
+      }).catch(err => {
+        hideAllNotifications();
+        showNotification('error', 'Import Error', 'Terjadi kesalahan saat menyimpan data: ' + err.message);
+      });
+      
+    } catch (error) {
+      hideAllNotifications();
+      showNotification('error', 'Parse Error', 'Gagal membaca file CSV: ' + error.message);
+    }
+  };
+  
+  reader.onerror = function() {
+    showNotification('error', 'File Error', 'Gagal membaca file');
+  };
+  
+  reader.readAsText(file);
+}
+
+function downloadTemplateBankSoal() {
+  // Create CSV template content
+  const headers = [
+    'No_Soal',
+    'Mata_Pelajaran',
+    'Pertanyaan',
+    'Type_Soal',
+    'Gambar_URL',
+    'Pilihan_A',
+    'Pilihan_B',
+    'Pilihan_C',
+    'Pilihan_D',
+    'Pilihan_E',
+    'Pernyataan_1',
+    'Pernyataan_2',
+    'Pernyataan_3',
+    'Pernyataan_4',
+    'Pernyataan_5',
+    'Pernyataan_6',
+    'Pernyataan_7',
+    'Pernyataan_8',
+    'Pernyataan_9',
+    'Pernyataan_10'
+  ];
+  
+  const exampleRow = [
+    '1',
+    'Matematika',
+    'Berapakah hasil dari 2 + 2?',
+    'Pilihan Ganda Tunggal',
+    'https://example.com/image.jpg',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    ''
+  ];
+  
+  const csvContent = [headers.join(','), exampleRow.join(',')].join('\n');
+  
+  // Create download link
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'Template_Import_Bank_Soal.csv';
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  
+  showNotification('success', 'Template Downloaded', 'File template berhasil diunduh');
+}
 
       function openBankSoalModalForCreate() {
         if (!currentAgendaForBank || !currentMapelForBank) {
