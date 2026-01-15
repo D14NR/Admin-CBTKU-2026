@@ -25,9 +25,6 @@
         --danger: #dc2626;
         --danger-soft: rgba(220, 38, 38, 0.1);
         --danger-hover: #b91c1c;
-        --warning: #f59e0b;
-        --warning-soft: rgba(245, 158, 11, 0.1);
-        --warning-hover: #d97706;
         --text: #111827;
         --text-muted: #6b7280;
         --radius-sm: 6px;
@@ -380,17 +377,6 @@
       button[onclick^="deleteSelected"]:hover {
         background: var(--danger-hover);
         box-shadow: 0 3px 6px rgba(220, 38, 38, 0.24);
-      }
-
-      button[onclick*="resetJawaban"],
-      button[onclick*="Reset"] {
-        background: var(--warning);
-      }
-
-      button[onclick*="resetJawaban"]:hover,
-      button[onclick*="Reset"]:hover {
-        background: var(--warning-hover);
-        box-shadow: 0 3px 6px rgba(245, 158, 11, 0.25);
       }
 
       button[onclick="generateTokenUjian()"] {
@@ -1002,14 +988,6 @@
         background: #dc2626;
       }
 
-      .confirmation-btn.confirm.warning {
-        background: #f59e0b;
-      }
-
-      .confirmation-btn.confirm.warning:hover {
-        background: #d97706;
-      }
-
       /* Toast Notification */
       .toast-notification {
         position: fixed;
@@ -1097,51 +1075,6 @@
 
       .preview-container {
         margin-top: 8px;
-      }
-
-      /* Style untuk checkbox mapel di modal reset */
-      .reset-mapel-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px;
-        border-bottom: 1px solid var(--border);
-        cursor: pointer;
-      }
-
-      .reset-mapel-item:hover {
-        background: #f3f4f6;
-      }
-
-      .reset-mapel-item input[type="checkbox"] {
-        transform: scale(1.2);
-      }
-
-      .reset-mapel-item label {
-        flex: 1;
-        margin: 0;
-        cursor: pointer;
-        font-size: 13px;
-      }
-
-      .reset-mapel-count {
-        font-size: 11px;
-        color: var(--text-muted);
-        background: var(--surface-alt);
-        padding: 2px 6px;
-        border-radius: 10px;
-        margin-left: auto;
-      }
-
-      /* Badge untuk jumlah jawaban */
-      .jawaban-badge {
-        font-size: 10px;
-        background: #10b981;
-        color: white;
-        padding: 1px 6px;
-        border-radius: 10px;
-        margin-left: 4px;
-        vertical-align: middle;
       }
     </style>
   </head>
@@ -1418,13 +1351,12 @@
       <div id="tab-jawaban" class="tab-content" style="display:none;">
         <div class="section-header">
           <h2>Jawaban Siswa</h2>
-          <p class="section-subtitle">Rekap jawaban peserta untuk setiap sesi ujian. Klik tombol reset untuk mereset jawaban siswa.</p>
+          <p class="section-subtitle">Rekap jawaban peserta untuk setiap sesi ujian.</p>
         </div>
 
         <div style="margin-bottom:8px; display:flex; flex-wrap:wrap; gap:6px;">
           <button type="button" onclick="deleteSelectedJawaban()">Hapus Terpilih</button>
           <button type="button" onclick="exportJawabanToCsv()">Export Data</button>
-          <button type="button" onclick="resetAllJawabanForSelected()" style="background: var(--warning);">Reset Jawaban Terpilih</button>
         </div>
 
         <div class="table-card">
@@ -1905,35 +1837,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Modal Reset Jawaban -->
-    <div id="modal-reset-jawaban" class="modal-backdrop">
-      <div class="modal">
-        <div class="modal-header">
-          <div>
-            <div class="modal-title">Reset Jawaban Siswa</div>
-            <p class="section-subtitle">Pilih mata pelajaran yang akan direset untuk siswa ini.</p>
-          </div>
-          <button type="button" class="modal-close-btn" onclick="hideModal('modal-reset-jawaban')">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div id="resetStudentInfo" style="margin-bottom: 16px; padding: 12px; background: #f3f4f6; border-radius: 8px;">
-            <strong id="resetStudentName">Nama Siswa</strong><br>
-            <small id="resetStudentAgenda">Agenda: -</small><br>
-            <small id="resetStudentStatus">Status: -</small>
-          </div>
-          
-          <div id="resetMapelList" style="max-height: 300px; overflow-y: auto;">
-            <p style="font-size: 12px; color: var(--text-muted);">Memuat daftar mata pelajaran...</p>
-          </div>
-          
-          <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
-            <button type="button" onclick="hideModal('modal-reset-jawaban')">Batal</button>
-            <button type="button" onclick="confirmResetJawaban()" style="background: var(--warning);">Reset Jawaban Terpilih</button>
-          </div>
-        </div>
-      </div>
-    </div>
     
 
     <!-- Modern Notification System -->
@@ -1983,6 +1886,7 @@
       };
 
       // ====== GOOGLE APPS SCRIPT URL ======
+      // GANTI DENGAN URL WEB APP ANDA SETELAH DEPLOY
       const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwOXJ-kL-ywDQv-GAe4bDlngnTN7ljOr6fTdtz3a6O0x-JTgyo/exec';
 
       // ====== INISIALISASI FIREBASE ======
@@ -2023,11 +1927,10 @@
       let currentAgendaForKartu = '';
       let kartuPesertaList = [];
       let agendaCache = {};
-      let selectedJawabanForReset = null;
-      let resetMapelList = [];
 
       // ====== UTILITY FUNCTIONS ======
       
+      // Fungsi untuk menampilkan notifikasi
       function showNotification(type, title, message, duration = 5000) {
         const container = document.getElementById('notificationContainer');
         const id = 'notification-' + Date.now();
@@ -2126,6 +2029,7 @@
 
       // ====== GOOGLE DRIVE UPLOAD FUNCTIONS ======
       
+      // Konversi file ke base64
       function fileToBase64(file) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -2135,13 +2039,16 @@
         });
       }
 
+      // Upload ke Google Drive via Google Apps Script
       async function uploadToGoogleDrive(file, context) {
         try {
           showNotification('info', 'Upload Gambar', 'Mengunggah ke Google Drive...', 0);
           
+          // Convert file to base64
           const base64Data = await fileToBase64(file);
-          const base64String = base64Data.split(',')[1];
+          const base64String = base64Data.split(',')[1]; // Remove data URL prefix
           
+          // Generate filename
           const safeAgenda = (context.agenda || 'agenda')
             .replace(/[^a-z0-9]/gi, '_')
             .substring(0, 30);
@@ -2154,6 +2061,7 @@
           const extension = file.name.split('.').pop().toLowerCase();
           const fileName = `soal_${safeAgenda}_${safeMapel}_${context.noSoal}_${timestamp}.${extension}`;
           
+          // Prepare request data
           const requestData = {
             base64Data: base64String,
             fileName: fileName,
@@ -2162,6 +2070,7 @@
           
           console.log('Uploading to Google Apps Script:', GAS_WEB_APP_URL);
           
+          // Send to Google Apps Script via fetch with CORS workaround
           const response = await fetch(GAS_WEB_APP_URL, {
             method: 'POST',
             mode: 'cors',
@@ -2188,14 +2097,16 @@
         } catch (error) {
           console.error('Google Drive upload error:', error);
           
+          // Fallback: Simpan sebagai base64 di Firebase
           hideAllNotifications();
           showNotification('warning', 'Upload Gagal', 'Menyimpan sebagai base64 di Firebase...');
           
           const base64Data = await fileToBase64(file);
-          return base64Data;
+          return base64Data; // Return base64 string as fallback
         }
       }
 
+      // Preview image sebelum upload
       function previewImage(input) {
         const container = document.getElementById('imagePreviewContainer');
         container.innerHTML = '';
@@ -2234,6 +2145,7 @@
         const username = document.getElementById('login_username').value;
         const password = document.getElementById('login_password').value;
 
+        // Simple authentication (in production, use Firebase Auth)
         const validCredentials = [
           { user: 'Admin', pass: '290192' },
           { user: 'admin', pass: 'admin123' }
@@ -2275,6 +2187,7 @@
         loginSection.style.display = 'none';
         appShell.style.display = 'block';
         
+        // Initialize data
         loadPeserta();
         loadAgenda();
         loadAgendaListForPeserta();
@@ -2293,6 +2206,7 @@
         loginSection.style.display = 'flex';
         appShell.style.display = 'none';
         
+        // Reset form
         document.getElementById('login_username').value = '';
         document.getElementById('login_password').value = '';
       }
@@ -3180,6 +3094,7 @@
             return;
           }
           
+          // Prepare data
           const data = {
             ID_Agenda: ID_Agenda,
             ID_Mapel: ID_Mapel,
@@ -3194,15 +3109,18 @@
             Pilihan_E: document.getElementById('Pilihan_E').value.trim()
           };
           
+          // Add pernyataan data
           for (let i = 1; i <= 10; i++) {
             data['Pernyataan_' + i] = document.getElementById('Pernyataan_' + i)?.value.trim() || '';
           }
           
+          // Add pejodohan data
           for (let j = 1; j <= 10; j++) {
             data['Pasangan_kiri_' + j] = document.getElementById('Pasangan_kiri_' + j)?.value.trim() || '';
             data['Pasangan_kanan_' + j] = document.getElementById('Pasangan_kanan_' + j)?.value.trim() || '';
           }
           
+          // Handle image upload
           const fileInput = document.getElementById('Gambar');
           const file = fileInput.files[0];
           const existingUrl = document.getElementById('Gambar_Url').value || '';
@@ -3222,6 +3140,7 @@
             data.Gambar = existingUrl;
           }
           
+          // Save to Firebase
           if (firebaseSoalId) {
             await bankSoalRef.child(firebaseSoalId).update(data);
             showNotification('success', 'Berhasil', 'Soal berhasil diperbarui');
@@ -3260,6 +3179,7 @@
             document.getElementById('Type_Soal').value = data.Type_Soal || '';
             document.getElementById('Gambar_Url').value = data.Gambar || '';
             
+            // Set image preview if exists
             if (data.Gambar) {
               const container = document.getElementById('imagePreviewContainer');
               container.innerHTML = '';
@@ -3271,17 +3191,20 @@
               container.appendChild(img);
             }
             
+            // Set pilihan data
             document.getElementById('Pilihan_A').value = data.Pilihan_A || '';
             document.getElementById('Pilihan_B').value = data.Pilihan_B || '';
             document.getElementById('Pilihan_C').value = data.Pilihan_C || '';
             document.getElementById('Pilihan_D').value = data.Pilihan_D || '';
             document.getElementById('Pilihan_E').value = data.Pilihan_E || '';
             
+            // Set pernyataan data
             for (let i = 1; i <= 10; i++) {
               const el = document.getElementById('Pernyataan_' + i);
               if (el) el.value = data['Pernyataan_' + i] || '';
             }
             
+            // Set pejodohan data
             for (let i = 1; i <= 10; i++) {
               const lk = document.getElementById('Pasangan_kiri_' + i);
               const rk = document.getElementById('Pasangan_kanan_' + i);
@@ -3289,8 +3212,10 @@
               if (rk) rk.value = data['Pasangan_kanan_' + i] || '';
             }
             
+            // Update dropdowns
             document.getElementById('Bank_Agenda_Select').value = currentAgendaForBank;
             
+            // Update mapel dropdown
             const mpSelect = document.getElementById('Bank_Mapel_Select');
             if (mapelRef) {
               mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
@@ -3504,7 +3429,6 @@
             <th>TglJam_Mulai</th>
             <th>EndAt</th>
             <th>TglJam_Selesai</th>
-            <th>Aksi</th>
           `;
           headerTr.innerHTML = headerHtml;
           
@@ -3519,29 +3443,16 @@
               jenisTes = agendaCache[agendaId].Jenis_Tes || '';
             }
             
-            let jawabanCount = 0;
-            for (let i = 1; i <= maxJ; i++) {
-              if (d['Jwb' + i] && d['Jwb' + i].trim() !== '') {
-                jawabanCount++;
-              }
-            }
-            
-            const jawabanBadge = jawabanCount > 0 
-              ? `<span class="jawaban-badge">${jawabanCount}</span>` 
-              : '';
-            
             let rowHtml = `
               <td><input type="checkbox" class="jawaban-checkbox" value="${r.id}"></td>
-              <td>${namaSiswa} ${jawabanBadge}</td>
+              <td>${namaSiswa}</td>
               <td>${d.Judul_Ujian || ''}</td>
               <td>${d.Mata_Pelajaran || ''}</td>
               <td>${jenisTes}</td>
             `;
             
             for (let i = 1; i <= maxJ; i++) {
-              const jawaban = d['Jwb' + i] || '';
-              const cellClass = jawaban.trim() !== '' ? 'style="background:#d1fae5;"' : '';
-              rowHtml += `<td ${cellClass}>${jawaban}</td>`;
+              rowHtml += `<td>${d['Jwb' + i] || ''}</td>`;
             }
             
             rowHtml += `
@@ -3549,9 +3460,6 @@
               <td>${d.TglJam_Mulai || ''}</td>
               <td>${d.EndAt || ''}</td>
               <td>${d.TglJam_Selesai || ''}</td>
-              <td class="actions">
-                <button onclick="openResetJawabanModal('${r.id}')" title="Reset jawaban siswa">🔄 Reset</button>
-              </td>
             `;
             
             const tr = document.createElement('tr');
@@ -3594,439 +3502,6 @@
               });
           }
         );
-      }
-
-      function resetAllJawabanForSelected() {
-        const checked = document.querySelectorAll('.jawaban-checkbox:checked');
-        if (!checked.length) {
-          showNotification('warning', 'Peringatan', 'Pilih minimal satu data jawaban untuk direset');
-          return;
-        }
-        
-        const siswaMap = new Map();
-        
-        checked.forEach(cb => {
-          const row = cb.closest('tr');
-          if (row) {
-            const cells = row.querySelectorAll('td');
-            if (cells.length >= 5) {
-              const nis = cells[1].textContent.split('(')[1]?.replace(')', '') || '';
-              const namaSiswa = cells[1].textContent.split(' ')[0] || '';
-              const mapel = cells[3].textContent || '';
-              
-              if (nis && namaSiswa) {
-                if (!siswaMap.has(nis)) {
-                  siswaMap.set(nis, {
-                    name: namaSiswa,
-                    mapels: new Set()
-                  });
-                }
-                if (mapel) {
-                  siswaMap.get(nis).mapels.add(mapel);
-                }
-              }
-            }
-          }
-        });
-        
-        if (siswaMap.size > 0) {
-          openMultiResetModal(siswaMap);
-        }
-      }
-
-      // ====== RESET JAWABAN FUNCTIONS ======
-      function openResetJawabanModal(jawabanId) {
-  if (!jawabanRef) return;
-  
-  showNotification('info', 'Memuat', 'Sedang mengambil data jawaban...', 0);
-  
-  jawabanRef.child(jawabanId).once('value')
-    .then(snapshot => {
-      const data = snapshot.val();
-      if (!data) {
-        hideAllNotifications();
-        showNotification('error', 'Error', 'Data jawaban tidak ditemukan');
-        return;
-      }
-      
-      selectedJawabanForReset = { id: jawabanId, data: data };
-      
-      const nis = data.NIS_Username || '';
-      const namaSiswa = pesertaNameMap[nis] || nis;
-      const agendaId = data.ID_Agenda || '';
-      
-      // Cari nama agenda dari cache
-      let agendaName = 'Tidak diketahui';
-      if (agendaId && agendaCache[agendaId]) {
-        agendaName = agendaCache[agendaId].Agenda_Ujian || agendaId;
-      }
-      
-      document.getElementById('resetStudentName').textContent = `Siswa: ${namaSiswa} (${nis})`;
-      document.getElementById('resetStudentAgenda').textContent = `Agenda: ${agendaName}`;
-      document.getElementById('resetStudentStatus').textContent = `Status: ${data.Status || 'Tidak diketahui'}`;
-      
-      // Debug info
-      console.log('Data jawaban yang akan direset:', {
-        id: jawabanId,
-        nis: nis,
-        agendaId: agendaId,
-        agendaName: agendaName,
-        currentMapel: data.Mata_Pelajaran,
-        agendaCacheKeys: Object.keys(agendaCache)
-      });
-      
-      loadMapelForReset(agendaId, data.Mata_Pelajaran);
-      hideAllNotifications();
-      showModal('modal-reset-jawaban');
-      
-    })
-    .catch(error => {
-      hideAllNotifications();
-      showNotification('error', 'Error', 'Gagal mengambil data jawaban: ' + error.message);
-      console.error('Error openResetJawabanModal:', error);
-    });
-}
-
-      function loadMapelForReset(agendaId, currentMapel) {
-  const container = document.getElementById('resetMapelList');
-  container.innerHTML = '<p style="font-size: 12px; color: var(--text-muted);">Memuat daftar mata pelajaran...</p>';
-  
-  if (!agendaId) {
-    container.innerHTML = '<p style="color: #dc2626; font-size: 12px;">Error: ID Agenda tidak valid</p>';
-    return;
-  }
-  
-  if (!mapelRef) {
-    container.innerHTML = '<p style="color: #dc2626; font-size: 12px;">Error: Firebase tidak terinisialisasi</p>';
-    return;
-  }
-  
-  // Coba cari mapel berdasarkan ID_Agenda terlebih dahulu
-  mapelRef.orderByChild('ID_Agenda').equalTo(agendaId).once('value')
-    .then(snapshot => {
-      resetMapelList = [];
-      container.innerHTML = '';
-      
-      let hasMapel = false;
-      
-      if (snapshot.exists()) {
-        snapshot.forEach(childSnap => {
-          const mapelData = childSnap.val();
-          const mapelName = mapelData.Nama_Mata_Pelajaran || '';
-          
-          if (mapelName) {
-            resetMapelList.push({
-              name: mapelName,
-              selected: mapelName === currentMapel || mapelName.trim() === currentMapel?.trim()
-            });
-            hasMapel = true;
-            
-            // Tampilkan di console untuk debugging
-            console.log('Mapel ditemukan:', mapelName, 'current:', currentMapel);
-          }
-        });
-      }
-      
-      // Jika tidak ada mapel yang ditemukan, coba cara alternatif
-      if (!hasMapel) {
-        console.log('Tidak ada mapel ditemukan untuk agenda:', agendaId);
-        console.log('Current mapel dari data jawaban:', currentMapel);
-        
-        // Jika currentMapel ada, gunakan itu saja
-        if (currentMapel && currentMapel.trim() !== '') {
-          resetMapelList.push({
-            name: currentMapel,
-            selected: true
-          });
-          hasMapel = true;
-          console.log('Menggunakan mapel dari data jawaban:', currentMapel);
-        }
-        
-        // Coba cari semua mapel tanpa filter agenda
-        if (!hasMapel) {
-          return mapelRef.once('value').then(allSnapshot => {
-            const allMapels = new Set();
-            allSnapshot.forEach(childSnap => {
-              const mapelData = childSnap.val();
-              const mapelName = mapelData.Nama_Mata_Pelajaran || '';
-              if (mapelName) {
-                allMapels.add(mapelName);
-              }
-            });
-            
-            if (allMapels.size > 0) {
-              Array.from(allMapels).sort().forEach(mapelName => {
-                resetMapelList.push({
-                  name: mapelName,
-                  selected: mapelName === currentMapel || mapelName.trim() === currentMapel?.trim()
-                });
-              });
-              hasMapel = true;
-              console.log('Menggunakan semua mapel yang tersedia:', Array.from(allMapels));
-            }
-            
-            updateMapelListUI(container, hasMapel);
-          });
-        }
-      }
-      
-      updateMapelListUI(container, hasMapel);
-      
-    })
-    .catch(error => {
-      console.error('Error load mapel:', error);
-      container.innerHTML = `
-        <p style="color: #dc2626; font-size: 12px;">
-          Error: ${error.message || 'Gagal memuat data'}
-        </p>
-        <p style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-          ID Agenda: ${agendaId || 'tidak ada'}<br>
-          Mapel saat ini: ${currentMapel || 'tidak ada'}
-        </p>
-      `;
-    });
-}
-
-      function updateMapelListUI(container, hasMapel) {
-  if (!hasMapel) {
-    container.innerHTML = `
-      <div style="padding: 16px; text-align: center;">
-        <p style="color: var(--text-muted); font-size: 12px;">
-          Tidak ada mata pelajaran ditemukan untuk agenda ini
-        </p>
-        <p style="font-size: 11px; color: var(--warning); margin-top: 8px;">
-          Coba tambahkan mata pelajaran terlebih dahulu di tab "Mata Pelajaran"
-        </p>
-      </div>
-    `;
-    return;
-  }
-  
-  let html = '<div style="margin-bottom: 8px; font-size: 11px; color: var(--text-muted);">';
-  html += `${resetMapelList.length} mata pelajaran tersedia</div>`;
-  
-  resetMapelList.forEach((mapel, index) => {
-    html += `
-      <div class="reset-mapel-item">
-        <input type="checkbox" id="reset_mapel_${index}" ${mapel.selected ? 'checked' : ''} 
-               onchange="toggleResetMapel(${index}, this.checked)">
-        <label for="reset_mapel_${index}">${mapel.name}</label>
-      </div>
-    `;
-  });
-  
-  html += `
-    <div class="reset-mapel-item" style="border-top: 2px solid var(--border); margin-top: 8px; padding-top: 12px;">
-      <input type="checkbox" id="reset_all_mapel" onchange="toggleAllResetMapel(this.checked)">
-      <label for="reset_all_mapel" style="font-weight: 600;">Pilih Semua Mata Pelajaran</label>
-    </div>
-  `;
-  
-  container.innerHTML = html;
-}
-      function toggleResetMapel(index, isChecked) {
-        if (resetMapelList[index]) {
-          resetMapelList[index].selected = isChecked;
-        }
-      }
-
-      function toggleAllResetMapel(isChecked) {
-        resetMapelList.forEach((mapel, index) => {
-          mapel.selected = isChecked;
-          const checkbox = document.getElementById(`reset_mapel_${index}`);
-          if (checkbox) {
-            checkbox.checked = isChecked;
-          }
-        });
-      }
-
-      function confirmResetJawaban() {
-        if (!selectedJawabanForReset || !jawabanRef) {
-          showNotification('error', 'Error', 'Tidak ada data jawaban yang dipilih');
-          return;
-        }
-        
-        const selectedMapels = resetMapelList.filter(mapel => mapel.selected);
-        
-        if (selectedMapels.length === 0) {
-          showNotification('warning', 'Peringatan', 'Pilih minimal satu mata pelajaran untuk direset');
-          return;
-        }
-        
-        const confirmMessage = selectedMapels.length === 1
-          ? `Yakin reset jawaban untuk mata pelajaran "${selectedMapels[0].name}"?`
-          : `Yakin reset jawaban untuk ${selectedMapels.length} mata pelajaran?`;
-        
-        showConfirmation(
-          'Konfirmasi Reset Jawaban',
-          confirmMessage,
-          function() {
-            performResetJawaban(selectedMapels);
-          }
-        );
-      }
-
-      async function performResetJawaban(selectedMapels) {
-        try {
-          showNotification('info', 'Memproses', 'Sedang mereset jawaban...', 0);
-          
-          const jawabanData = selectedJawabanForReset.data;
-          const jawabanId = selectedJawabanForReset.id;
-          const nis = jawabanData.NIS_Username || '';
-          const namaSiswa = pesertaNameMap[nis] || nis;
-          
-          for (const mapel of selectedMapels) {
-            const snapshot = await jawabanRef.orderByChild('NIS_Username').equalTo(nis).once('value');
-            
-            const updates = {};
-            snapshot.forEach(childSnap => {
-              const data = childSnap.val();
-              if (data.Mata_Pelajaran === mapel.name) {
-                const updatedData = { ...data };
-                
-                Object.keys(updatedData).forEach(key => {
-                  if (key.startsWith('Jwb')) {
-                    updatedData[key] = '';
-                  }
-                });
-                
-                updatedData.Status = 'Belum Mengerjakan';
-                updatedData.TglJam_Mulai = '';
-                updatedData.EndAt = '';
-                updatedData.TglJam_Selesai = '';
-                updatedData.Last_Update = new Date().toISOString();
-                
-                updates[childSnap.key] = updatedData;
-              }
-            });
-            
-            if (Object.keys(updates).length > 0) {
-              await jawabanRef.update(updates);
-            }
-          }
-          
-          hideModal('modal-reset-jawaban');
-          showNotification('success', 'Berhasil', 
-            `Jawaban untuk ${selectedMapels.length} mata pelajaran berhasil direset untuk ${namaSiswa}`);
-          
-        } catch (error) {
-          console.error('Reset jawaban error:', error);
-          showNotification('error', 'Gagal', 'Gagal mereset jawaban: ' + error.message);
-        } finally {
-          hideAllNotifications();
-        }
-      }
-
-      function openMultiResetModal(siswaMap) {
-        const container = document.getElementById('resetMapelList');
-        container.innerHTML = '';
-        
-        let html = `
-          <div style="margin-bottom: 12px; font-size: 12px; color: var(--text-muted);">
-            ${siswaMap.size} siswa terpilih. Pilih mata pelajaran yang akan direset:
-          </div>
-        `;
-        
-        const allMapels = new Set();
-        siswaMap.forEach(siswa => {
-          siswa.mapels.forEach(mapel => allMapels.add(mapel));
-        });
-        
-        Array.from(allMapels).sort().forEach((mapel, index) => {
-          html += `
-            <div class="reset-mapel-item">
-              <input type="checkbox" id="multi_mapel_${index}" checked>
-              <label for="multi_mapel_${index}">${mapel}</label>
-            </div>
-          `;
-        });
-        
-        if (allMapels.size === 0) {
-          html += '<p style="color: var(--text-muted); text-align: center;">Tidak ada mata pelajaran yang ditemukan</p>';
-        }
-        
-        container.innerHTML = html;
-        
-        document.getElementById('resetStudentName').textContent = `${siswaMap.size} Siswa Terpilih`;
-        document.getElementById('resetStudentAgenda').textContent = `Total: ${checked.length} data jawaban`;
-        document.getElementById('resetStudentStatus').textContent = `Mapel: ${allMapels.size} mata pelajaran`;
-        
-        window.confirmMultiReset = function() {
-          const selectedMapels = [];
-          Array.from(allMapels).forEach((mapel, index) => {
-            const checkbox = document.getElementById(`multi_mapel_${index}`);
-            if (checkbox && checkbox.checked) {
-              selectedMapels.push(mapel);
-            }
-          });
-          
-          if (selectedMapels.length === 0) {
-            showNotification('warning', 'Peringatan', 'Pilih minimal satu mata pelajaran');
-            return;
-          }
-          
-          showConfirmation(
-            'Reset Jawaban Multiple',
-            `Yakin reset jawaban untuk ${siswaMap.size} siswa pada ${selectedMapels.length} mata pelajaran?`,
-            async function() {
-              try {
-                showNotification('info', 'Memproses', 'Sedang mereset jawaban...', 0);
-                
-                const updates = {};
-                let resetCount = 0;
-                
-                for (const [nis, siswa] of siswaMap) {
-                  for (const mapel of selectedMapels) {
-                    const snapshot = await jawabanRef.orderByChild('NIS_Username').equalTo(nis).once('value');
-                    
-                    snapshot.forEach(childSnap => {
-                      const data = childSnap.val();
-                      if (data.Mata_Pelajaran === mapel) {
-                        const updatedData = { ...data };
-                        
-                        Object.keys(updatedData).forEach(key => {
-                          if (key.startsWith('Jwb')) {
-                            updatedData[key] = '';
-                          }
-                        });
-                        
-                        updatedData.Status = 'Belum Mengerjakan';
-                        updatedData.TglJam_Mulai = '';
-                        updatedData.EndAt = '';
-                        updatedData.TglJam_Selesai = '';
-                        updatedData.Last_Update = new Date().toISOString();
-                        
-                        updates[childSnap.key] = updatedData;
-                        resetCount++;
-                      }
-                    });
-                  }
-                }
-                
-                if (Object.keys(updates).length > 0) {
-                  await jawabanRef.update(updates);
-                }
-                
-                hideModal('modal-reset-jawaban');
-                showNotification('success', 'Berhasil', 
-                  `${resetCount} jawaban berhasil direset untuk ${siswaMap.size} siswa`);
-                
-              } catch (error) {
-                console.error('Multi reset error:', error);
-                showNotification('error', 'Gagal', 'Gagal mereset jawaban: ' + error.message);
-              } finally {
-                hideAllNotifications();
-              }
-            }
-          );
-        };
-        
-        const confirmBtn = document.querySelector('#modal-reset-jawaban button[onclick="confirmResetJawaban()"]');
-        if (confirmBtn) {
-          confirmBtn.onclick = window.confirmMultiReset;
-        }
-        
-        showModal('modal-reset-jawaban');
       }
 
       // ====== CETAK KARTU FUNCTIONS ======
@@ -4203,16 +3678,6 @@
         if (!el) return;
         el.classList.remove('show');
         document.body.style.overflow = '';
-        
-        if (id === 'modal-reset-jawaban') {
-          selectedJawabanForReset = null;
-          resetMapelList = [];
-          
-          const confirmBtn = document.querySelector('#modal-reset-jawaban button[onclick="confirmResetJawaban()"]');
-          if (confirmBtn) {
-            confirmBtn.onclick = confirmResetJawaban;
-          }
-        }
       }
 
       function togglePasswordVisibility(inputElement, buttonElement) {
@@ -4233,6 +3698,7 @@
       document.addEventListener('DOMContentLoaded', function() {
         checkLoginStatus();
         
+        // Check if Google Apps Script URL is configured
         if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes('YOUR_WEB_APP_URL')) {
           showNotification('warning', 'Konfigurasi', 'URL Google Apps Script belum dikonfigurasi. Upload gambar akan menggunakan fallback ke base64.', 10000);
         }
