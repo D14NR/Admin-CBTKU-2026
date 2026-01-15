@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login Admin - Portal Admin CBT 2026</title>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
     <style>
       :root {
         --bg: #f3f4f6;
@@ -35,25 +41,33 @@
 
       html, body {
         height: 100%;
-      }
-
-      body {
         margin: 0;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      /* Body untuk halaman login */
+      body.login-page {
         background: radial-gradient(circle at top left, #e0f2fe 0, #eef2ff 35%, #f9fafb 70%, #f3f4f6 100%);
-        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      /* Body untuk halaman app */
+      body.app-page {
+        background: radial-gradient(circle at top left, #e0f2fe 0, #eef2ff 35%, #f9fafb 70%, #f3f4f6 100%);
+        min-height: 100vh;
       }
 
       /* LOGIN STYLES */
       #login-section {
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        background: radial-gradient(circle at top left, #e0f2fe 0, #eef2ff 35%, #f9fafb 70%, #f3f4f6 100%);
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
+        flex: 1;
         padding: 20px;
+        width: 100%;
       }
 
       .login-card {
@@ -65,6 +79,7 @@
         box-shadow: 0 10px 25px rgba(37, 99, 235, 0.1);
         border: 1px solid rgba(255, 255, 255, 0.8);
         text-align: center;
+        margin-bottom: 60px;
       }
 
       .login-title {
@@ -94,6 +109,15 @@
         margin-top: 8px;
         padding: 10px;
         font-size: 14px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+      }
+
+      .login-btn:hover {
+        background: var(--primary-hover);
       }
 
       /* Password wrapper styles */
@@ -130,10 +154,6 @@
         color: var(--primary);
         background: transparent;
         box-shadow: none;
-      }
-
-      .toggle-password:active {
-        transform: none;
       }
 
       /* APP STYLES */
@@ -689,391 +709,376 @@
       }
 
       /* ====== MODERN NOTIFICATION SYSTEM ====== */
-.notification-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 99999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 400px;
-  pointer-events: none;
-}
+      .notification-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+        pointer-events: none;
+      }
 
-.notification {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  border-left: 5px solid;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  transform: translateX(120%);
-  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  pointer-events: auto;
-  max-width: 380px;
-  min-width: 300px;
-}
+      .notification {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        border-left: 5px solid;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        transform: translateX(120%);
+        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        pointer-events: auto;
+        max-width: 380px;
+        min-width: 300px;
+      }
 
-.notification.show {
-  transform: translateX(0);
-}
+      .notification.show {
+        transform: translateX(0);
+      }
 
-.notification.hide {
-  transform: translateX(120%);
-}
+      .notification.hide {
+        transform: translateX(120%);
+      }
 
-.notification-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 14px;
-  font-weight: bold;
-}
+      .notification-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 14px;
+        font-weight: bold;
+      }
 
-.notification-content {
-  flex: 1;
-  min-width: 0;
-}
+      .notification-content {
+        flex: 1;
+        min-width: 0;
+      }
 
-.notification-title {
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 4px;
-  color: #111827;
-}
+      .notification-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 4px;
+        color: #111827;
+      }
 
-.notification-message {
-  font-size: 13px;
-  color: #4b5563;
-  line-height: 1.4;
-}
+      .notification-message {
+        font-size: 13px;
+        color: #4b5563;
+        line-height: 1.4;
+      }
 
-.notification-close {
-  background: transparent;
-  border: none;
-  color: #9ca3af;
-  cursor: pointer;
-  padding: 4px;
-  font-size: 18px;
-  line-height: 1;
-  flex-shrink: 0;
-  transition: color 0.2s;
-}
+      .notification-close {
+        background: transparent;
+        border: none;
+        color: #9ca3af;
+        cursor: pointer;
+        padding: 4px;
+        font-size: 18px;
+        line-height: 1;
+        flex-shrink: 0;
+        transition: color 0.2s;
+      }
 
-.notification-close:hover {
-  color: #6b7280;
-}
+      .notification-close:hover {
+        color: #6b7280;
+      }
 
-/* Notification Types */
-.notification.success {
-  border-left-color: #10b981;
-  background: linear-gradient(135deg, #f0fdf4, #ffffff);
-}
+      /* Notification Types */
+      .notification.success {
+        border-left-color: #10b981;
+        background: linear-gradient(135deg, #f0fdf4, #ffffff);
+      }
 
-.notification.success .notification-icon {
-  background: #10b981;
-  color: white;
-}
+      .notification.success .notification-icon {
+        background: #10b981;
+        color: white;
+      }
 
-.notification.error {
-  border-left-color: #ef4444;
-  background: linear-gradient(135deg, #fef2f2, #ffffff);
-}
+      .notification.error {
+        border-left-color: #ef4444;
+        background: linear-gradient(135deg, #fef2f2, #ffffff);
+      }
 
-.notification.error .notification-icon {
-  background: #ef4444;
-  color: white;
-}
+      .notification.error .notification-icon {
+        background: #ef4444;
+        color: white;
+      }
 
-.notification.warning {
-  border-left-color: #f59e0b;
-  background: linear-gradient(135deg, #fffbeb, #ffffff);
-}
+      .notification.warning {
+        border-left-color: #f59e0b;
+        background: linear-gradient(135deg, #fffbeb, #ffffff);
+      }
 
-.notification.warning .notification-icon {
-  background: #f59e0b;
-  color: white;
-}
+      .notification.warning .notification-icon {
+        background: #f59e0b;
+        color: white;
+      }
 
-.notification.info {
-  border-left-color: #3b82f6;
-  background: linear-gradient(135deg, #eff6ff, #ffffff);
-}
+      .notification.info {
+        border-left-color: #3b82f6;
+        background: linear-gradient(135deg, #eff6ff, #ffffff);
+      }
 
-.notification.info .notification-icon {
-  background: #3b82f6;
-  color: white;
-}
+      .notification.info .notification-icon {
+        background: #3b82f6;
+        color: white;
+      }
 
-/* Progress bar */
-.notification-progress {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 0 0 12px 12px;
-  overflow: hidden;
-}
+      /* Progress bar */
+      .notification-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+      }
 
-.notification-progress-bar {
-  height: 100%;
-  width: 100%;
-  transform-origin: left;
-  transform: scaleX(1);
-  transition: transform linear;
-}
+      .notification-progress-bar {
+        height: 100%;
+        width: 100%;
+        transform-origin: left;
+        transform: scaleX(1);
+        transition: transform linear;
+      }
 
-.notification.success .notification-progress-bar {
-  background: #10b981;
-}
+      .notification.success .notification-progress-bar {
+        background: #10b981;
+      }
 
-.notification.error .notification-progress-bar {
-  background: #ef4444;
-}
+      .notification.error .notification-progress-bar {
+        background: #ef4444;
+      }
 
-.notification.warning .notification-progress-bar {
-  background: #f59e0b;
-}
+      .notification.warning .notification-progress-bar {
+        background: #f59e0b;
+      }
 
-.notification.info .notification-progress-bar {
-  background: #3b82f6;
-}
+      .notification.info .notification-progress-bar {
+        background: #3b82f6;
+      }
 
-/* Confirmation Dialog */
-.confirmation-dialog {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 23, 42, 0.75);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-  backdrop-filter: blur(4px);
-}
+      /* Confirmation Dialog */
+      .confirmation-dialog {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.75);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        backdrop-filter: blur(4px);
+      }
 
-.confirmation-dialog.show {
-  display: flex;
-}
+      .confirmation-dialog.show {
+        display: flex;
+      }
 
-.confirmation-box {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  max-width: 400px;
-  width: 90%;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-  animation: dialogSlideIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
+      .confirmation-box {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        animation: dialogSlideIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      }
 
-@keyframes dialogSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
+      @keyframes dialogSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
 
-.confirmation-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 16px;
-  font-size: 28px;
-}
+      .confirmation-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 28px;
+      }
 
-.confirmation-icon.warning {
-  background: #fef3c7;
-  color: #f59e0b;
-}
+      .confirmation-icon.warning {
+        background: #fef3c7;
+        color: #f59e0b;
+      }
 
-.confirmation-icon.info {
-  background: #dbeafe;
-  color: #3b82f6;
-}
+      .confirmation-icon.info {
+        background: #dbeafe;
+        color: #3b82f6;
+      }
 
-.confirmation-title {
-  font-size: 18px;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 8px;
-  color: #111827;
-}
+      .confirmation-title {
+        font-size: 18px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 8px;
+        color: #111827;
+      }
 
-.confirmation-message {
-  font-size: 14px;
-  color: #6b7280;
-  text-align: center;
-  margin-bottom: 24px;
-  line-height: 1.5;
-}
+      .confirmation-message {
+        font-size: 14px;
+        color: #6b7280;
+        text-align: center;
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
 
-.confirmation-buttons {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
+      .confirmation-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+      }
 
-.confirmation-btn {
-  padding: 10px 24px;
-  border-radius: 999px;
-  border: none;
-  font-weight: 500;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  min-width: 100px;
-}
+      .confirmation-btn {
+        padding: 10px 24px;
+        border-radius: 999px;
+        border: none;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        min-width: 100px;
+      }
 
-.confirmation-btn.cancel {
-  background: #f3f4f6;
-  color: #4b5563;
-}
+      .confirmation-btn.cancel {
+        background: #f3f4f6;
+        color: #4b5563;
+      }
 
-.confirmation-btn.cancel:hover {
-  background: #e5e7eb;
-}
+      .confirmation-btn.cancel:hover {
+        background: #e5e7eb;
+      }
 
-.confirmation-btn.confirm {
-  background: #3b82f6;
-  color: white;
-}
+      .confirmation-btn.confirm {
+        background: #3b82f6;
+        color: white;
+      }
 
-.confirmation-btn.confirm:hover {
-  background: #2563eb;
-}
+      .confirmation-btn.confirm:hover {
+        background: #2563eb;
+      }
 
-.confirmation-btn.confirm.delete {
-  background: #ef4444;
-}
+      .confirmation-btn.confirm.delete {
+        background: #ef4444;
+      }
 
-.confirmation-btn.confirm.delete:hover {
-  background: #dc2626;
-}
+      .confirmation-btn.confirm.delete:hover {
+        background: #dc2626;
+      }
 
-/* Toast Notification */
-.toast-notification {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(100px);
-  background: #1f2937;
-  color: white;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-size: 14px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  max-width: 90%;
-}
+      /* Toast Notification */
+      .toast-notification {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: #1f2937;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        max-width: 90%;
+      }
 
-.toast-notification.show {
-  transform: translateX(-50%) translateY(0);
-}
+      .toast-notification.show {
+        transform: translateX(-50%) translateY(0);
+      }
 
-.toast-icon {
-  font-size: 18px;
-}
+      .toast-icon {
+        font-size: 18px;
+      }
 
-.toast-message {
-  flex: 1;
-}
+      .toast-message {
+        flex: 1;
+      }
 
-/* ====== FOOTER STYLES ====== */
-.site-footer {
-  margin-top: 30px;
-  padding: 16px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-muted);
-  border-top: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-}
+      /* ====== FOOTER STYLES ====== */
+      .site-footer {
+        padding: 16px;
+        text-align: center;
+        font-size: 13px;
+        color: var(--text-muted);
+        border-top: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        width: 100%;
+        margin-top: auto;
+      }
 
-.footer-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+      .footer-content {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
 
-.footer-text {
-  font-weight: 500;
-  color: var(--primary);
-  letter-spacing: 0.5px;
-}
+      .footer-text {
+        font-weight: 500;
+        color: var(--primary);
+        letter-spacing: 0.5px;
+      }
 
-.footer-subtext {
-  font-size: 11px;
-  color: var(--text-muted);
-}
+      .footer-subtext {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .site-footer {
-    margin-top: 20px;
-    padding: 12px;
-    font-size: 12px;
-  }
-  
-  .footer-subtext {
-    font-size: 10px;
-  }
-}
+      /* Responsive */
+      @media (max-width: 768px) {
+        .site-footer {
+          margin-top: 20px;
+          padding: 12px;
+          font-size: 12px;
+        }
+        
+        .footer-subtext {
+          font-size: 10px;
+        }
+      }
 
-/* Pastikan footer tetap di bawah konten */
-body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+      /* Image preview */
+      .image-preview {
+        margin-top: 10px;
+        max-width: 200px;
+        max-height: 150px;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        object-fit: contain;
+      }
 
-.app-shell {
-  flex: 1;
-}
-
-/* Untuk login page */
-#login-section {
-  position: relative;
-}
-
-#login-section .site-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: transparent;
-  border-top: none;
-  box-shadow: none;
-  backdrop-filter: none;
-}
-
+      .preview-container {
+        margin-top: 8px;
+      }
     </style>
   </head>
-  <body>
+  <body class="login-page">
 
     <!-- LOGIN SECTION -->
     <div id="login-section">
@@ -1253,64 +1258,60 @@ body {
       </div>
 
       <!-- TAB BANK SOAL -->
-      <!-- TAB BANK SOAL -->
-<div id="tab-banksoal" class="tab-content" style="display:none;">
-  <div class="section-header">
-    <h2>Bank Soal</h2>
-    <p class="section-subtitle">Input dan kelola butir soal per agenda dan mata pelajaran.</p>
-  </div>
+      <div id="tab-banksoal" class="tab-content" style="display:none;">
+        <div class="section-header">
+          <h2>Bank Soal</h2>
+          <p class="section-subtitle">Input dan kelola butir soal per agenda dan mata pelajaran.</p>
+        </div>
 
-  <label>
-    Pilih Agenda Ujian:
-    <select id="Bank_Agenda_Select" onchange="onChangeAgendaBankSoal()">
-      <option value="">-- Pilih Agenda Ujian dulu --</option>
-    </select>
-  </label>
+        <label>
+          Pilih Agenda Ujian:
+          <select id="Bank_Agenda_Select" onchange="onChangeAgendaBankSoal()">
+            <option value="">-- Pilih Agenda Ujian dulu --</option>
+          </select>
+        </label>
 
-  <label>
-    Pilih Mata Pelajaran:
-    <select id="Bank_Mapel_Select" onchange="onChangeMapelBankSoal()">
-      <option value="">-- Pilih Mata Pelajaran --</option>
-    </select>
-  </label>
+        <label>
+          Pilih Mata Pelajaran:
+          <select id="Bank_Mapel_Select" onchange="onChangeMapelBankSoal()">
+            <option value="">-- Pilih Mata Pelajaran --</option>
+          </select>
+        </label>
 
-  <!-- TAMBAHKAN TOMBOL AKSI DI SINI -->
-  <div style="margin:8px 0 10px; display:flex; flex-wrap:wrap; gap:6px;">
-  <button type="button" onclick="openBankSoalModalForCreate()">+ Tambah Soal</button>
-  <button type="button" onclick="openImportBankSoalModal()">Import Data</button>
-  <button type="button" onclick="deleteSelectedBankSoal()" style="background: var(--danger);">Hapus Terpilih</button>
-  <button type="button" onclick="selectAllBankSoal()">Pilih Semua</button>
-  <button type="button" onclick="deselectAllBankSoal()">Batal Pilih</button>
-  <!-- TAMBAHKAN TOMBOL HAPUS SEMUA (OPSIONAL) -->
-  <button type="button" onclick="deleteAllBankSoal()" style="background: var(--danger);">Hapus Semua di Mapel Ini</button>
-</div>
+        <div style="margin:8px 0 10px; display:flex; flex-wrap:wrap; gap:6px;">
+          <button type="button" onclick="openBankSoalModalForCreate()">+ Tambah Soal</button>
+          <button type="button" onclick="openImportBankSoalModal()">Import Data</button>
+          <button type="button" onclick="deleteSelectedBankSoal()" style="background: var(--danger);">Hapus Terpilih</button>
+          <button type="button" onclick="selectAllBankSoal()">Pilih Semua</button>
+          <button type="button" onclick="deselectAllBankSoal()">Batal Pilih</button>
+          <button type="button" onclick="deleteAllBankSoal()" style="background: var(--danger);">Hapus Semua di Mapel Ini</button>
+        </div>
 
-  <div class="section-header">
-    <h2>Daftar Soal</h2>
-    <p class="section-subtitle">Berdasarkan agenda dan mata pelajaran yang dipilih.</p>
-  </div>
+        <div class="section-header">
+          <h2>Daftar Soal</h2>
+          <p class="section-subtitle">Berdasarkan agenda dan mata pelajaran yang dipilih.</p>
+        </div>
 
-  <div class="table-card">
-    <div class="table-container">
-      <table id="bankSoalTable">
-        <thead>
-          <tr>
-            <!-- TAMBAH KOLOM CHECKBOX DI SINI -->
-            <th style="width: 30px;">
-              <input type="checkbox" id="bankSoal_select_all" onclick="toggleSelectAllBankSoal(this)">
-            </th>
-            <th>No_Soal</th>
-            <th>Type_Soal</th>
-            <th>Pertanyaan</th>
-            <th>Gambar</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-</div>
+        <div class="table-card">
+          <div class="table-container">
+            <table id="bankSoalTable">
+              <thead>
+                <tr>
+                  <th style="width: 30px;">
+                    <input type="checkbox" id="bankSoal_select_all" onclick="toggleSelectAllBankSoal(this)">
+                  </th>
+                  <th>No_Soal</th>
+                  <th>Type_Soal</th>
+                  <th>Pertanyaan</th>
+                  <th>Gambar</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       <!-- TAB MONITORING PENGERJAAN -->
       <div id="tab-monitoring" class="tab-content" style="display:none;">
@@ -1684,7 +1685,8 @@ body {
 
             <label>
               Gambar (opsional):
-              <input type="file" id="Gambar" accept="image/*">
+              <input type="file" id="Gambar" accept="image/*" onchange="previewImage(this)">
+              <div id="imagePreviewContainer" class="preview-container"></div>
             </label>
 
             <label>
@@ -1838,43 +1840,40 @@ body {
     
 
     <!-- Modern Notification System -->
-<div class="notification-container" id="notificationContainer"></div>
+    <div class="notification-container" id="notificationContainer"></div>
 
-<!-- Confirmation Dialog -->
-<div class="confirmation-dialog" id="confirmationDialog">
-  <div class="confirmation-box">
-    <div class="confirmation-icon warning">⚠️</div>
-    <h3 class="confirmation-title" id="dialogTitle">Konfirmasi</h3>
-    <p class="confirmation-message" id="dialogMessage">Apakah Anda yakin?</p>
-    <div class="confirmation-buttons">
-      <button class="confirmation-btn cancel" onclick="hideConfirmation()">Batal</button>
-      <button class="confirmation-btn confirm" id="confirmActionBtn">Ya, Lanjutkan</button>
+    <!-- Confirmation Dialog -->
+    <div class="confirmation-dialog" id="confirmationDialog">
+      <div class="confirmation-box">
+        <div class="confirmation-icon warning">⚠️</div>
+        <h3 class="confirmation-title" id="dialogTitle">Konfirmasi</h3>
+        <p class="confirmation-message" id="dialogMessage">Apakah Anda yakin?</p>
+        <div class="confirmation-buttons">
+          <button class="confirmation-btn cancel" onclick="hideConfirmation()">Batal</button>
+          <button class="confirmation-btn confirm" id="confirmActionBtn">Ya, Lanjutkan</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<!-- Toast Notification -->
-<div class="toast-notification" id="toastNotification">
-  <span class="toast-icon">📋</span>
-  <span class="toast-message" id="toastMessage">Pesan toast</span>
-</div>
+    <!-- Toast Notification -->
+    <div class="toast-notification" id="toastNotification">
+      <span class="toast-icon">📋</span>
+      <span class="toast-message" id="toastMessage">Pesan toast</span>
+    </div>
 
-<!-- Footer di bagian bawah halaman -->
-<footer class="site-footer">
-  <div class="footer-content">
-    <div class="footer-text">Developed by D14nr © 2026</div>
-    <div class="footer-subtext">Portal Admin CBT 2026</div>
-  </div>
-</footer>
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-content">
+        <div class="footer-text">Developed by D14nr © 2026</div>
+        <div class="footer-subtext">Portal Admin CBT 2026</div>
+      </div>
+    </footer>
 
     <!-- Area khusus untuk print kartu -->
     <div id="printArea"></div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
     <script>
+      // ====== KONFIGURASI ======
       const firebaseConfig = {
         apiKey: "AIzaSyC1Yakfe4BkvRKs54Vqp3-mcrf-wSn5Gro",
         authDomain: "appku-aa5b2.firebaseapp.com",
@@ -1886,219 +1885,333 @@ body {
         measurementId: "G-90LQBNR7RG"
       };
 
-      firebase.initializeApp(firebaseConfig);
-      const db            = firebase.database();
-      const pesertaRef    = db.ref('peserta');
-      const agendaRef     = db.ref('agenda_ujian');
-      const mapelRef      = db.ref('mata_pelajaran');
-      const bankSoalRef   = db.ref('bank_soal');
-      const monitoringRef = db.ref('monitoring_pengerjaan');
-      const jawabanRef    = db.ref('jawaban_siswa');
+      // ====== GOOGLE APPS SCRIPT URL ======
+      // GANTI DENGAN URL WEB APP ANDA SETELAH DEPLOY
+      const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwOXJ-kL-ywDQv-GAe4bDlngnTN7ljOr6fTdtz3a6O0x-JTgyo/exec';
 
-      const DRIVE_FOLDER_ID = '1QQXJOBBopF1skSPUR11pCDz9eTh1uH_0';
+      // ====== INISIALISASI FIREBASE ======
+      let firebaseApp;
+      let db;
+      let pesertaRef;
+      let agendaRef;
+      let mapelRef;
+      let bankSoalRef;
+      let monitoringRef;
+      let jawabanRef;
+      let storage;
 
-      // PETA NAMA SISWA
-      let pesertaNameMap  = {}; 
-
-      let currentAgendaForMapel = '';
-      let currentAgendaForBank  = '';
-      let importBankSoalMapelMap = {}; 
-      let currentMapelForBank   = '';
-      let currentAgendaForKartu = '';
-      let kartuPesertaList      = [];
-      let agendaCache           = {};
-
-      // ====== LOGIN ADMIN ======
-      function checkLoginStatus() {
-  const loggedIn = sessionStorage.getItem('adminLoggedIn');
-  
-  if (loggedIn === 'true') {
-    showApp();
-  } else {
-    showLogin();
-  }
-}
-
-function handleLogin() {
-  const u = document.getElementById('login_username').value;
-  const p = document.getElementById('login_password').value;
-
-  // Credentials
-  if (u === 'Admin' && p === '290192') {
-    sessionStorage.setItem('adminLoggedIn', 'true');
-    showApp();
-  } else {
-    alert('Username atau Password salah!');
-    // Reset password field
-    document.getElementById('login_password').value = '';
-    document.getElementById('login_password').type = 'password';
-    const toggleBtn = document.querySelector('#login_password + .toggle-password');
-    if (toggleBtn) {
-      toggleBtn.textContent = '👁️';
-    }
-    // Fokus kembali ke password field
-    document.getElementById('login_password').focus();
-  }
-}
-
-function handleLogout() {
-  if(confirm('Yakin ingin keluar?')) {
-    sessionStorage.removeItem('adminLoggedIn');
-    showLogin();
-    
-    // Juga reset semua data yang mungkin masih tersimpan
-    pesertaNameMap = {};
-    currentAgendaForMapel = '';
-    currentAgendaForBank = '';
-    importBankSoalMapelMap = {};
-    currentMapelForBank = '';
-    currentAgendaForKartu = '';
-    kartuPesertaList = [];
-    agendaCache = {};
-    
-    // Reset form login untuk keamanan
-    document.getElementById('login_username').value = '';
-    document.getElementById('login_password').value = '';
-    
-    // Tampilkan pesan logout berhasil
-    setTimeout(() => {
-      alert('Anda telah berhasil logout.');
-    }, 100);
-  }
-}
-
-function showApp() {
-  // Sembunyikan login section
-  const loginSection = document.getElementById('login-section');
-  const appShell = document.getElementById('app-shell');
-  
-  loginSection.style.display = 'none';
-  appShell.style.display = 'block';
-  
-  // Init Load Data
-  loadPeserta();
-  loadAgenda();
-  loadAgendaListForPeserta();
-  loadAgendaListForMapelDropdown();
-  loadAgendaListForBankSoalDropdown();
-  loadAgendaListForCetakKartuDropdown();
-  loadMonitoring();
-  loadJawaban();
-  showTab('peserta');
-  
-  // Inisialisasi tombol show/hide password
-  setTimeout(initializePasswordToggles, 500);
-}
-
-function showLogin() {
-  // Sembunyikan app shell dan tampilkan login
-  const loginSection = document.getElementById('login-section');
-  const appShell = document.getElementById('app-shell');
-  
-  loginSection.style.display = 'flex';
-  appShell.style.display = 'none';
-  
-  // Reset form login
-  const usernameInput = document.getElementById('login_username');
-  const passwordInput = document.getElementById('login_password');
-  
-  if (usernameInput) usernameInput.value = '';
-  if (passwordInput) {
-    passwordInput.value = '';
-    passwordInput.type = 'password';
-  }
-  
-  // Reset tombol show/hide password
-  const toggleBtn = document.querySelector('#login_password + .toggle-password');
-  if (toggleBtn) {
-    toggleBtn.textContent = '👁️';
-  }
-  
-  // Fokus ke username field
-  if (usernameInput) {
-    setTimeout(() => {
-      usernameInput.focus();
-    }, 100);
-  }
-}
-
-      // ====== SHOW/HIDE PASSWORD ======
-      function togglePasswordVisibility(inputElement, buttonElement) {
-        const input = typeof inputElement === 'string' 
-          ? document.getElementById(inputElement) 
-          : inputElement;
+      try {
+        firebaseApp = firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+        storage = firebase.storage();
         
-        if (input.type === 'password') {
-          input.type = 'text';
-          buttonElement.textContent = '🙈';
-          buttonElement.title = 'Sembunyikan password';
-        } else {
-          input.type = 'password';
-          buttonElement.textContent = '👁️';
-          buttonElement.title = 'Tampilkan password';
+        pesertaRef = db.ref('peserta');
+        agendaRef = db.ref('agenda_ujian');
+        mapelRef = db.ref('mata_pelajaran');
+        bankSoalRef = db.ref('bank_soal');
+        monitoringRef = db.ref('monitoring_pengerjaan');
+        jawabanRef = db.ref('jawaban_siswa');
+        
+        console.log('Firebase initialized successfully');
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
+        showNotification('error', 'Firebase Error', 'Gagal menginisialisasi Firebase. Periksa koneksi internet.');
+      }
+
+      // ====== VARIABEL GLOBAL ======
+      let pesertaNameMap = {};
+      let currentAgendaForMapel = '';
+      let currentAgendaForBank = '';
+      let importBankSoalMapelMap = {};
+      let currentMapelForBank = '';
+      let currentAgendaForKartu = '';
+      let kartuPesertaList = [];
+      let agendaCache = {};
+
+      // ====== UTILITY FUNCTIONS ======
+      
+      // Fungsi untuk menampilkan notifikasi
+      function showNotification(type, title, message, duration = 5000) {
+        const container = document.getElementById('notificationContainer');
+        const id = 'notification-' + Date.now();
+        
+        const iconMap = {
+          success: '✓',
+          error: '✗',
+          warning: '⚠',
+          info: 'ℹ'
+        };
+        
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.id = id;
+        
+        notification.innerHTML = `
+          <div class="notification-icon">${iconMap[type] || 'ℹ'}</div>
+          <div class="notification-content">
+            <div class="notification-title">${title}</div>
+            <div class="notification-message">${message}</div>
+          </div>
+          <button class="notification-close" onclick="closeNotification('${id}')">&times;</button>
+          <div class="notification-progress">
+            <div class="notification-progress-bar" style="transform: scaleX(1); transition: transform ${duration}ms linear;"></div>
+          </div>
+        `;
+        
+        container.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.classList.add('show');
+          
+          setTimeout(() => {
+            const progressBar = notification.querySelector('.notification-progress-bar');
+            if (progressBar) {
+              progressBar.style.transform = 'scaleX(0)';
+            }
+          }, 10);
+        }, 10);
+        
+        if (duration > 0) {
+          setTimeout(() => {
+            closeNotification(id);
+          }, duration);
+        }
+        
+        return id;
+      }
+
+      function closeNotification(id) {
+        const notification = document.getElementById(id);
+        if (notification) {
+          notification.classList.remove('show');
+          notification.classList.add('hide');
+          
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 400);
         }
       }
 
-      // Inisialisasi tombol show/hide password di tabel
-      function initializePasswordToggles() {
-        document.querySelectorAll('.password-wrapper input[type="password"]').forEach(input => {
-          const wrapper = input.closest('.password-wrapper');
-          if (wrapper && !wrapper.querySelector('.toggle-password')) {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'toggle-password';
-            button.innerHTML = '👁️';
-            button.onclick = () => togglePasswordVisibility(input, button);
-            wrapper.appendChild(button);
+      function hideAllNotifications() {
+        const notifications = document.querySelectorAll('.notification');
+        notifications.forEach(notification => {
+          notification.classList.remove('show');
+          notification.classList.add('hide');
+          
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 400);
+        });
+      }
+
+      function showConfirmation(title, message, onConfirm) {
+        document.getElementById('dialogTitle').textContent = title;
+        document.getElementById('dialogMessage').textContent = message;
+        
+        const confirmBtn = document.getElementById('confirmActionBtn');
+        confirmBtn.onclick = function() {
+          hideConfirmation();
+          if (typeof onConfirm === 'function') {
+            onConfirm();
           }
+        };
+        
+        document.getElementById('confirmationDialog').classList.add('show');
+      }
+
+      function hideConfirmation() {
+        document.getElementById('confirmationDialog').classList.remove('show');
+      }
+
+      // ====== GOOGLE DRIVE UPLOAD FUNCTIONS ======
+      
+      // Konversi file ke base64
+      function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
         });
       }
 
-      // ====== Modal helpers ======
-      function showModal(id) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.classList.add('show');
-        document.body.style.overflow = 'hidden';
-      }
-
-      function hideModal(id) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.classList.remove('show');
-        document.body.style.overflow = '';
-      }
-
-      // helper download CSV
-      function downloadCsvFile(filename, csvContent) {
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-
-      // helper parse CSV
-      function parseCsv(text) {
-        const lines = text.replace(/\r/g, '').split('\n').filter(l => l.trim() !== '');
-        if (!lines.length) return { headers: [], rows: [] };
-        const headers = lines[0].split(',').map(h => h.trim());
-        const rows = lines.slice(1).map(line => {
-          const cols = line.split(',');
-          const obj = {};
-          headers.forEach((h, i) => {
-            obj[h] = (cols[i] || '').trim();
+      // Upload ke Google Drive via Google Apps Script
+      async function uploadToGoogleDrive(file, context) {
+        try {
+          showNotification('info', 'Upload Gambar', 'Mengunggah ke Google Drive...', 0);
+          
+          // Convert file to base64
+          const base64Data = await fileToBase64(file);
+          const base64String = base64Data.split(',')[1]; // Remove data URL prefix
+          
+          // Generate filename
+          const safeAgenda = (context.agenda || 'agenda')
+            .replace(/[^a-z0-9]/gi, '_')
+            .substring(0, 30);
+          
+          const safeMapel = (context.mapel || 'mapel')
+            .replace(/[^a-z0-9]/gi, '_')
+            .substring(0, 30);
+          
+          const timestamp = new Date().getTime();
+          const extension = file.name.split('.').pop().toLowerCase();
+          const fileName = `soal_${safeAgenda}_${safeMapel}_${context.noSoal}_${timestamp}.${extension}`;
+          
+          // Prepare request data
+          const requestData = {
+            base64Data: base64String,
+            fileName: fileName,
+            mimeType: file.type || 'image/jpeg'
+          };
+          
+          console.log('Uploading to Google Apps Script:', GAS_WEB_APP_URL);
+          
+          // Send to Google Apps Script via fetch with CORS workaround
+          const response = await fetch(GAS_WEB_APP_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
           });
-          return obj;
-        });
-        return { headers, rows };
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            hideAllNotifications();
+            showNotification('success', 'Upload Berhasil', 'Gambar berhasil diupload ke Google Drive!');
+            return result.thumbnailUrl;
+          } else {
+            throw new Error(result.error || 'Upload gagal');
+          }
+          
+        } catch (error) {
+          console.error('Google Drive upload error:', error);
+          
+          // Fallback: Simpan sebagai base64 di Firebase
+          hideAllNotifications();
+          showNotification('warning', 'Upload Gagal', 'Menyimpan sebagai base64 di Firebase...');
+          
+          const base64Data = await fileToBase64(file);
+          return base64Data; // Return base64 string as fallback
+        }
       }
 
-      // ====== TAB ======
+      // Preview image sebelum upload
+      function previewImage(input) {
+        const container = document.getElementById('imagePreviewContainer');
+        container.innerHTML = '';
+        
+        if (input.files && input.files[0]) {
+          const file = input.files[0];
+          const reader = new FileReader();
+          
+          reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'image-preview';
+            img.alt = 'Preview Gambar';
+            
+            container.appendChild(img);
+          };
+          
+          reader.readAsDataURL(file);
+        }
+      }
+
+      // ====== LOGIN FUNCTIONS ======
+      function checkLoginStatus() {
+        const loggedIn = sessionStorage.getItem('adminLoggedIn');
+        
+        if (loggedIn === 'true') {
+          document.body.className = 'app-page';
+          showApp();
+        } else {
+          document.body.className = 'login-page';
+          showLogin();
+        }
+      }
+
+      function handleLogin() {
+        const username = document.getElementById('login_username').value;
+        const password = document.getElementById('login_password').value;
+
+        // Simple authentication (in production, use Firebase Auth)
+        const validCredentials = [
+          { user: 'Admin', pass: '290192' },
+          { user: 'admin', pass: 'admin123' }
+        ];
+        
+        const isValid = validCredentials.some(cred => 
+          cred.user === username && cred.pass === password
+        );
+        
+        if (isValid) {
+          sessionStorage.setItem('adminLoggedIn', 'true');
+          document.body.className = 'app-page';
+          showApp();
+          showNotification('success', 'Login Berhasil', 'Selamat datang di Portal Admin CBT 2026');
+        } else {
+          showNotification('error', 'Login Gagal', 'Username atau Password salah!');
+          document.getElementById('login_password').value = '';
+          document.getElementById('login_password').focus();
+        }
+      }
+
+      function handleLogout() {
+        showConfirmation(
+          'Konfirmasi Logout',
+          'Apakah Anda yakin ingin keluar dari sistem?',
+          function() {
+            sessionStorage.removeItem('adminLoggedIn');
+            document.body.className = 'login-page';
+            showLogin();
+            showNotification('success', 'Logout Berhasil', 'Anda telah berhasil logout');
+          }
+        );
+      }
+
+      function showApp() {
+        const loginSection = document.getElementById('login-section');
+        const appShell = document.getElementById('app-shell');
+        
+        loginSection.style.display = 'none';
+        appShell.style.display = 'block';
+        
+        // Initialize data
+        loadPeserta();
+        loadAgenda();
+        loadAgendaListForPeserta();
+        loadAgendaListForMapelDropdown();
+        loadAgendaListForBankSoalDropdown();
+        loadAgendaListForCetakKartuDropdown();
+        loadMonitoring();
+        loadJawaban();
+        showTab('peserta');
+      }
+
+      function showLogin() {
+        const loginSection = document.getElementById('login-section');
+        const appShell = document.getElementById('app-shell');
+        
+        loginSection.style.display = 'flex';
+        appShell.style.display = 'none';
+        
+        // Reset form
+        document.getElementById('login_username').value = '';
+        document.getElementById('login_password').value = '';
+      }
+
+      // ====== TAB FUNCTIONS ======
       function showTab(tab) {
         const tabs = ['peserta', 'agenda', 'mapel', 'banksoal', 'monitoring', 'jawaban', 'cetakkartu'];
         tabs.forEach(name => {
@@ -2108,7 +2221,7 @@ function showLogin() {
         });
       }
 
-      // ====== UTIL PESERTA: NIS dari No. WA ======
+      // ====== PESERTA FUNCTIONS ======
       function generateNISFromNoWA(noWa) {
         if (!noWa) return '';
         let digits = noWa.replace(/\D/g, '');
@@ -2126,101 +2239,9 @@ function showLogin() {
         document.getElementById('NIS_Username').value = nis;
       }
 
-      // ====== UTIL AGENDA: Token ======
-      function generateRandomToken() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        const length = 6 + Math.floor(Math.random() * 3);
-        let token = '';
-        for (let i = 0; i < length; i++) {
-          token += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return token;
-      }
-
-      function generateTokenUjian() {
-        const token = generateRandomToken();
-        document.getElementById('Token_Ujian').value = token;
-      }
-
-      // ====== LOAD AGENDA dropdowns ======
-      function loadAgendaListForPeserta() {
-        const select = document.getElementById('ID_Agenda_Peserta');
-        agendaRef.on('value', snapshot => {
-          const currentValue = select.value;
-          select.innerHTML = '<option value="">-- Pilih Agenda --</option>';
-          snapshot.forEach(childSnap => {
-            const id = childSnap.key;
-            const ag = childSnap.val();
-            const opt = document.createElement('option');
-            opt.value = id;
-            let label = ag.Agenda_Ujian || id;
-            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
-            opt.textContent = label;
-            select.appendChild(opt);
-          });
-          if (currentValue) select.value = currentValue;
-        });
-      }
-
-      function loadAgendaListForMapelDropdown() {
-        const select = document.getElementById('Mapel_Agenda_Select');
-        agendaRef.on('value', snapshot => {
-          const currentValue = select.value;
-          select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
-          snapshot.forEach(childSnap => {
-            const id = childSnap.key;
-            const ag = childSnap.val();
-            const opt = document.createElement('option');
-            opt.value = id;
-            let label = ag.Agenda_Ujian || id;
-            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
-            opt.textContent = label;
-            select.appendChild(opt);
-          });
-          if (currentValue) select.value = currentValue;
-        });
-      }
-
-      function loadAgendaListForBankSoalDropdown() {
-        const select = document.getElementById('Bank_Agenda_Select');
-        agendaRef.on('value', snapshot => {
-          const currentValue = select.value;
-          select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
-          snapshot.forEach(childSnap => {
-            const id = childSnap.key;
-            const ag = childSnap.val();
-            const opt = document.createElement('option');
-            opt.value = id;
-            let label = ag.Agenda_Ujian || id;
-            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
-            opt.textContent = label;
-            select.appendChild(opt);
-          });
-          if (currentValue) select.value = currentValue;
-        });
-      }
-
-      function loadAgendaListForCetakKartuDropdown() {
-        const select = document.getElementById('CetakKartu_Agenda_Select');
-        agendaRef.on('value', snapshot => {
-          const currentValue = select.value;
-          select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
-          snapshot.forEach(childSnap => {
-            const id = childSnap.key;
-            const ag = childSnap.val();
-            const opt = document.createElement('option');
-            opt.value = id;
-            let label = ag.Agenda_Ujian || id;
-            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
-            opt.textContent = label;
-            select.appendChild(opt);
-          });
-          if (currentValue) select.value = currentValue;
-        });
-      }
-
-      // ====== CRUD PESERTA ======
       function loadPeserta() {
+        if (!pesertaRef) return;
+        
         pesertaRef.on('value', snapshot => {
           const tbody = document.querySelector('#pesertaTable tbody');
           tbody.innerHTML = '';
@@ -2259,11 +2280,9 @@ function showLogin() {
             `;
             tbody.appendChild(tr);
           });
-          
-          // Inisialisasi tombol show/hide password di tabel
-          initializePasswordToggles();
-          
-        }, error => alert('Gagal membaca data peserta: ' + error.message));
+        }, error => {
+          showNotification('error', 'Error', 'Gagal membaca data peserta: ' + error.message);
+        });
       }
 
       function openPesertaModalForCreate() {
@@ -2272,22 +2291,27 @@ function showLogin() {
       }
 
       function savePeserta() {
-        const firebaseId    = document.getElementById('firebaseId').value;
-        const Nama_Peserta  = document.getElementById('Nama_Peserta').value.trim();
-        const Password      = document.getElementById('Password').value.trim();
-        const Jenjang_Studi = document.getElementById('Jenjang_Studi').value.trim();
-        const Kelas         = document.getElementById('Kelas').value.trim();
-        const Asal_Sekolah  = document.getElementById('Asal_Sekolah').value.trim();
-        const No_WA_Peserta = document.getElementById('No_WA_Peserta').value.trim();
-        const No_WA_Ortu    = document.getElementById('No_WA_Ortu').value.trim();
-        const ID_Agenda     = document.getElementById('ID_Agenda_Peserta').value.trim();
+        if (!pesertaRef) {
+          showNotification('error', 'Error', 'Firebase tidak terinisialisasi');
+          return;
+        }
 
-        const NIS_Username  = generateNISFromNoWA(No_WA_Peserta);
+        const firebaseId = document.getElementById('firebaseId').value;
+        const Nama_Peserta = document.getElementById('Nama_Peserta').value.trim();
+        const Password = document.getElementById('Password').value.trim();
+        const Jenjang_Studi = document.getElementById('Jenjang_Studi').value.trim();
+        const Kelas = document.getElementById('Kelas').value.trim();
+        const Asal_Sekolah = document.getElementById('Asal_Sekolah').value.trim();
+        const No_WA_Peserta = document.getElementById('No_WA_Peserta').value.trim();
+        const No_WA_Ortu = document.getElementById('No_WA_Ortu').value.trim();
+        const ID_Agenda = document.getElementById('ID_Agenda_Peserta').value.trim();
+
+        const NIS_Username = generateNISFromNoWA(No_WA_Peserta);
         document.getElementById('NIS_Username').value = NIS_Username;
 
         if (!Nama_Peserta || !Password || !Jenjang_Studi || !Kelas ||
             !Asal_Sekolah || !No_WA_Peserta || !No_WA_Ortu || !ID_Agenda || !NIS_Username) {
-          alert('Mohon lengkapi semua field dan pastikan No. WA Peserta valid.');
+          showNotification('error', 'Validasi Error', 'Mohon lengkapi semua field');
           return;
         }
 
@@ -2308,229 +2332,110 @@ function showLogin() {
           data.ID_Peserta = existingId;
           pesertaRef.child(firebaseId).update(data)
             .then(() => {
+              showNotification('success', 'Berhasil', 'Data peserta berhasil diperbarui');
               resetForm();
               hideModal('modal-peserta');
             })
-            .catch(err => alert('Gagal update peserta: ' + err.message));
+            .catch(err => {
+              showNotification('error', 'Gagal', 'Gagal update peserta: ' + err.message);
+            });
         } else {
           const newRef = pesertaRef.push();
           const newId = newRef.key;
           data.ID_Peserta = newId;
           newRef.set(data)
             .then(() => {
+              showNotification('success', 'Berhasil', 'Data peserta berhasil disimpan');
               document.getElementById('ID_Peserta').value = newId;
               resetForm();
               hideModal('modal-peserta');
             })
-            .catch(err => alert('Gagal menyimpan peserta: ' + err.message));
+            .catch(err => {
+              showNotification('error', 'Gagal', 'Gagal menyimpan peserta: ' + err.message);
+            });
         }
       }
 
       function editPeserta(firebaseId) {
+        if (!pesertaRef) return;
+        
         pesertaRef.child(firebaseId).once('value')
           .then(snapshot => {
             const data = snapshot.val();
-            document.getElementById('firebaseId').value       = firebaseId;
-            document.getElementById('ID_Peserta').value       = data.ID_Peserta || '';
-            document.getElementById('NIS_Username').value     = data.NIS_Username || '';
-            document.getElementById('Nama_Peserta').value     = data.Nama_Peserta || '';
-            document.getElementById('Password').value         = data.Password || '';
-            document.getElementById('Password').type          = 'password';
-            document.getElementById('Jenjang_Studi').value    = data.Jenjang_Studi || '';
-            document.getElementById('Kelas').value            = data.Kelas || '';
-            document.getElementById('Asal_Sekolah').value     = data.Asal_Sekolah || '';
-            document.getElementById('No_WA_Peserta').value    = data.No_WA_Peserta || '';
-            document.getElementById('No_WA_Ortu').value       = data.No_WA_Ortu || '';
-            document.getElementById('ID_Agenda_Peserta').value= data.ID_Agenda || '';
-            
-            // Reset tombol show/hide password
-            const toggleBtn = document.querySelector('#Password + .toggle-password');
-            if (toggleBtn) {
-              toggleBtn.textContent = '👁️';
-            }
+            document.getElementById('firebaseId').value = firebaseId;
+            document.getElementById('ID_Peserta').value = data.ID_Peserta || '';
+            document.getElementById('NIS_Username').value = data.NIS_Username || '';
+            document.getElementById('Nama_Peserta').value = data.Nama_Peserta || '';
+            document.getElementById('Password').value = data.Password || '';
+            document.getElementById('Jenjang_Studi').value = data.Jenjang_Studi || '';
+            document.getElementById('Kelas').value = data.Kelas || '';
+            document.getElementById('Asal_Sekolah').value = data.Asal_Sekolah || '';
+            document.getElementById('No_WA_Peserta').value = data.No_WA_Peserta || '';
+            document.getElementById('No_WA_Ortu').value = data.No_WA_Ortu || '';
+            document.getElementById('ID_Agenda_Peserta').value = data.ID_Agenda || '';
             
             showModal('modal-peserta');
           })
-          .catch(err => alert('Gagal mengambil data peserta: ' + err.message));
+          .catch(err => {
+            showNotification('error', 'Gagal', 'Gagal mengambil data peserta: ' + err.message);
+          });
       }
 
       function deletePeserta(firebaseId) {
-        if (!confirm('Yakin ingin menghapus data peserta ini?')) return;
-        pesertaRef.child(firebaseId).remove()
-          .catch(err => alert('Gagal menghapus peserta: ' + err.message));
+        showConfirmation(
+          'Hapus Peserta',
+          'Apakah Anda yakin ingin menghapus data peserta ini?',
+          function() {
+            pesertaRef.child(firebaseId).remove()
+              .then(() => {
+                showNotification('success', 'Berhasil', 'Data peserta berhasil dihapus');
+              })
+              .catch(err => {
+                showNotification('error', 'Gagal', 'Gagal menghapus peserta: ' + err.message);
+              });
+          }
+        );
       }
 
       function resetForm() {
-        document.getElementById('firebaseId').value   = '';
+        document.getElementById('firebaseId').value = '';
         document.getElementById('pesertaForm').reset();
-        document.getElementById('ID_Peserta').value   = '';
+        document.getElementById('ID_Peserta').value = '';
         document.getElementById('NIS_Username').value = '';
-        document.getElementById('Password').type = 'password';
-        
-        // Reset tombol show/hide password
-        const toggleBtn = document.querySelector('#Password + .toggle-password');
-        if (toggleBtn) {
-          toggleBtn.textContent = '👁️';
+      }
+
+      // ====== AGENDA FUNCTIONS ======
+      function generateRandomToken() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const length = 6 + Math.floor(Math.random() * 3);
+        let token = '';
+        for (let i = 0; i < length; i++) {
+          token += chars.charAt(Math.floor(Math.random() * chars.length));
         }
+        return token;
       }
 
-      function exportPesertaToCsv() {
-        pesertaRef.once('value')
-          .then(snapshot => {
-            const rows = [];
-            const header = [
-              'ID_Peserta',
-              'NIS_Username',
-              'Nama_Peserta',
-              'Password',
-              'Jenjang_Studi',
-              'Kelas',
-              'Asal_Sekolah',
-              'No_WA_Peserta',
-              'No_WA_Ortu',
-              'ID_Agenda'
-            ];
-            rows.push(header);
-
-            snapshot.forEach(childSnap => {
-              const d = childSnap.val() || {};
-              rows.push([
-                d.ID_Peserta || childSnap.key,
-                d.NIS_Username || '',
-                d.Nama_Peserta || '',
-                d.Password || '',
-                d.Jenjang_Studi || '',
-                d.Kelas || '',
-                d.Asal_Sekolah || '',
-                d.No_WA_Peserta || '',
-                d.No_WA_Ortu || '',
-                d.ID_Agenda || ''
-              ]);
-            });
-
-            if (rows.length <= 1) {
-              alert('Tidak ada data peserta untuk diexport.');
-              return;
-            }
-            const csv = rows.map(r =>
-              r.map(v => String(v).replace(/"/g, '""')).map(v => `"${v}"`).join(',')
-            ).join('\r\n');
-            downloadCsvFile('peserta_export.csv', csv);
-          })
-          .catch(err => alert('Gagal export peserta: ' + err.message));
+      function generateTokenUjian() {
+        const token = generateRandomToken();
+        document.getElementById('Token_Ujian').value = token;
       }
 
-      function downloadTemplatePeserta() {
-        const header = [
-          'Nama_Peserta',
-          'Password',
-          'Jenjang_Studi',
-          'Kelas',
-          'Asal_Sekolah',
-          'No_WA_Peserta',
-          'No_WA_Ortu',
-          'ID_Agenda'
-        ];
-        const example = [
-          'Budi Setiawan',
-          'pass123',
-          'SMP',
-          '8A',
-          'SMPN 1 Contoh',
-          '08123456789',
-          '081298765432',
-          'ID_AGENDA_CONTOH'
-        ];
-        const csv = [
-          header.join(','),
-          example.map(v => String(v).replace(/"/g, '""')).join(',')
-        ].join('\r\n');
-        downloadCsvFile('template_peserta.csv', csv);
-      }
-
-      function importPesertaFromFile() {
-        const input = document.getElementById('file_import_peserta');
-        const file = input.files[0];
-        if (!file) {
-          alert('Pilih file CSV terlebih dahulu.');
-          return;
-        }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const text = e.target.result;
-          const parsed = parseCsv(text);
-          if (!parsed.rows.length) {
-            alert('File kosong atau format tidak sesuai.');
-            return;
-          }
-          const headers = parsed.headers;
-          const required = [
-            'Nama_Peserta',
-            'Password',
-            'Jenjang_Studi',
-            'Kelas',
-            'Asal_Sekolah',
-            'No_WA_Peserta',
-            'No_WA_Ortu',
-            'ID_Agenda'
-          ];
-          for (const r of required) {
-            if (!headers.includes(r)) {
-              alert('Header CSV harus mengandung kolom: ' + required.join(', '));
-              return;
-            }
-          }
-          const promises = [];
-          let inserted = 0;
-          parsed.rows.forEach(row => {
-            if (!row.Nama_Peserta || !row.Password || !row.No_WA_Peserta || !row.ID_Agenda) return;
-            const NIS_Username = generateNISFromNoWA(row.No_WA_Peserta);
-            if (!NIS_Username) return;
-            const newRef = pesertaRef.push();
-            const newId = newRef.key;
-            const data = {
-              ID_Peserta: newId,
-              NIS_Username,
-              Nama_Peserta: row.Nama_Peserta,
-              Password: row.Password,
-              Jenjang_Studi: row.Jenjang_Studi || '',
-              Kelas: row.Kelas || '',
-              Asal_Sekolah: row.Asal_Sekolah || '',
-              No_WA_Peserta: row.No_WA_Peserta,
-              No_WA_Ortu: row.No_WA_Ortu || '',
-              ID_Agenda: row.ID_Agenda
-            };
-            inserted++;
-            promises.push(newRef.set(data));
-          });
-          if (!inserted) {
-            alert('Tidak ada baris valid untuk diimport.');
-            return;
-          }
-          Promise.all(promises)
-            .then(() => {
-              alert('Import peserta selesai. Baris berhasil ditambahkan: ' + inserted);
-              input.value = '';
-              hideModal('modal-import-peserta');
-            })
-            .catch(err => alert('Terjadi kesalahan saat import peserta: ' + err.message));
-        };
-        reader.onerror = err => alert('Gagal membaca file: ' + err);
-        reader.readAsText(file);
-      }
-
-      // ====== CRUD AGENDA ======
       function loadAgenda() {
+        if (!agendaRef) return;
+        
         agendaRef.on('value', snapshot => {
           const tbody = document.querySelector('#agendaTable tbody');
           tbody.innerHTML = '';
           agendaCache = {};
+          
           snapshot.forEach(childSnap => {
             const firebaseId = childSnap.key;
             const data = childSnap.val();
             agendaCache[firebaseId] = data;
-            const mulai   = data.TglJam_Mulai   ? data.TglJam_Mulai.replace('T', ' ')   : '';
+            
+            const mulai = data.TglJam_Mulai ? data.TglJam_Mulai.replace('T', ' ') : '';
             const selesai = data.TglJam_Selesai ? data.TglJam_Selesai.replace('T', ' ') : '';
+            
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td>${data.Agenda_Ujian || ''}</td>
@@ -2547,7 +2452,101 @@ function showLogin() {
             `;
             tbody.appendChild(tr);
           });
-        }, error => alert('Gagal membaca data agenda: ' + error.message));
+        }, error => {
+          showNotification('error', 'Error', 'Gagal membaca data agenda: ' + error.message);
+        });
+      }
+
+      function loadAgendaListForPeserta() {
+        const select = document.getElementById('ID_Agenda_Peserta');
+        if (!agendaRef) return;
+        
+        agendaRef.on('value', snapshot => {
+          const currentValue = select.value;
+          select.innerHTML = '<option value="">-- Pilih Agenda --</option>';
+          
+          snapshot.forEach(childSnap => {
+            const id = childSnap.key;
+            const ag = childSnap.val();
+            const opt = document.createElement('option');
+            opt.value = id;
+            let label = ag.Agenda_Ujian || id;
+            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.textContent = label;
+            select.appendChild(opt);
+          });
+          
+          if (currentValue) select.value = currentValue;
+        });
+      }
+
+      function loadAgendaListForMapelDropdown() {
+        const select = document.getElementById('Mapel_Agenda_Select');
+        if (!agendaRef) return;
+        
+        agendaRef.on('value', snapshot => {
+          const currentValue = select.value;
+          select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
+          
+          snapshot.forEach(childSnap => {
+            const id = childSnap.key;
+            const ag = childSnap.val();
+            const opt = document.createElement('option');
+            opt.value = id;
+            let label = ag.Agenda_Ujian || id;
+            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.textContent = label;
+            select.appendChild(opt);
+          });
+          
+          if (currentValue) select.value = currentValue;
+        });
+      }
+
+      function loadAgendaListForBankSoalDropdown() {
+        const select = document.getElementById('Bank_Agenda_Select');
+        if (!agendaRef) return;
+        
+        agendaRef.on('value', snapshot => {
+          const currentValue = select.value;
+          select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
+          
+          snapshot.forEach(childSnap => {
+            const id = childSnap.key;
+            const ag = childSnap.val();
+            const opt = document.createElement('option');
+            opt.value = id;
+            let label = ag.Agenda_Ujian || id;
+            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.textContent = label;
+            select.appendChild(opt);
+          });
+          
+          if (currentValue) select.value = currentValue;
+        });
+      }
+
+      function loadAgendaListForCetakKartuDropdown() {
+        const select = document.getElementById('CetakKartu_Agenda_Select');
+        if (!agendaRef) return;
+        
+        agendaRef.on('value', snapshot => {
+          const currentValue = select.value;
+          select.innerHTML = '<option value="">-- Pilih Agenda Ujian dulu --</option>';
+          
+          snapshot.forEach(childSnap => {
+            const id = childSnap.key;
+            const ag = childSnap.val();
+            const opt = document.createElement('option');
+            opt.value = id;
+            let label = ag.Agenda_Ujian || id;
+            if (ag.Jenjang_Studi) label += ' (' + ag.Jenjang_Studi + ')';
+            opt.textContent = label;
+            select.appendChild(opt);
+          });
+          
+          if (currentValue) select.value = currentValue;
+        });
       }
 
       function openAgendaModalForCreate() {
@@ -2556,17 +2555,22 @@ function showLogin() {
       }
 
       function saveAgenda() {
+        if (!agendaRef) {
+          showNotification('error', 'Error', 'Firebase tidak terinisialisasi');
+          return;
+        }
+
         const firebaseAgendaId = document.getElementById('firebaseAgendaId').value;
-        const Agenda_Ujian     = document.getElementById('Agenda_Ujian').value.trim();
-        const Deskripsi_Ujian  = document.getElementById('Deskripsi_Ujian').value.trim();
-        const Jenjang_Studi    = document.getElementById('Jenjang_Studi_Agenda').value.trim();
-        const Jenis_Tes        = document.getElementById('Jenis_Tes').value.trim();
-        const TglJam_Mulai     = document.getElementById('TglJam_Mulai').value;
-        const TglJam_Selesai   = document.getElementById('TglJam_Selesai').value;
-        let   Token_Ujian      = document.getElementById('Token_Ujian').value.trim().toUpperCase();
+        const Agenda_Ujian = document.getElementById('Agenda_Ujian').value.trim();
+        const Deskripsi_Ujian = document.getElementById('Deskripsi_Ujian').value.trim();
+        const Jenjang_Studi = document.getElementById('Jenjang_Studi_Agenda').value.trim();
+        const Jenis_Tes = document.getElementById('Jenis_Tes').value.trim();
+        const TglJam_Mulai = document.getElementById('TglJam_Mulai').value;
+        const TglJam_Selesai = document.getElementById('TglJam_Selesai').value;
+        let Token_Ujian = document.getElementById('Token_Ujian').value.trim().toUpperCase();
 
         if (!Agenda_Ujian || !Deskripsi_Ujian || !Jenjang_Studi || !Jenis_Tes || !TglJam_Mulai || !TglJam_Selesai) {
-          alert('Mohon lengkapi semua field agenda ujian.');
+          showNotification('error', 'Validasi Error', 'Mohon lengkapi semua field agenda ujian');
           return;
         }
 
@@ -2591,56 +2595,77 @@ function showLogin() {
           data.ID_Agenda = existingId;
           agendaRef.child(firebaseAgendaId).update(data)
             .then(() => {
+              showNotification('success', 'Berhasil', 'Agenda ujian berhasil diperbarui');
               resetAgendaForm();
               hideModal('modal-agenda');
             })
-            .catch(err => alert('Gagal update agenda: ' + err.message));
+            .catch(err => {
+              showNotification('error', 'Gagal', 'Gagal update agenda: ' + err.message);
+            });
         } else {
           const newRef = agendaRef.push();
-          const newId  = newRef.key;
+          const newId = newRef.key;
           data.ID_Agenda = newId;
           newRef.set(data)
             .then(() => {
+              showNotification('success', 'Berhasil', 'Agenda ujian berhasil disimpan');
               document.getElementById('ID_Agenda_Agenda').value = newId;
               resetAgendaForm();
               hideModal('modal-agenda');
             })
-            .catch(err => alert('Gagal menyimpan agenda: ' + err.message));
+            .catch(err => {
+              showNotification('error', 'Gagal', 'Gagal menyimpan agenda: ' + err.message);
+            });
         }
       }
 
       function editAgenda(firebaseAgendaId) {
+        if (!agendaRef) return;
+        
         agendaRef.child(firebaseAgendaId).once('value')
           .then(snapshot => {
             const data = snapshot.val();
-            document.getElementById('firebaseAgendaId').value  = firebaseAgendaId;
-            document.getElementById('ID_Agenda_Agenda').value  = data.ID_Agenda || '';
-            document.getElementById('Agenda_Ujian').value      = data.Agenda_Ujian || '';
-            document.getElementById('Deskripsi_Ujian').value   = data.Deskripsi_Ujian || '';
+            document.getElementById('firebaseAgendaId').value = firebaseAgendaId;
+            document.getElementById('ID_Agenda_Agenda').value = data.ID_Agenda || '';
+            document.getElementById('Agenda_Ujian').value = data.Agenda_Ujian || '';
+            document.getElementById('Deskripsi_Ujian').value = data.Deskripsi_Ujian || '';
             document.getElementById('Jenjang_Studi_Agenda').value = data.Jenjang_Studi || '';
-            document.getElementById('Jenis_Tes').value         = data.Jenis_Tes || '';
-            document.getElementById('TglJam_Mulai').value      = data.TglJam_Mulai || '';
-            document.getElementById('TglJam_Selesai').value    = data.TglJam_Selesai || '';
-            document.getElementById('Token_Ujian').value       = data.Token_Ujian || '';
+            document.getElementById('Jenis_Tes').value = data.Jenis_Tes || '';
+            document.getElementById('TglJam_Mulai').value = data.TglJam_Mulai || '';
+            document.getElementById('TglJam_Selesai').value = data.TglJam_Selesai || '';
+            document.getElementById('Token_Ujian').value = data.Token_Ujian || '';
+            
             showModal('modal-agenda');
           })
-          .catch(err => alert('Gagal mengambil data agenda: ' + err.message));
+          .catch(err => {
+            showNotification('error', 'Gagal', 'Gagal mengambil data agenda: ' + err.message);
+          });
       }
 
       function deleteAgenda(firebaseAgendaId) {
-        if (!confirm('Yakin ingin menghapus agenda ujian ini?')) return;
-        agendaRef.child(firebaseAgendaId).remove()
-          .catch(err => alert('Gagal menghapus agenda: ' + err.message));
+        showConfirmation(
+          'Hapus Agenda',
+          'Apakah Anda yakin ingin menghapus agenda ujian ini?',
+          function() {
+            agendaRef.child(firebaseAgendaId).remove()
+              .then(() => {
+                showNotification('success', 'Berhasil', 'Agenda ujian berhasil dihapus');
+              })
+              .catch(err => {
+                showNotification('error', 'Gagal', 'Gagal menghapus agenda: ' + err.message);
+              });
+          }
+        );
       }
 
       function resetAgendaForm() {
-        document.getElementById('firebaseAgendaId').value   = '';
+        document.getElementById('firebaseAgendaId').value = '';
         document.getElementById('agendaForm').reset();
-        document.getElementById('ID_Agenda_Agenda').value   = '';
-        document.getElementById('Token_Ujian').value        = '';
+        document.getElementById('ID_Agenda_Agenda').value = '';
+        document.getElementById('Token_Ujian').value = '';
       }
 
-      // ====== CRUD MAPEL ======
+      // ====== MATA PELAJARAN FUNCTIONS ======
       function onChangeAgendaMapel() {
         currentAgendaForMapel = document.getElementById('Mapel_Agenda_Select').value;
         document.getElementById('ID_Agenda_Mapel').value = currentAgendaForMapel || '';
@@ -2651,13 +2676,16 @@ function showLogin() {
       function loadMapelTable() {
         const tbody = document.querySelector('#mapelTable tbody');
         tbody.innerHTML = '';
-        if (!currentAgendaForMapel) return;
+        
+        if (!currentAgendaForMapel || !mapelRef) return;
+        
         mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForMapel).once('value')
           .then(snapshot => {
             snapshot.forEach(childSnap => {
               const firebaseId = childSnap.key;
               const data = childSnap.val();
               const isSiap = data.Status_Mapel === 'Siap';
+              
               const tr = document.createElement('tr');
               tr.innerHTML = `
                 <td>${data.Nama_Mata_Pelajaran || ''}</td>
@@ -2678,12 +2706,14 @@ function showLogin() {
               tbody.appendChild(tr);
             });
           })
-          .catch(err => alert('Gagal membaca data mapel: ' + err.message));
+          .catch(err => {
+            showNotification('error', 'Error', 'Gagal membaca data mapel: ' + err.message);
+          });
       }
 
       function openMapelModalForCreate() {
         if (!currentAgendaForMapel) {
-          alert('Pilih Agenda Ujian terlebih dahulu.');
+          showNotification('error', 'Error', 'Pilih Agenda Ujian terlebih dahulu');
           return;
         }
         resetMapelForm(false);
@@ -2691,21 +2721,29 @@ function showLogin() {
       }
 
       function saveMapel() {
-        const firebaseMapelId = document.getElementById('firebaseMapelId').value;
-        const ID_Agenda       = currentAgendaForMapel;
-        if (!ID_Agenda) {
-          alert('Pilih Agenda Ujian terlebih dahulu.');
+        if (!mapelRef) {
+          showNotification('error', 'Error', 'Firebase tidak terinisialisasi');
           return;
         }
+
+        const firebaseMapelId = document.getElementById('firebaseMapelId').value;
+        const ID_Agenda = currentAgendaForMapel;
+        
+        if (!ID_Agenda) {
+          showNotification('error', 'Error', 'Pilih Agenda Ujian terlebih dahulu');
+          return;
+        }
+        
         const Nama_Mata_Pelajaran = document.getElementById('Nama_Mata_Pelajaran').value.trim();
-        const Jumlah_Soal         = document.getElementById('Jumlah_Soal').value.trim();
-        const Durasi_Ujian        = document.getElementById('Durasi_Ujian').value.trim();
-        let   Status_Mapel        = document.getElementById('Status_Mapel').value || 'Draft';
+        const Jumlah_Soal = document.getElementById('Jumlah_Soal').value.trim();
+        const Durasi_Ujian = document.getElementById('Durasi_Ujian').value.trim();
+        let Status_Mapel = document.getElementById('Status_Mapel').value || 'Draft';
 
         if (!Nama_Mata_Pelajaran || !Jumlah_Soal || !Durasi_Ujian) {
-          alert('Mohon lengkapi Nama Mata Pelajaran, Jumlah Soal, dan Durasi Ujian.');
+          showNotification('error', 'Validasi Error', 'Mohon lengkapi semua field mata pelajaran');
           return;
         }
+        
         const data = {
           ID_Agenda,
           Nama_Mata_Pelajaran,
@@ -2713,68 +2751,97 @@ function showLogin() {
           Durasi_Ujian,
           Status_Mapel
         };
+        
         if (firebaseMapelId) {
           const existingId = document.getElementById('ID_Mapel_Mapel').value || firebaseMapelId;
           data.ID_Mapel = existingId;
           mapelRef.child(firebaseMapelId).update(data)
             .then(() => {
+              showNotification('success', 'Berhasil', 'Mata pelajaran berhasil diperbarui');
               resetMapelForm(false);
               loadMapelTable();
               hideModal('modal-mapel');
             })
-            .catch(err => alert('Gagal update mapel: ' + err.message));
+            .catch(err => {
+              showNotification('error', 'Gagal', 'Gagal update mapel: ' + err.message);
+            });
         } else {
           const newRef = mapelRef.push();
-          const newId  = newRef.key;
+          const newId = newRef.key;
           data.ID_Mapel = newId;
           newRef.set(data)
             .then(() => {
+              showNotification('success', 'Berhasil', 'Mata pelajaran berhasil disimpan');
               document.getElementById('ID_Mapel_Mapel').value = newId;
               resetMapelForm(false);
               loadMapelTable();
               hideModal('modal-mapel');
             })
-            .catch(err => alert('Gagal menyimpan mapel: ' + err.message));
+            .catch(err => {
+              showNotification('error', 'Gagal', 'Gagal menyimpan mapel: ' + err.message);
+            });
         }
       }
 
       function editMapel(firebaseMapelId) {
+        if (!mapelRef) return;
+        
         mapelRef.child(firebaseMapelId).once('value')
           .then(snapshot => {
             const data = snapshot.val();
-            document.getElementById('firebaseMapelId').value   = firebaseMapelId;
+            document.getElementById('firebaseMapelId').value = firebaseMapelId;
             currentAgendaForMapel = data.ID_Agenda || '';
             document.getElementById('Mapel_Agenda_Select').value = currentAgendaForMapel;
-            document.getElementById('ID_Agenda_Mapel').value  = currentAgendaForMapel;
-            document.getElementById('ID_Mapel_Mapel').value   = data.ID_Mapel || '';
+            document.getElementById('ID_Agenda_Mapel').value = currentAgendaForMapel;
+            document.getElementById('ID_Mapel_Mapel').value = data.ID_Mapel || '';
             document.getElementById('Nama_Mata_Pelajaran').value = data.Nama_Mata_Pelajaran || '';
-            document.getElementById('Jumlah_Soal').value      = data.Jumlah_Soal || '';
-            document.getElementById('Durasi_Ujian').value     = data.Durasi_Ujian || '';
-            document.getElementById('Status_Mapel').value     = data.Status_Mapel || 'Draft';
+            document.getElementById('Jumlah_Soal').value = data.Jumlah_Soal || '';
+            document.getElementById('Durasi_Ujian').value = data.Durasi_Ujian || '';
+            document.getElementById('Status_Mapel').value = data.Status_Mapel || 'Draft';
+            
             showModal('modal-mapel');
           })
-          .catch(err => alert('Gagal mengambil data mapel: ' + err.message));
+          .catch(err => {
+            showNotification('error', 'Gagal', 'Gagal mengambil data mapel: ' + err.message);
+          });
       }
 
       function deleteMapel(firebaseMapelId) {
-        if (!confirm('Yakin ingin menghapus mata pelajaran ini?')) return;
-        mapelRef.child(firebaseMapelId).remove()
-          .then(loadMapelTable)
-          .catch(err => alert('Gagal menghapus mapel: ' + err.message));
+        showConfirmation(
+          'Hapus Mata Pelajaran',
+          'Apakah Anda yakin ingin menghapus mata pelajaran ini?',
+          function() {
+            mapelRef.child(firebaseMapelId).remove()
+              .then(() => {
+                showNotification('success', 'Berhasil', 'Mata pelajaran berhasil dihapus');
+                loadMapelTable();
+              })
+              .catch(err => {
+                showNotification('error', 'Gagal', 'Gagal menghapus mapel: ' + err.message);
+              });
+          }
+        );
       }
 
       function toggleStatusMapel(firebaseMapelId, isSiap) {
+        if (!mapelRef) return;
+        
         const newStatus = isSiap ? 'Siap' : 'Draft';
         mapelRef.child(firebaseMapelId).update({ Status_Mapel: newStatus })
-          .then(loadMapelTable)
-          .catch(err => alert('Gagal mengubah status mapel: ' + err.message));
+          .then(() => {
+            loadMapelTable();
+          })
+          .catch(err => {
+            showNotification('error', 'Gagal', 'Gagal mengubah status mapel: ' + err.message);
+          });
       }
 
       function resetMapelForm(resetAgenda = true) {
         document.getElementById('firebaseMapelId').value = '';
         document.getElementById('mapelForm').reset();
-        document.getElementById('ID_Mapel_Mapel').value  = '';
-        document.getElementById('Status_Mapel').value    = 'Draft';
+        document.getElementById('ID_Mapel_Mapel').value = '';
+        document.getElementById('Status_Mapel').value = 'Draft';
+        
         if (resetAgenda) {
           currentAgendaForMapel = '';
           document.getElementById('Mapel_Agenda_Select').value = '';
@@ -2784,12 +2851,13 @@ function showLogin() {
         }
       }
 
-      // ====== BANK SOAL ======
+      // ====== BANK SOAL FUNCTIONS ======
       function onTypeSoalChange() {
         const type = document.getElementById('Type_Soal').value;
-        const pg        = document.getElementById('group-pg');
-        const perny     = document.getElementById('group-pernyataan');
+        const pg = document.getElementById('group-pg');
+        const perny = document.getElementById('group-pernyataan');
         const pejodohan = document.getElementById('group-pejodohan');
+        
         pg.style.display = 'none';
         perny.style.display = 'none';
         pejodohan.style.display = 'none';
@@ -2804,7 +2872,8 @@ function showLogin() {
       }
 
       function setAutoNoSoal() {
-        if (!currentAgendaForBank) return;
+        if (!currentAgendaForBank || !bankSoalRef) return;
+        
         bankSoalRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
           .then(snapshot => {
             let maxNo = 0;
@@ -2824,13 +2893,14 @@ function showLogin() {
         currentAgendaForBank = document.getElementById('Bank_Agenda_Select').value;
         document.getElementById('ID_Agenda_Bank').value = currentAgendaForBank || '';
         currentMapelForBank = '';
-        document.getElementById('Bank_Mapel_Select').innerHTML =
-          '<option value="">-- Pilih Mata Pelajaran --</option>';
+        document.getElementById('Bank_Mapel_Select').innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
         document.getElementById('ID_Mapel_Bank').value = '';
         document.getElementById('Nama_Mata_Pelajaran_Bank').value = '';
         document.querySelector('#bankSoalTable tbody').innerHTML = '';
         document.getElementById('No_Soal').value = '';
-        if (!currentAgendaForBank) return;
+        
+        if (!currentAgendaForBank || !mapelRef) return;
+        
         const select = document.getElementById('Bank_Mapel_Select');
         mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
           .then(snapshot => {
@@ -2844,850 +2914,439 @@ function showLogin() {
               select.appendChild(opt);
             });
           })
-          .catch(err => alert('Gagal membaca mapel untuk agenda ini: ' + err.message));
+          .catch(err => {
+            showNotification('error', 'Error', 'Gagal membaca mapel: ' + err.message);
+          });
       }
 
       function onChangeMapelBankSoal() {
         const select = document.getElementById('Bank_Mapel_Select');
         currentMapelForBank = select.value;
         document.getElementById('ID_Mapel_Bank').value = currentMapelForBank || '';
+        
         let nama = '';
         if (select && select.selectedIndex >= 0) {
           const opt = select.options[select.selectedIndex];
           if (opt && opt.dataset) nama = opt.dataset.nama || '';
         }
+        
         document.getElementById('Nama_Mata_Pelajaran_Bank').value = nama;
         resetBankSoalForm(false);
         loadBankSoalTable();
       }
 
       function loadBankSoalTable() {
-  const tbody = document.querySelector('#bankSoalTable tbody');
-  tbody.innerHTML = '';
-  if (!currentMapelForBank) return;
-  
-  bankSoalRef.orderByChild('ID_Mapel').equalTo(currentMapelForBank).once('value')
-    .then(snapshot => {
-      const list = [];
-      snapshot.forEach(childSnap => {
-        const data = childSnap.val();
-        list.push({ id: childSnap.key, ...data });
-      });
-      list.sort((a, b) => Number(a.No_Soal || 0) - Number(b.No_Soal || 0));
-      
-      list.forEach(item => {
-        const tr = document.createElement('tr');
-        const pertSingkat = (item.Pertanyaan || '').length > 80
-          ? item.Pertanyaan.substring(0, 80) + '...'
-          : (item.Pertanyaan || '');
-        const gambarCell = item.Gambar
-          ? `<a href="${item.Gambar}" target="_blank">Lihat</a>` : '';
+        const tbody = document.querySelector('#bankSoalTable tbody');
+        tbody.innerHTML = '';
         
-        tr.innerHTML = `
-          <!-- TAMBAHKAN CHECKBOX DI SETIAP BARIS -->
-          <td><input type="checkbox" class="banksoal-checkbox" value="${item.id}"></td>
-          <td>${item.No_Soal || ''}</td>
-          <td>${item.Type_Soal || ''}</td>
-          <td>${pertSingkat}</td>
-          <td>${gambarCell}</td>
-          <td class="actions">
-            <button onclick="editSoal('${item.id}')">Edit</button>
-            <button onclick="deleteSoal('${item.id}')">Hapus</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    })
-    .catch(err => alert('Gagal membaca bank soal: ' + err.message));
-}
-
-// ====== FUNGSI CHECKBOX BANK SOAL ======
-
-function toggleSelectAllBankSoal(src) {
-  const cbs = document.querySelectorAll('.banksoal-checkbox');
-  cbs.forEach(cb => cb.checked = src.checked);
-}
-
-function selectAllBankSoal() {
-  const cbs = document.querySelectorAll('.banksoal-checkbox');
-  cbs.forEach(cb => cb.checked = true);
-  document.getElementById('bankSoal_select_all').checked = true;
-}
-
-function deselectAllBankSoal() {
-  const cbs = document.querySelectorAll('.banksoal-checkbox');
-  cbs.forEach(cb => cb.checked = false);
-  document.getElementById('bankSoal_select_all').checked = false;
-}
-
-function deleteSelectedBankSoal() {
-  const checked = document.querySelectorAll('.banksoal-checkbox:checked');
-  if (!checked.length) {
-    alert('Pilih soal yang akan dihapus.');
-    return;
-  }
-  
-  if (!confirm(`Yakin akan menghapus ${checked.length} soal terpilih?`)) return;
-  
-  const promises = [];
-  checked.forEach(cb => {
-    promises.push(bankSoalRef.child(cb.value).remove());
-  });
-  
-  Promise.all(promises)
-    .then(() => {
-      alert(`${checked.length} soal berhasil dihapus.`);
-      loadBankSoalTable();
-    })
-    .catch(err => {
-      alert('Gagal menghapus sebagian soal: ' + err.message);
-    });
-}
-
-// Fungsi untuk menghapus semua soal pada mapel yang sedang dipilih
-function deleteAllBankSoal() {
-  if (!currentMapelForBank) {
-    alert('Pilih mata pelajaran terlebih dahulu.');
-    return;
-  }
-  
-  if (!confirm('Yakin akan menghapus SEMUA soal pada mata pelajaran ini? Tindakan ini tidak dapat dibatalkan!')) return;
-  
-  bankSoalRef.orderByChild('ID_Mapel').equalTo(currentMapelForBank).once('value')
-    .then(snapshot => {
-      const promises = [];
-      let count = 0;
-      
-      snapshot.forEach(childSnap => {
-        promises.push(bankSoalRef.child(childSnap.key).remove());
-        count++;
-      });
-      
-      if (count === 0) {
-        alert('Tidak ada soal untuk dihapus.');
-        return;
+        if (!currentMapelForBank || !bankSoalRef) return;
+        
+        bankSoalRef.orderByChild('ID_Mapel').equalTo(currentMapelForBank).once('value')
+          .then(snapshot => {
+            const list = [];
+            snapshot.forEach(childSnap => {
+              const data = childSnap.val();
+              list.push({ id: childSnap.key, ...data });
+            });
+            
+            list.sort((a, b) => Number(a.No_Soal || 0) - Number(b.No_Soal || 0));
+            
+            list.forEach(item => {
+              const tr = document.createElement('tr');
+              const pertSingkat = (item.Pertanyaan || '').length > 80
+                ? item.Pertanyaan.substring(0, 80) + '...'
+                : (item.Pertanyaan || '');
+              
+              const gambarCell = item.Gambar
+                ? `<a href="${item.Gambar}" target="_blank" title="Lihat gambar">📷</a>` : '';
+              
+              tr.innerHTML = `
+                <td><input type="checkbox" class="banksoal-checkbox" value="${item.id}"></td>
+                <td>${item.No_Soal || ''}</td>
+                <td>${item.Type_Soal || ''}</td>
+                <td>${pertSingkat}</td>
+                <td>${gambarCell}</td>
+                <td class="actions">
+                  <button onclick="editSoal('${item.id}')">Edit</button>
+                  <button onclick="deleteSoal('${item.id}')">Hapus</button>
+                </td>
+              `;
+              tbody.appendChild(tr);
+            });
+          })
+          .catch(err => {
+            showNotification('error', 'Error', 'Gagal membaca bank soal: ' + err.message);
+          });
       }
-      
-      Promise.all(promises)
-        .then(() => {
-          alert(`${count} soal berhasil dihapus.`);
-          loadBankSoalTable();
-        })
-        .catch(err => {
-          alert('Gagal menghapus soal: ' + err.message);
-        });
-    })
-    .catch(err => alert('Gagal membaca data soal: ' + err.message));
-}
 
+      function toggleSelectAllBankSoal(src) {
+        const cbs = document.querySelectorAll('.banksoal-checkbox');
+        cbs.forEach(cb => cb.checked = src.checked);
+      }
 
+      function selectAllBankSoal() {
+        const cbs = document.querySelectorAll('.banksoal-checkbox');
+        cbs.forEach(cb => cb.checked = true);
+        document.getElementById('bankSoal_select_all').checked = true;
+      }
+
+      function deselectAllBankSoal() {
+        const cbs = document.querySelectorAll('.banksoal-checkbox');
+        cbs.forEach(cb => cb.checked = false);
+        document.getElementById('bankSoal_select_all').checked = false;
+      }
+
+      function deleteSelectedBankSoal() {
+        const checked = document.querySelectorAll('.banksoal-checkbox:checked');
+        if (!checked.length) {
+          showNotification('warning', 'Peringatan', 'Pilih soal yang akan dihapus');
+          return;
+        }
+        
+        showConfirmation(
+          'Hapus Soal Terpilih',
+          `Yakin akan menghapus ${checked.length} soal terpilih?`,
+          function() {
+            const promises = [];
+            checked.forEach(cb => {
+              promises.push(bankSoalRef.child(cb.value).remove());
+            });
+            
+            Promise.all(promises)
+              .then(() => {
+                showNotification('success', 'Berhasil', `${checked.length} soal berhasil dihapus`);
+                loadBankSoalTable();
+              })
+              .catch(err => {
+                showNotification('error', 'Gagal', 'Gagal menghapus soal: ' + err.message);
+              });
+          }
+        );
+      }
+
+      function deleteAllBankSoal() {
+        if (!currentMapelForBank) {
+          showNotification('error', 'Error', 'Pilih mata pelajaran terlebih dahulu');
+          return;
+        }
+        
+        showConfirmation(
+          'Hapus Semua Soal',
+          'Yakin akan menghapus SEMUA soal pada mata pelajaran ini? Tindakan ini tidak dapat dibatalkan!',
+          function() {
+            bankSoalRef.orderByChild('ID_Mapel').equalTo(currentMapelForBank).once('value')
+              .then(snapshot => {
+                const promises = [];
+                let count = 0;
+                
+                snapshot.forEach(childSnap => {
+                  promises.push(bankSoalRef.child(childSnap.key).remove());
+                  count++;
+                });
+                
+                if (count === 0) {
+                  showNotification('info', 'Info', 'Tidak ada soal untuk dihapus');
+                  return;
+                }
+                
+                Promise.all(promises)
+                  .then(() => {
+                    showNotification('success', 'Berhasil', `${count} soal berhasil dihapus`);
+                    loadBankSoalTable();
+                  })
+                  .catch(err => {
+                    showNotification('error', 'Gagal', 'Gagal menghapus soal: ' + err.message);
+                  });
+              })
+              .catch(err => {
+                showNotification('error', 'Gagal', 'Gagal membaca data soal: ' + err.message);
+              });
+          }
+        );
+      }
 
       function openBankSoalModalForCreate() {
         if (!currentAgendaForBank || !currentMapelForBank) {
-          alert('Pilih Agenda Ujian dan Mata Pelajaran terlebih dahulu.');
+          showNotification('error', 'Error', 'Pilih Agenda Ujian dan Mata Pelajaran terlebih dahulu');
           return;
         }
         resetBankSoalForm(false);
         showModal('modal-banksoal');
       }
 
-      function openImportBankSoalModal() {
-        if (!currentAgendaForBank) {
-          alert('Pilih Agenda Ujian terlebih dahulu di Tab Bank Soal.');
+      async function saveSoal() {
+        if (!currentAgendaForBank || !currentMapelForBank) {
+          showNotification('error', 'Error', 'Pilih Agenda Ujian dan Mata Pelajaran terlebih dahulu');
           return;
-        }
-        const listDiv = document.getElementById('import-banksoal-mapel-list');
-        listDiv.innerHTML = 'Memuat daftar mata pelajaran...';
-        importBankSoalMapelMap = {};
-        mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
-          .then(snapshot => {
-            let html = '';
-            let count = 0;
-            snapshot.forEach(childSnap => {
-              const id   = childSnap.key;
-              const data = childSnap.val() || {};
-              const name = data.Nama_Mata_Pelajaran || id;
-              const key  = name.toLowerCase().trim();
-              importBankSoalMapelMap[key] = { id, name };
-              count++;
-              html += `
-                <label style="display:inline-flex; align-items:center; gap:4px; margin:2px 8px 2px 0;">
-                  <input type="checkbox" class="import-banksoal-mapel-cb" value="${id}" data-name="${name}" checked>
-                  <span>${name}</span>
-                </label>
-              `;
-            });
-            if (!count) {
-              html = '<em>Belum ada mata pelajaran untuk agenda ini. Tambah mapel terlebih dahulu di Tab Mata Pelajaran.</em>';
-            } else {
-              html = '<div style="margin-bottom:4px; font-weight:600;">Pilih Mata Pelajaran yang akan di-import:</div>' + html;
-            }
-            listDiv.innerHTML = html;
-          })
-          .catch(err => {
-            listDiv.innerHTML = '<span style="color:#b91c1c;">Gagal memuat mata pelajaran: ' + err.message + '</span>';
-          });
-        document.getElementById('file_import_banksoal').value = '';
-        showModal('modal-import-banksoal');
-      }
-
-      function saveSoal() {
-  if (!currentAgendaForBank || !currentMapelForBank) {
-    alert('Pilih Agenda Ujian dan Mata Pelajaran terlebih dahulu.');
-    return;
-  }
-  
-  const firebaseSoalId = document.getElementById('firebaseSoalId').value;
-  const ID_Agenda = currentAgendaForBank;
-  const ID_Mapel = currentMapelForBank;
-  const Nama_Mata_Pelajaran = document.getElementById('Nama_Mata_Pelajaran_Bank').value || '';
-  const No_Soal = document.getElementById('No_Soal').value.trim();
-  const Pertanyaan = document.getElementById('Pertanyaan').value.trim();
-  const Type_Soal = document.getElementById('Type_Soal').value;
-  
-  if (!No_Soal || !Pertanyaan || !Type_Soal) {
-    alert('No Soal, Pertanyaan, dan Type Soal wajib diisi.');
-    return;
-  }
-  
-  const data = {
-    ID_Agenda: ID_Agenda,
-    ID_Mapel: ID_Mapel,
-    Nama_Mata_Pelajaran: Nama_Mata_Pelajaran,
-    No_Soal: No_Soal,
-    Pertanyaan: Pertanyaan,
-    Type_Soal: Type_Soal
-  };
-  
-  // Data untuk pilihan ganda
-  data.Pilihan_A = document.getElementById('Pilihan_A').value.trim();
-  data.Pilihan_B = document.getElementById('Pilihan_B').value.trim();
-  data.Pilihan_C = document.getElementById('Pilihan_C').value.trim();
-  data.Pilihan_D = document.getElementById('Pilihan_D').value.trim();
-  data.Pilihan_E = document.getElementById('Pilihan_E').value.trim();
-  
-  // Data untuk pernyataan
-  for (let i = 1; i <= 10; i++) {
-    const pEl = document.getElementById('Pernyataan_' + i);
-    data['Pernyataan_' + i] = pEl ? pEl.value.trim() : '';
-  }
-  
-  // Data untuk pejodohan
-  for (let j = 1; j <= 10; j++) {
-    const kiriEl = document.getElementById('Pasangan_kiri_' + j);
-    const kananEl = document.getElementById('Pasangan_kanan_' + j);
-    data['Pasangan_kiri_' + j] = kiriEl ? kiriEl.value.trim() : '';
-    data['Pasangan_kanan_' + j] = kananEl ? kananEl.value.trim() : '';
-  }
-  
-  const fileInput = document.getElementById('Gambar');
-  const file = fileInput.files[0];
-  const existingUrl = document.getElementById('Gambar_Url').value || '';
-  
-  // Fungsi untuk menyimpan data setelah upload gambar
-  const doSave = (finalUrl) => {
-    data.Gambar = finalUrl || '';
-    
-    if (firebaseSoalId) {
-      bankSoalRef.child(firebaseSoalId).update(data)
-        .then(() => {
-          showNotification('success', 'Berhasil', 'Soal berhasil diperbarui.');
-          resetBankSoalForm(false);
-          loadBankSoalTable();
-          hideModal('modal-banksoal');
-        })
-        .catch((err) => {
-          showNotification('error', 'Gagal', 'Gagal update soal: ' + err.message);
-        });
-    } else {
-      bankSoalRef.push(data)
-        .then(() => {
-          showNotification('success', 'Berhasil', 'Soal berhasil disimpan.');
-          resetBankSoalForm(false);
-          loadBankSoalTable();
-          hideModal('modal-banksoal');
-        })
-        .catch((err) => {
-          showNotification('error', 'Gagal', 'Gagal menyimpan soal: ' + err.message);
-        });
-    }
-  };
-  
-  // Jika ada file gambar yang diupload
-  if (file) {
-    // Tampilkan loading
-    showNotification('info', 'Mengunggah', 'Mengunggah gambar...', 0);
-    
-    // Baca file sebagai base64
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target.result;
-      const base64Data = dataUrl.split(',')[1];
-      const mimeType = file.type || 'image/png';
-      
-      // Generate nama file yang unik
-      const agendaSelect = document.getElementById('Bank_Agenda_Select');
-      let agendaText = '';
-      if (agendaSelect && agendaSelect.selectedIndex >= 0) {
-        const optAg = agendaSelect.options[agendaSelect.selectedIndex];
-        if (optAg) agendaText = optAg.text || '';
-      }
-      
-      const rawAgendaName = agendaText.replace(/\s*\([^)]*\)\s*$/, '');
-      
-      const sanitizeName = (str, fallback) => {
-        const s = (str || '').toString()
-          .trim()
-          .replace(/[^A-Za-z0-9]+/g, '_')
-          .replace(/^_+|_+$/g, '')
-          .substring(0, 50);
-        return s || fallback;
-      };
-      
-      const safeAgenda = sanitizeName(rawAgendaName, 'Agenda');
-      const safeMapel = sanitizeName(Nama_Mata_Pelajaran, 'Mapel');
-      const safeNo = (No_Soal || '0').toString().replace(/[^0-9]+/g, '');
-      const timestamp = new Date().getTime();
-      const fileName = `${safeAgenda}_${safeMapel}_${safeNo}_${timestamp}.${file.name.split('.').pop()}`;
-      
-      // Panggil Google Apps Script untuk upload ke Google Drive
-      google.script.run
-        .withSuccessHandler((driveLink) => {
-          // Hide loading notification
-          hideAllNotifications();
-          
-          if (driveLink && driveLink.startsWith('https://')) {
-            showNotification('success', 'Gambar Terunggah', 'Gambar berhasil diupload ke Google Drive');
-            doSave(driveLink);
-          } else {
-            showNotification('error', 'Gagal Upload', 'Gagal mengupload gambar: ' + driveLink);
-            doSave(''); // Save tanpa gambar
-          }
-        })
-        .withFailureHandler((error) => {
-          hideAllNotifications();
-          showNotification('error', 'Gagal Upload', 'Gagal mengupload gambar: ' + error.message);
-          doSave(''); // Save tanpa gambar
-        })
-        .uploadImageToDrive(base64Data, fileName, mimeType);
-    };
-    
-    reader.onerror = (err) => {
-      hideAllNotifications();
-      showNotification('error', 'Gagal', 'Gagal membaca file gambar: ' + err);
-      doSave(existingUrl); // Gunakan URL yang sudah ada jika ada
-    };
-    
-    reader.readAsDataURL(file);
-  } else {
-    // Jika tidak ada file baru, gunakan URL yang sudah ada
-    doSave(existingUrl);
-  }
-}
-function uploadImageToDrive(base64Data, fileName, mimeType) {
-  if (!base64Data) {
-    throw new Error('Data gambar kosong');
-  }
-
-  var bytes = Utilities.base64Decode(base64Data);
-  var blob = Utilities.newBlob(bytes, mimeType || 'application/octet-stream', fileName);
-
-  var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-  var file = folder.createFile(blob);
-
-  // Set agar bisa diakses via link
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-
-  var fileId = file.getId();
-  var link = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1000';
-  return link;
-}
-
-function uploadImageToDrive(base64Data, fileName, mimeType) {
-  try {
-    if (!base64Data) {
-      throw new Error('Data gambar kosong');
-    }
-    
-    // Decode base64 data
-    var bytes = Utilities.base64Decode(base64Data);
-    var blob = Utilities.newBlob(bytes, mimeType || 'image/png', fileName);
-    
-    // Get the folder
-    var folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-    
-    // Upload file to Google Drive
-    var file = folder.createFile(blob);
-    
-    // Set sharing permissions to anyone with link can view
-    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-    
-    // Get the file ID
-    var fileId = file.getId();
-    
-    // Return the thumbnail URL (this will give you the link format you want)
-    // You can adjust the size (sz parameter) as needed
-    var link = 'https://drive.google.com/thumbnail?id=' + fileId + '&sz=w1200';
-    
-    // Alternatively, you can return the direct link like this:
-    // var link = 'https://drive.google.com/uc?id=' + fileId;
-    
-    // Or the view link:
-    // var link = 'https://drive.google.com/file/d/' + fileId + '/view';
-    
-    return link;
-  } catch (error) {
-    return 'Error: ' + error.toString();
-  }
-}
-
-// Fungsi untuk menampilkan notifikasi
-function showNotification(type, title, message, duration = 5000) {
-  const container = document.getElementById('notificationContainer');
-  const id = 'notification-' + Date.now();
-  
-  const iconMap = {
-    success: '✓',
-    error: '✗',
-    warning: '⚠',
-    info: 'ℹ'
-  };
-  
-  const notification = document.createElement('div');
-  notification.className = `notification ${type}`;
-  notification.id = id;
-  
-  notification.innerHTML = `
-    <div class="notification-icon">${iconMap[type] || 'ℹ'}</div>
-    <div class="notification-content">
-      <div class="notification-title">${title}</div>
-      <div class="notification-message">${message}</div>
-    </div>
-    <button class="notification-close" onclick="closeNotification('${id}')">&times;</button>
-    <div class="notification-progress">
-      <div class="notification-progress-bar" style="transform: scaleX(1); transition: transform ${duration}ms linear;"></div>
-    </div>
-  `;
-  
-  container.appendChild(notification);
-  
-  // Trigger animation
-  setTimeout(() => {
-    notification.classList.add('show');
-    
-    // Start progress bar
-    setTimeout(() => {
-      const progressBar = notification.querySelector('.notification-progress-bar');
-      if (progressBar) {
-        progressBar.style.transform = 'scaleX(0)';
-      }
-    }, 10);
-  }, 10);
-  
-  // Auto remove after duration
-  if (duration > 0) {
-    setTimeout(() => {
-      closeNotification(id);
-    }, duration);
-  }
-  
-  return id;
-}
-
-// Fungsi untuk menutup notifikasi
-function closeNotification(id) {
-  const notification = document.getElementById(id);
-  if (notification) {
-    notification.classList.remove('show');
-    notification.classList.add('hide');
-    
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.parentNode.removeChild(notification);
-      }
-    }, 400);
-  }
-}
-
-// Fungsi untuk menyembunyikan semua notifikasi
-function hideAllNotifications() {
-  const notifications = document.querySelectorAll('.notification');
-  notifications.forEach(notification => {
-    notification.classList.remove('show');
-    notification.classList.add('hide');
-    
-    setTimeout(() => {
-      if (notification.parentNode) {
-        notification.parentNode.removeChild(notification);
-      }
-    }, 400);
-  });
-}
-
-function editSoal(firebaseSoalId) {
-  bankSoalRef.child(firebaseSoalId).once('value')
-    .then(snapshot => {
-      const data = snapshot.val();
-      document.getElementById('firebaseSoalId').value = firebaseSoalId;
-      currentAgendaForBank = data.ID_Agenda || '';
-      currentMapelForBank = data.ID_Mapel || '';
-      document.getElementById('ID_Agenda_Bank').value = currentAgendaForBank;
-      document.getElementById('ID_Mapel_Bank').value = currentMapelForBank;
-      document.getElementById('Nama_Mata_Pelajaran_Bank').value = data.Nama_Mata_Pelajaran || '';
-      document.getElementById('No_Soal').value = data.No_Soal || '';
-      document.getElementById('Pertanyaan').value = data.Pertanyaan || '';
-      document.getElementById('Type_Soal').value = data.Type_Soal || '';
-      document.getElementById('Gambar_Url').value = data.Gambar || '';
-      
-      // Tampilkan preview gambar jika ada
-      if (data.Gambar) {
-        const gambarContainer = document.getElementById('gambarPreviewContainer');
-        if (!gambarContainer) {
-          // Buat container preview jika belum ada
-          const inputGambar = document.getElementById('Gambar');
-          const container = document.createElement('div');
-          container.id = 'gambarPreviewContainer';
-          container.style.marginTop = '8px';
-          inputGambar.parentNode.insertBefore(container, inputGambar.nextSibling);
         }
         
-        const gambarPreview = document.getElementById('gambarPreview');
-        if (gambarPreview) {
-          gambarPreview.src = data.Gambar;
-        } else {
-          const preview = document.createElement('img');
-          preview.id = 'gambarPreview';
-          preview.src = data.Gambar;
-          preview.style.maxWidth = '200px';
-          preview.style.maxHeight = '150px';
-          preview.style.marginTop = '8px';
-          preview.style.border = '1px solid #e5e7eb';
-          preview.style.borderRadius = '4px';
-          preview.style.display = 'block';
+        try {
+          const firebaseSoalId = document.getElementById('firebaseSoalId').value;
+          const ID_Agenda = currentAgendaForBank;
+          const ID_Mapel = currentMapelForBank;
+          const Nama_Mata_Pelajaran = document.getElementById('Nama_Mata_Pelajaran_Bank').value || '';
+          const No_Soal = document.getElementById('No_Soal').value.trim();
+          const Pertanyaan = document.getElementById('Pertanyaan').value.trim();
+          const Type_Soal = document.getElementById('Type_Soal').value;
           
-          // Tambahkan link untuk melihat gambar
-          const link = document.createElement('a');
-          link.href = data.Gambar;
-          link.target = '_blank';
-          link.textContent = 'Lihat gambar asli';
-          link.style.display = 'block';
-          link.style.fontSize = '12px';
-          link.style.marginTop = '4px';
-          link.style.color = '#2563eb';
+          if (!No_Soal || !Pertanyaan || !Type_Soal) {
+            showNotification('error', 'Validasi Error', 'No Soal, Pertanyaan, dan Type Soal wajib diisi');
+            return;
+          }
           
-          const container = document.getElementById('gambarPreviewContainer');
-          container.innerHTML = '';
-          container.appendChild(preview);
-          container.appendChild(link);
+          // Prepare data
+          const data = {
+            ID_Agenda: ID_Agenda,
+            ID_Mapel: ID_Mapel,
+            Nama_Mata_Pelajaran: Nama_Mata_Pelajaran,
+            No_Soal: No_Soal,
+            Pertanyaan: Pertanyaan,
+            Type_Soal: Type_Soal,
+            Pilihan_A: document.getElementById('Pilihan_A').value.trim(),
+            Pilihan_B: document.getElementById('Pilihan_B').value.trim(),
+            Pilihan_C: document.getElementById('Pilihan_C').value.trim(),
+            Pilihan_D: document.getElementById('Pilihan_D').value.trim(),
+            Pilihan_E: document.getElementById('Pilihan_E').value.trim()
+          };
+          
+          // Add pernyataan data
+          for (let i = 1; i <= 10; i++) {
+            data['Pernyataan_' + i] = document.getElementById('Pernyataan_' + i)?.value.trim() || '';
+          }
+          
+          // Add pejodohan data
+          for (let j = 1; j <= 10; j++) {
+            data['Pasangan_kiri_' + j] = document.getElementById('Pasangan_kiri_' + j)?.value.trim() || '';
+            data['Pasangan_kanan_' + j] = document.getElementById('Pasangan_kanan_' + j)?.value.trim() || '';
+          }
+          
+          // Handle image upload
+          const fileInput = document.getElementById('Gambar');
+          const file = fileInput.files[0];
+          const existingUrl = document.getElementById('Gambar_Url').value || '';
+          
+          if (file) {
+            showNotification('info', 'Upload Gambar', 'Sedang mengupload gambar...', 0);
+            
+            const context = {
+              agenda: Nama_Mata_Pelajaran,
+              mapel: ID_Mapel,
+              noSoal: No_Soal
+            };
+            
+            const imageUrl = await uploadToGoogleDrive(file, context);
+            data.Gambar = imageUrl;
+          } else {
+            data.Gambar = existingUrl;
+          }
+          
+          // Save to Firebase
+          if (firebaseSoalId) {
+            await bankSoalRef.child(firebaseSoalId).update(data);
+            showNotification('success', 'Berhasil', 'Soal berhasil diperbarui');
+          } else {
+            await bankSoalRef.push(data);
+            showNotification('success', 'Berhasil', 'Soal berhasil disimpan');
+          }
+          
+          resetBankSoalForm(false);
+          loadBankSoalTable();
+          hideModal('modal-banksoal');
+          
+        } catch (error) {
+          console.error('Save soal error:', error);
+          showNotification('error', 'Gagal', 'Gagal menyimpan soal: ' + error.message);
+        } finally {
+          hideAllNotifications();
         }
-      } else {
-        // Hapus preview jika tidak ada gambar
-        const container = document.getElementById('gambarPreviewContainer');
-        if (container) {
-          container.innerHTML = '';
-        }
       }
-      
-      // Reset input file
-      document.getElementById('Gambar').value = '';
-      
-      // Isi data lainnya...
-      document.getElementById('Pilihan_A').value = data.Pilihan_A || '';
-      document.getElementById('Pilihan_B').value = data.Pilihan_B || '';
-      document.getElementById('Pilihan_C').value = data.Pilihan_C || '';
-      document.getElementById('Pilihan_D').value = data.Pilihan_D || '';
-      document.getElementById('Pilihan_E').value = data.Pilihan_E || '';
-      
-      for (let i = 1; i <= 10; i++) {
-        const el = document.getElementById('Pernyataan_' + i);
-        if (el) el.value = data['Pernyataan_' + i] || '';
-      }
-      
-      for (let i = 1; i <= 10; i++) {
-        const lk = document.getElementById('Pasangan_kiri_' + i);
-        const rk = document.getElementById('Pasangan_kanan_' + i);
-        if (lk) lk.value = data['Pasangan_kiri_' + i] || '';
-        if (rk) rk.value = data['Pasangan_kanan_' + i] || '';
-      }
-      
-      // Update dropdowns
-      const agSelect = document.getElementById('Bank_Agenda_Select');
-      agSelect.value = currentAgendaForBank;
-      
-      const mpSelect = document.getElementById('Bank_Mapel_Select');
-      mpSelect.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
-      mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
-        .then(snap => {
-          snap.forEach(child => {
-            const id = child.key;
-            const d = child.val();
-            const opt = document.createElement('option');
-            opt.value = id;
-            opt.textContent = d.Nama_Mata_Pelajaran || id;
-            opt.dataset.nama = d.Nama_Mata_Pelajaran || '';
-            mpSelect.appendChild(opt);
+
+      function editSoal(firebaseSoalId) {
+        if (!bankSoalRef) return;
+        
+        bankSoalRef.child(firebaseSoalId).once('value')
+          .then(snapshot => {
+            const data = snapshot.val();
+            document.getElementById('firebaseSoalId').value = firebaseSoalId;
+            currentAgendaForBank = data.ID_Agenda || '';
+            currentMapelForBank = data.ID_Mapel || '';
+            
+            document.getElementById('ID_Agenda_Bank').value = currentAgendaForBank;
+            document.getElementById('ID_Mapel_Bank').value = currentMapelForBank;
+            document.getElementById('Nama_Mata_Pelajaran_Bank').value = data.Nama_Mata_Pelajaran || '';
+            document.getElementById('No_Soal').value = data.No_Soal || '';
+            document.getElementById('Pertanyaan').value = data.Pertanyaan || '';
+            document.getElementById('Type_Soal').value = data.Type_Soal || '';
+            document.getElementById('Gambar_Url').value = data.Gambar || '';
+            
+            // Set image preview if exists
+            if (data.Gambar) {
+              const container = document.getElementById('imagePreviewContainer');
+              container.innerHTML = '';
+              
+              const img = document.createElement('img');
+              img.src = data.Gambar;
+              img.className = 'image-preview';
+              img.alt = 'Gambar Soal';
+              container.appendChild(img);
+            }
+            
+            // Set pilihan data
+            document.getElementById('Pilihan_A').value = data.Pilihan_A || '';
+            document.getElementById('Pilihan_B').value = data.Pilihan_B || '';
+            document.getElementById('Pilihan_C').value = data.Pilihan_C || '';
+            document.getElementById('Pilihan_D').value = data.Pilihan_D || '';
+            document.getElementById('Pilihan_E').value = data.Pilihan_E || '';
+            
+            // Set pernyataan data
+            for (let i = 1; i <= 10; i++) {
+              const el = document.getElementById('Pernyataan_' + i);
+              if (el) el.value = data['Pernyataan_' + i] || '';
+            }
+            
+            // Set pejodohan data
+            for (let i = 1; i <= 10; i++) {
+              const lk = document.getElementById('Pasangan_kiri_' + i);
+              const rk = document.getElementById('Pasangan_kanan_' + i);
+              if (lk) lk.value = data['Pasangan_kiri_' + i] || '';
+              if (rk) rk.value = data['Pasangan_kanan_' + i] || '';
+            }
+            
+            // Update dropdowns
+            document.getElementById('Bank_Agenda_Select').value = currentAgendaForBank;
+            
+            // Update mapel dropdown
+            const mpSelect = document.getElementById('Bank_Mapel_Select');
+            if (mapelRef) {
+              mapelRef.orderByChild('ID_Agenda').equalTo(currentAgendaForBank).once('value')
+                .then(snap => {
+                  mpSelect.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+                  snap.forEach(child => {
+                    const id = child.key;
+                    const d = child.val();
+                    const opt = document.createElement('option');
+                    opt.value = id;
+                    opt.textContent = d.Nama_Mata_Pelajaran || id;
+                    opt.dataset.nama = d.Nama_Mata_Pelajaran || '';
+                    mpSelect.appendChild(opt);
+                  });
+                  mpSelect.value = currentMapelForBank;
+                });
+            }
+            
+            onTypeSoalChange();
+            showModal('modal-banksoal');
+            
+          })
+          .catch(err => {
+            showNotification('error', 'Gagal', 'Gagal mengambil soal: ' + err.message);
           });
-          mpSelect.value = currentMapelForBank;
-        });
-      
-      onTypeSoalChange();
-      showModal('modal-banksoal');
-    })
-    .catch(err => {
-      showNotification('error', 'Gagal', 'Gagal mengambil soal: ' + err.message);
-    });
-}
+      }
 
       function deleteSoal(firebaseSoalId) {
-        if (!confirm('Yakin ingin menghapus soal ini?')) return;
-        bankSoalRef.child(firebaseSoalId).remove()
-          .then(loadBankSoalTable)
-          .catch(err => alert('Gagal menghapus soal: ' + err.message));
+        showConfirmation(
+          'Hapus Soal',
+          'Apakah Anda yakin ingin menghapus soal ini?',
+          function() {
+            bankSoalRef.child(firebaseSoalId).remove()
+              .then(() => {
+                showNotification('success', 'Berhasil', 'Soal berhasil dihapus');
+                loadBankSoalTable();
+              })
+              .catch(err => {
+                showNotification('error', 'Gagal', 'Gagal menghapus soal: ' + err.message);
+              });
+          }
+        );
       }
 
-function resetBankSoalForm(resetContext = true) {
-  document.getElementById('firebaseSoalId').value = '';
-  document.getElementById('Gambar_Url').value = '';
-  document.getElementById('Gambar').value = '';
-  
-  // Hapus preview gambar
-  const container = document.getElementById('gambarPreviewContainer');
-  if (container) {
-    container.innerHTML = '';
-  }
-  
-  if (resetContext) {
-    document.getElementById('bankSoalForm').reset();
-    onTypeSoalChange();
-    currentAgendaForBank = '';
-    currentMapelForBank = '';
-    document.getElementById('Bank_Agenda_Select').value = '';
-    document.getElementById('Bank_Mapel_Select').innerHTML =
-      '<option value="">-- Pilih Mata Pelajaran --</option>';
-    document.getElementById('ID_Agenda_Bank').value = '';
-    document.getElementById('ID_Mapel_Bank').value = '';
-    document.getElementById('Nama_Mata_Pelajaran_Bank').value = '';
-    document.querySelector('#bankSoalTable tbody').innerHTML = '';
-    document.getElementById('No_Soal').value = '';
-  } else {
-    document.getElementById('Pertanyaan').value = '';
-    document.getElementById('Type_Soal').value = '';
-    document.getElementById('Pilihan_A').value = '';
-    document.getElementById('Pilihan_B').value = '';
-    document.getElementById('Pilihan_C').value = '';
-    document.getElementById('Pilihan_D').value = '';
-    document.getElementById('Pilihan_E').value = '';
-    
-    for (let i = 1; i <= 10; i++) {
-      const el = document.getElementById('Pernyataan_' + i);
-      if (el) el.value = '';
-    }
-    
-    for (let i = 1; i <= 10; i++) {
-      const lk = document.getElementById('Pasangan_kiri_' + i);
-      const rk = document.getElementById('Pasangan_kanan_' + i);
-      if (lk) lk.value = '';
-      if (rk) rk.value = '';
-    }
-    
-    onTypeSoalChange();
-    document.getElementById('ID_Agenda_Bank').value = currentAgendaForBank || '';
-    document.getElementById('ID_Mapel_Bank').value = currentMapelForBank || '';
-    setAutoNoSoal();
-  }
-}
-
-      function downloadTemplateBankSoal() {
-        const headers = [
-          'No_Soal',
-          'Mata_Pelajaran', 
-          'Pertanyaan',
-          'Type_Soal',
-          'Gambar_URL',     
-          'Pilihan_A',
-          'Pilihan_B',
-          'Pilihan_C',
-          'Pilihan_D',
-          'Pilihan_E'
-        ];
-        for (let i = 1; i <= 10; i++) headers.push('Pernyataan_' + i);
-        for (let i = 1; i <= 10; i++) headers.push('Pasangan_kiri_' + i);
-        for (let i = 1; i <= 10; i++) headers.push('Pasangan_kanan_' + i);
-        const sample = [
-          '1',
-          'Bahasa Indonesia',                   
-          'Contoh pertanyaan Dimana Ibu kota Indonesia ?',
-          'Pilihan Ganda Tunggal/Pilihan Ganda Kompleks/Pilihan Benar/Salah/Pilihan Setuju/Tidak/Pilihan Pejodohan/Uraian',
-          'https://drive.google.com/thumbnail?id=(isikan ID gambar dari google drive)&sz=w1200', 
-          'Pilihan 1',
-          'Pilihan 2',
-          'Pilihan 3',
-          'Pilihan 4',
-          'Pilihan 5'
-        ];
-        while (sample.length < headers.length) sample.push('');
-        const csv = [
-          headers.join(','),
-          sample.map(v => String(v).replace(/"/g, '""')).join(',')
-        ].join('\r\n');
-        downloadCsvFile('template_bank_soal.csv', csv);
+      function resetBankSoalForm(resetContext = true) {
+        document.getElementById('firebaseSoalId').value = '';
+        document.getElementById('Gambar_Url').value = '';
+        document.getElementById('Gambar').value = '';
+        document.getElementById('imagePreviewContainer').innerHTML = '';
+        
+        if (resetContext) {
+          document.getElementById('bankSoalForm').reset();
+          onTypeSoalChange();
+          currentAgendaForBank = '';
+          currentMapelForBank = '';
+          document.getElementById('Bank_Agenda_Select').value = '';
+          document.getElementById('Bank_Mapel_Select').innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+          document.getElementById('ID_Agenda_Bank').value = '';
+          document.getElementById('ID_Mapel_Bank').value = '';
+          document.getElementById('Nama_Mata_Pelajaran_Bank').value = '';
+          document.querySelector('#bankSoalTable tbody').innerHTML = '';
+          document.getElementById('No_Soal').value = '';
+        } else {
+          document.getElementById('Pertanyaan').value = '';
+          document.getElementById('Type_Soal').value = '';
+          document.getElementById('Pilihan_A').value = '';
+          document.getElementById('Pilihan_B').value = '';
+          document.getElementById('Pilihan_C').value = '';
+          document.getElementById('Pilihan_D').value = '';
+          document.getElementById('Pilihan_E').value = '';
+          
+          for (let i = 1; i <= 10; i++) {
+            const el = document.getElementById('Pernyataan_' + i);
+            if (el) el.value = '';
+          }
+          
+          for (let i = 1; i <= 10; i++) {
+            const lk = document.getElementById('Pasangan_kiri_' + i);
+            const rk = document.getElementById('Pasangan_kanan_' + i);
+            if (lk) lk.value = '';
+            if (rk) rk.value = '';
+          }
+          
+          onTypeSoalChange();
+          document.getElementById('ID_Agenda_Bank').value = currentAgendaForBank || '';
+          document.getElementById('ID_Mapel_Bank').value = currentMapelForBank || '';
+          setAutoNoSoal();
+        }
       }
 
-      function importBankSoalFromFile() {
-        if (!currentAgendaForBank) {
-          alert('Pilih Agenda Ujian terlebih dahulu di Tab Bank Soal.');
-          return;
-        }
-        const input = document.getElementById('file_import_banksoal');
-        const file = input.files[0];
-        if (!file) {
-          alert('Pilih file CSV terlebih dahulu.');
-          return;
-        }
-        const checked = document.querySelectorAll('.import-banksoal-mapel-cb:checked');
-        if (!checked.length) {
-          alert('Pilih minimal satu Mata Pelajaran yang akan di-import.');
-          return;
-        }
-        const allowedMapelIds = new Set();
-        checked.forEach(cb => allowedMapelIds.add(cb.value));
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const text = e.target.result;
-          const parsed = parseCsv(text);
-          if (!parsed.rows.length) {
-            alert('File kosong atau format tidak sesuai.');
-            return;
-          }
-          const headers = parsed.headers;
-          const required = ['No_Soal', 'Mata_Pelajaran', 'Pertanyaan', 'Type_Soal'];
-          for (const r of required) {
-            if (!headers.includes(r)) {
-              alert('Header CSV harus mengandung kolom: ' + required.join(', '));
-              return;
-            }
-          }
-          const promises = [];
-          let inserted = 0;
-          let skippedMapelTidakDikenal = 0;
-          let skippedMapelTidakDipilih = 0;
-          parsed.rows.forEach(row => {
-            const no = (row.No_Soal || '').trim();
-            const pertanyaan = (row.Pertanyaan || '').trim();
-            const type = (row.Type_Soal || '').trim();
-            const namaMapel = (row.Mata_Pelajaran || '').trim();
-            const gambarUrl = (row.Gambar_URL || '').trim();
-            if (!no || !pertanyaan || !type || !namaMapel) return;
-            const key = namaMapel.toLowerCase();
-            const mpInfo = importBankSoalMapelMap[key];
-            if (!mpInfo) {
-              skippedMapelTidakDikenal++;
-              return; 
-            }
-            if (!allowedMapelIds.has(mpInfo.id)) {
-              skippedMapelTidakDipilih++;
-              return; 
-            }
-            const data = {
-              ID_Agenda: currentAgendaForBank,
-              ID_Mapel: mpInfo.id,
-              Nama_Mata_Pelajaran: mpInfo.name,
-              No_Soal: no,
-              Pertanyaan: pertanyaan,
-              Type_Soal: type,
-              Gambar: gambarUrl || ''
-            };
-            data.Pilihan_A = row.Pilihan_A || '';
-            data.Pilihan_B = row.Pilihan_B || '';
-            data.Pilihan_C = row.Pilihan_C || '';
-            data.Pilihan_D = row.Pilihan_D || '';
-            data.Pilihan_E = row.Pilihan_E || '';
-            for (let i = 1; i <= 10; i++) {
-              data['Pernyataan_' + i] = row['Pernyataan_' + i] || '';
-            }
-            for (let i = 1; i <= 10; i++) {
-              data['Pasangan_kiri_'  + i] = row['Pasangan_kiri_'  + i] || '';
-              data['Pasangan_kanan_' + i] = row['Pasangan_kanan_' + i] || '';
-            }
-            inserted++;
-            promises.push(bankSoalRef.push(data));
+      // ====== MONITORING FUNCTIONS ======
+      function loadMonitoring() {
+        if (!monitoringRef) return;
+        
+        monitoringRef.orderByChild('TglJam_Mulai').on('value', snapshot => {
+          const tbody = document.querySelector('#monitoringTable tbody');
+          tbody.innerHTML = '';
+          
+          const dataArray = [];
+          snapshot.forEach(childSnap => {
+            const id = childSnap.key;
+            const data = childSnap.val();
+            dataArray.push({ id, data });
           });
-          if (!inserted) {
-            let msg = 'Tidak ada baris valid untuk diimport.';
-            if (skippedMapelTidakDikenal || skippedMapelTidakDipilih) {
-              msg += '\nCatatan:\n';
-              if (skippedMapelTidakDikenal)
-                msg += '- ' + skippedMapelTidakDikenal + ' baris di-skip karena Mata_Pelajaran tidak ditemukan di data mapel.\n';
-              if (skippedMapelTidakDipilih)
-                msg += '- ' + skippedMapelTidakDipilih + ' baris di-skip karena Mata_Pelajaran tidak dicentang di modal.\n';
-            }
-            alert(msg);
-            return;
-          }
-          Promise.all(promises)
-            .then(() => {
-              let msg = 'Import bank soal selesai.\nBaris berhasil ditambahkan: ' + inserted;
-              if (skippedMapelTidakDikenal || skippedMapelTidakDipilih) {
-                msg += '\n\nBaris yang di-skip:\n';
-                if (skippedMapelTidakDikenal)
-                  msg += '- ' + skippedMapelTidakDikenal + ' baris: Mata_Pelajaran tidak ditemukan di data mapel.\n';
-                if (skippedMapelTidakDipilih)
-                  msg += '- ' + skippedMapelTidakDipilih + ' baris: Mata_Pelajaran tidak dicentang di modal.\n';
-              }
-              alert(msg);
-              input.value = '';
-              hideModal('modal-import-banksoal');
-              loadBankSoalTable();
-            })
-            .catch(err => alert('Terjadi kesalahan saat import bank soal: ' + err.message));
-        };
-        reader.onerror = err => alert('Gagal membaca file: ' + err);
-        reader.readAsText(file);
+          
+          dataArray.sort((a, b) => {
+            const dateA = new Date(a.data.TglJam_Mulai || 0);
+            const dateB = new Date(b.data.TglJam_Mulai || 0);
+            return dateB - dateA;
+          });
+          
+          dataArray.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><input type="checkbox" class="monitoring-checkbox" value="${item.id}"></td>
+              <td>${item.data.NIS_Username || ''}</td>
+              <td>${item.data.Nama_Peserta || ''}</td>
+              <td>${item.data.Aktivitas_Login || ''}</td>
+              <td>${item.data.Judul_Ujian || ''}</td>
+              <td>${item.data.Mata_Pelajaran || ''}</td>
+              <td>${item.data.Status_Pengerjaan || ''}</td>
+              <td>${item.data.TglJam_Mulai || ''}</td>
+              <td>${item.data.Last_Update || ''}</td>
+              <td>${item.data.TglJam_Selesai || ''}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }, error => {
+          showNotification('error', 'Error', 'Gagal membaca Monitoring: ' + error.message);
+        });
       }
-
-      // ====== MONITORING ======
-function loadMonitoring() {
-  // Ganti .once('value') dengan .on('value') untuk real-time updates
-  monitoringRef.orderByChild('TglJam_Mulai').on('value', snapshot => {
-    const tbody = document.querySelector('#monitoringTable tbody');
-    tbody.innerHTML = '';
-    
-    // Mengumpulkan semua data ke dalam array
-    const dataArray = [];
-    snapshot.forEach(childSnap => {
-      const id = childSnap.key;
-      const data = childSnap.val();
-      dataArray.push({ id, data });
-    });
-    
-    // Urutkan berdasarkan TglJam_Mulai secara descending (terbaru ke terlama)
-    dataArray.sort((a, b) => {
-      const dateA = new Date(a.data.TglJam_Mulai || 0);
-      const dateB = new Date(b.data.TglJam_Mulai || 0);
-      return dateB - dateA; // Descending
-    });
-    
-    // Tampilkan data yang sudah diurutkan
-    dataArray.forEach(item => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input type="checkbox" class="monitoring-checkbox" value="${item.id}"></td>
-        <td>${item.data.NIS_Username || ''}</td>
-        <td>${item.data.Nama_Peserta || ''}</td>
-        <td>${item.data.Aktivitas_Login || ''}</td>
-        <td>${item.data.Judul_Ujian || ''}</td>
-        <td>${item.data.Mata_Pelajaran || ''}</td>
-        <td>${item.data.Status_Pengerjaan || ''}</td>
-        <td>${item.data.TglJam_Mulai || ''}</td>
-        <td>${item.data.Last_Update || ''}</td>
-        <td>${item.data.TglJam_Selesai || ''}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }, error => {
-    showNotification('error', 'Error', 'Gagal membaca Monitoring Pengerjaan: ' + error.message);
-  });
-}
 
       function toggleSelectAllMonitoring(src) {
         const cbs = document.querySelectorAll('.monitoring-checkbox');
@@ -3697,128 +3356,121 @@ function loadMonitoring() {
       function deleteSelectedMonitoring() {
         const checked = document.querySelectorAll('.monitoring-checkbox:checked');
         if (!checked.length) {
-          alert('Pilih data monitoring yang akan dihapus.');
+          showNotification('warning', 'Peringatan', 'Pilih data monitoring yang akan dihapus');
           return;
         }
-        if (!confirm('Yakin akan menghapus ' + checked.length + ' data Monitoring Pengerjaan?')) return;
-        const promises = [];
-        checked.forEach(cb => {
-          promises.push(monitoringRef.child(cb.value).remove());
-        });
-        Promise.all(promises)
-          .catch(err => alert('Gagal menghapus sebagian data monitoring: ' + err.message));
+        
+        showConfirmation(
+          'Hapus Monitoring',
+          `Yakin akan menghapus ${checked.length} data monitoring?`,
+          function() {
+            const promises = [];
+            checked.forEach(cb => {
+              promises.push(monitoringRef.child(cb.value).remove());
+            });
+            
+            Promise.all(promises)
+              .then(() => {
+                showNotification('success', 'Berhasil', `${checked.length} data monitoring berhasil dihapus`);
+              })
+              .catch(err => {
+                showNotification('error', 'Gagal', 'Gagal menghapus data monitoring: ' + err.message);
+              });
+          }
+        );
       }
 
-      // ====== JAWABAN SISWA ======
-function loadJawaban() {
-  // Ganti .once('value') dengan .on('value') untuk real-time updates
-  jawabanRef.orderByChild('TglJam_Mulai').on('value', snapshot => {
-    const tbody = document.querySelector('#jawabanTable tbody');
-    const headerTr = document.getElementById('jawabanHeaderRow');
-    tbody.innerHTML = '';
-    headerTr.innerHTML = '';
-    
-    // Mengumpulkan semua data ke dalam array
-    const rows = [];
-    snapshot.forEach(childSnap => {
-      rows.push({ id: childSnap.key, data: childSnap.val() });
-    });
-    
-    // Urutkan berdasarkan TglJam_Mulai secara descending (terbaru ke terlama)
-    rows.sort((a, b) => {
-      const dateA = new Date(a.data.TglJam_Mulai || 0);
-      const dateB = new Date(b.data.TglJam_Mulai || 0);
-      return dateB - dateA; // Descending
-    });
-    
-    // Cari jumlah maksimal kolom jawaban
-    let maxJ = 0;
-    rows.forEach(r => {
-      const d = r.data;
-      for (const key in d) {
-        if (key.indexOf('Jwb') === 0) {
-          const num = parseInt(key.substring(3), 10);
-          if (!isNaN(num) && num > maxJ) maxJ = num;
-        }
+      // ====== JAWABAN SISWA FUNCTIONS ======
+      function loadJawaban() {
+        if (!jawabanRef) return;
+        
+        jawabanRef.orderByChild('TglJam_Mulai').on('value', snapshot => {
+          const tbody = document.querySelector('#jawabanTable tbody');
+          const headerTr = document.getElementById('jawabanHeaderRow');
+          tbody.innerHTML = '';
+          headerTr.innerHTML = '';
+          
+          const rows = [];
+          snapshot.forEach(childSnap => {
+            rows.push({ id: childSnap.key, data: childSnap.val() });
+          });
+          
+          rows.sort((a, b) => {
+            const dateA = new Date(a.data.TglJam_Mulai || 0);
+            const dateB = new Date(b.data.TglJam_Mulai || 0);
+            return dateB - dateA;
+          });
+          
+          let maxJ = 0;
+          rows.forEach(r => {
+            const d = r.data;
+            for (const key in d) {
+              if (key.indexOf('Jwb') === 0) {
+                const num = parseInt(key.substring(3), 10);
+                if (!isNaN(num) && num > maxJ) maxJ = num;
+              }
+            }
+          });
+          
+          let headerHtml = `
+            <th><input type="checkbox" id="jawaban_select_all" onclick="toggleSelectAllJawaban(this)"></th>
+            <th>Nama Siswa</th>
+            <th>Agenda Ujian</th>
+            <th>Mata Pelajaran</th>
+            <th>Jenis Tes</th>
+          `;
+          
+          for (let i = 1; i <= maxJ; i++) {
+            headerHtml += `<th>Jwb${i}</th>`;
+          }
+          
+          headerHtml += `
+            <th>Status</th>
+            <th>TglJam_Mulai</th>
+            <th>EndAt</th>
+            <th>TglJam_Selesai</th>
+          `;
+          headerTr.innerHTML = headerHtml;
+          
+          rows.forEach(r => {
+            const d = r.data;
+            const nis = d.NIS_Username || '';
+            const namaSiswa = pesertaNameMap[nis] || nis;
+            
+            let jenisTes = '';
+            const agendaId = d.ID_Agenda || '';
+            if (agendaId && agendaCache[agendaId]) {
+              jenisTes = agendaCache[agendaId].Jenis_Tes || '';
+            }
+            
+            let rowHtml = `
+              <td><input type="checkbox" class="jawaban-checkbox" value="${r.id}"></td>
+              <td>${namaSiswa}</td>
+              <td>${d.Judul_Ujian || ''}</td>
+              <td>${d.Mata_Pelajaran || ''}</td>
+              <td>${jenisTes}</td>
+            `;
+            
+            for (let i = 1; i <= maxJ; i++) {
+              rowHtml += `<td>${d['Jwb' + i] || ''}</td>`;
+            }
+            
+            rowHtml += `
+              <td>${d.Status || ''}</td>
+              <td>${d.TglJam_Mulai || ''}</td>
+              <td>${d.EndAt || ''}</td>
+              <td>${d.TglJam_Selesai || ''}</td>
+            `;
+            
+            const tr = document.createElement('tr');
+            tr.innerHTML = rowHtml;
+            tbody.appendChild(tr);
+          });
+          
+        }, error => {
+          showNotification('error', 'Error', 'Gagal membaca Jawaban Siswa: ' + error.message);
+        });
       }
-    });
-    
-    // Buat header
-    let headerHtml = `
-      <th><input type="checkbox" id="jawaban_select_all" onclick="toggleSelectAllJawaban(this)"></th>
-      <th>Nama Siswa</th>
-      <th>Agenda Ujian</th>
-      <th>Mata Pelajaran</th>
-      <th>Jenis Tes</th>
-    `;
-    
-    for (let i = 1; i <= maxJ; i++) {
-      headerHtml += `<th>Jwb${i}</th>`;
-    }
-    
-    headerHtml += `
-      <th>Status</th>
-      <th>TglJam_Mulai</th>
-      <th>EndAt</th>
-      <th>TglJam_Selesai</th>
-    `;
-    headerTr.innerHTML = headerHtml;
-    
-    // Load data agenda untuk mendapatkan Jenis_Tes
-    agendaRef.once('value').then(agendaSnapshot => {
-      const agendaMap = {};
-      agendaSnapshot.forEach(child => {
-        agendaMap[child.key] = child.val();
-      });
-      
-      // Tampilkan data yang sudah diurutkan
-      rows.forEach(r => {
-        const d = r.data;
-        const nis = d.NIS_Username || '';
-        const namaSiswa = pesertaNameMap[nis] || nis;
-        
-        // Ambil Jenis_Tes dari data agenda berdasarkan ID_Agenda
-        let jenisTes = '';
-        const agendaId = d.ID_Agenda || '';
-        if (agendaId && agendaMap[agendaId]) {
-          jenisTes = agendaMap[agendaId].Jenis_Tes || '';
-        }
-        
-        let rowHtml = `
-          <td><input type="checkbox" class="jawaban-checkbox" value="${r.id}"></td>
-          <td>${namaSiswa}</td>
-          <td>${d.Judul_Ujian || ''}</td>
-          <td>${d.Mata_Pelajaran || ''}</td>
-          <td>${jenisTes}</td>
-        `;
-        
-        for (let i = 1; i <= maxJ; i++) {
-          rowHtml += `<td>${d['Jwb' + i] || ''}</td>`;
-        }
-        
-        rowHtml += `
-          <td>${d.Status || ''}</td>
-          <td>${d.TglJam_Mulai || ''}</td>
-          <td>${d.EndAt || ''}</td>
-          <td>${d.TglJam_Selesai || ''}</td>
-        `;
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = rowHtml;
-        tbody.appendChild(tr);
-      });
-      
-      // Inisialisasi tombol show/hide password
-      initializePasswordToggles();
-      
-    }).catch(error => {
-      showNotification('error', 'Error', 'Gagal membaca data agenda: ' + error.message);
-    });
-    
-  }, error => {
-    showNotification('error', 'Error', 'Gagal membaca Jawaban Siswa: ' + error.message);
-  });
-}
 
       function toggleSelectAllJawaban(src) {
         const cbs = document.querySelectorAll('.jawaban-checkbox');
@@ -3828,72 +3480,31 @@ function loadJawaban() {
       function deleteSelectedJawaban() {
         const checked = document.querySelectorAll('.jawaban-checkbox:checked');
         if (!checked.length) {
-          alert('Pilih data jawaban yang akan dihapus.');
+          showNotification('warning', 'Peringatan', 'Pilih data jawaban yang akan dihapus');
           return;
         }
-        if (!confirm('Yakin akan menghapus ' + checked.length + ' data Jawaban Siswa?')) return;
-        const promises = [];
-        checked.forEach(cb => {
-          promises.push(jawabanRef.child(cb.value).remove());
-        });
-        Promise.all(promises)
-          .catch(err => alert('Gagal menghapus sebagian data jawaban: ' + err.message));
+        
+        showConfirmation(
+          'Hapus Jawaban',
+          `Yakin akan menghapus ${checked.length} data jawaban?`,
+          function() {
+            const promises = [];
+            checked.forEach(cb => {
+              promises.push(jawabanRef.child(cb.value).remove());
+            });
+            
+            Promise.all(promises)
+              .then(() => {
+                showNotification('success', 'Berhasil', `${checked.length} data jawaban berhasil dihapus`);
+              })
+              .catch(err => {
+                showNotification('error', 'Gagal', 'Gagal menghapus data jawaban: ' + err.message);
+              });
+          }
+        );
       }
 
-      function exportJawabanToCsv() {
-        jawabanRef.once('value')
-          .then(snapshot => {
-            const list = [];
-            snapshot.forEach(childSnap => list.push(childSnap.val() || {}));
-            if (!list.length) {
-              alert('Tidak ada data jawaban untuk diexport.');
-              return;
-            }
-            let maxJ = 0;
-            list.forEach(d => {
-              for (const key in d) {
-                if (key.indexOf('Jwb') === 0) {
-                  const num = parseInt(key.substring(3), 10);
-                  if (!isNaN(num) && num > maxJ) maxJ = num;
-                }
-              }
-            });
-            const header = ['Nama Siswa', 'Agenda Ujian', 'Mata Pelajaran', 'Jenis Tes'];
-            for (let i = 1; i <= maxJ; i++) header.push('Jwb' + i);
-            header.push('Status', 'TglJam_Mulai', 'EndAt', 'TglJam_Selesai');
-            const rows = [header];
-            list.forEach(d => {
-              const nis = d.NIS_Username || '';
-              const namaSiswa = pesertaNameMap[nis] || nis;
-              
-              // Ambil Jenis_Tes dari data agenda
-              let jenisTes = '';
-              const agendaId = d.ID_Agenda || '';
-              if (agendaId && agendaCache[agendaId]) {
-                jenisTes = agendaCache[agendaId].Jenis_Tes || '';
-              }
-              
-              const row = [
-                namaSiswa,
-                d.Judul_Ujian || '',
-                d.Mata_Pelajaran || '',
-                jenisTes
-              ];
-              for (let i = 1; i <= maxJ; i++) {
-                row.push(d['Jwb' + i] || '');
-              }
-              row.push(d.Status || '', d.TglJam_Mulai || '', d.EndAt || '', d.TglJam_Selesai || '');
-              rows.push(row);
-            });
-            const csv = rows.map(r =>
-              r.map(v => String(v).replace(/"/g, '""')).map(v => `"${v}"`).join(',')
-            ).join('\r\n');
-            downloadCsvFile('jawaban_siswa_export.csv', csv);
-          })
-          .catch(err => alert('Gagal export jawaban: ' + err.message));
-      }
-
-      // ====== CETAK KARTU ======
+      // ====== CETAK KARTU FUNCTIONS ======
       function onChangeAgendaCetakKartu() {
         currentAgendaForKartu = document.getElementById('CetakKartu_Agenda_Select').value;
         loadKartuPesertaTable();
@@ -3903,13 +3514,16 @@ function loadJawaban() {
         const tbody = document.querySelector('#cetakKartuTable tbody');
         tbody.innerHTML = '';
         kartuPesertaList = [];
-        if (!currentAgendaForKartu) return;
+        
+        if (!currentAgendaForKartu || !pesertaRef) return;
+        
         pesertaRef.orderByChild('ID_Agenda').equalTo(currentAgendaForKartu).once('value')
           .then(snapshot => {
             let idx = 0;
             snapshot.forEach(childSnap => {
               const data = childSnap.val();
               kartuPesertaList.push(data);
+              
               const tr = document.createElement('tr');
               tr.innerHTML = `
                 <td><input type="checkbox" class="kartu-checkbox" data-index="${idx}"></td>
@@ -3932,12 +3546,10 @@ function loadJawaban() {
               tbody.appendChild(tr);
               idx++;
             });
-            
-            // Inisialisasi tombol show/hide password
-            initializePasswordToggles();
-            
           })
-          .catch(err => alert('Gagal membaca peserta untuk Cetak Kartu: ' + err.message));
+          .catch(err => {
+            showNotification('error', 'Error', 'Gagal membaca peserta: ' + err.message);
+          });
       }
 
       function toggleSelectAllKartu(src) {
@@ -3946,16 +3558,16 @@ function loadJawaban() {
       }
 
       function buildKartuHtml(peserta, agendaData) {
-        const agendaName = (agendaData && agendaData.Agenda_Ujian) ? agendaData.Agenda_Ujian : (peserta.ID_Agenda || '');
-        const token = (agendaData && agendaData.Token_Ujian) ? agendaData.Token_Ujian : '';
+        const agendaName = agendaData && agendaData.Agenda_Ujian ? agendaData.Agenda_Ujian : peserta.ID_Agenda || '';
+        const token = agendaData && agendaData.Token_Ujian ? agendaData.Token_Ujian : '';
         const nama = peserta.Nama_Peserta || '';
         const sekolah = peserta.Asal_Sekolah || '';
         const kelas = peserta.Kelas || '';
         const username = peserta.NIS_Username || '';
         const password = peserta.Password || '';
         const jenjang = peserta.Jenjang_Studi || '';
-        const deskripsi = (agendaData && agendaData.Deskripsi_Ujian) ? agendaData.Deskripsi_Ujian : '';
-        const jenisTes = (agendaData && agendaData.Jenis_Tes) ? agendaData.Jenis_Tes : '';
+        const deskripsi = agendaData && agendaData.Deskripsi_Ujian ? agendaData.Deskripsi_Ujian : '';
+        const jenisTes = agendaData && agendaData.Jenis_Tes ? agendaData.Jenis_Tes : '';
         
         return `
           <div class="kartu-container">
@@ -3992,34 +3604,24 @@ function loadJawaban() {
         `;
       }
 
-      function doPrintCards(html) {
+      function printKartuSingle(index) {
+        if (!currentAgendaForKartu) {
+          showNotification('error', 'Error', 'Pilih Agenda Ujian terlebih dahulu');
+          return;
+        }
+        
+        const peserta = kartuPesertaList[index];
+        if (!peserta) return;
+        
+        const agendaData = agendaCache[currentAgendaForKartu] || {};
+        const html = buildKartuHtml(peserta, agendaData);
+        
         const area = document.getElementById('printArea');
-        
-        // Tambahkan header untuk print
-        const printHeader = `
-          <style>
-            @media print {
-              @page {
-                margin: 15mm;
-                size: A4 portrait;
-              }
-              body {
-                margin: 0;
-                padding: 0;
-                font-family: "Segoe UI", system-ui, sans-serif;
-              }
-            }
-          </style>
-        `;
-        
-        area.innerHTML = printHeader + html;
+        area.innerHTML = html;
         area.style.display = 'block';
         
-        // Delay sedikit sebelum print
         setTimeout(() => {
           window.print();
-          
-          // Kembalikan setelah print
           setTimeout(() => {
             area.innerHTML = '';
             area.style.display = 'none';
@@ -4027,30 +3629,21 @@ function loadJawaban() {
         }, 100);
       }
 
-      function printKartuSingle(index) {
-        if (!currentAgendaForKartu) {
-          alert('Pilih Agenda Ujian terlebih dahulu.');
-          return;
-        }
-        const peserta = kartuPesertaList[index];
-        if (!peserta) return;
-        const agendaData = agendaCache[currentAgendaForKartu] || {};
-        const html = buildKartuHtml(peserta, agendaData);
-        doPrintCards(html);
-      }
-
       function printKartuSelected() {
         if (!currentAgendaForKartu) {
-          alert('Pilih Agenda Ujian terlebih dahulu.');
+          showNotification('error', 'Error', 'Pilih Agenda Ujian terlebih dahulu');
           return;
         }
+        
         const checked = document.querySelectorAll('.kartu-checkbox:checked');
         if (!checked.length) {
-          alert('Pilih peserta yang akan dicetak kartunya.');
+          showNotification('warning', 'Peringatan', 'Pilih peserta yang akan dicetak kartunya');
           return;
         }
+        
         const agendaData = agendaCache[currentAgendaForKartu] || {};
         let html = '';
+        
         checked.forEach(cb => {
           const idx = parseInt(cb.getAttribute('data-index'), 10);
           const peserta = kartuPesertaList[idx];
@@ -4058,58 +3651,59 @@ function loadJawaban() {
             html += buildKartuHtml(peserta, agendaData);
           }
         });
-        doPrintCards(html);
+        
+        const area = document.getElementById('printArea');
+        area.innerHTML = html;
+        area.style.display = 'block';
+        
+        setTimeout(() => {
+          window.print();
+          setTimeout(() => {
+            area.innerHTML = '';
+            area.style.display = 'none';
+          }, 500);
+        }, 100);
       }
 
-      // ====== INIT ======
-      document.addEventListener('DOMContentLoaded', () => {
-        checkLoginStatus(); // Cek dulu login, baru load data
+      // ====== MODAL FUNCTIONS ======
+      function showModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function hideModal(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+
+      function togglePasswordVisibility(inputElement, buttonElement) {
+        const input = typeof inputElement === 'string' 
+          ? document.getElementById(inputElement) 
+          : inputElement;
+        
+        if (input.type === 'password') {
+          input.type = 'text';
+          buttonElement.textContent = '🙈';
+        } else {
+          input.type = 'password';
+          buttonElement.textContent = '👁️';
+        }
+      }
+
+      // ====== INITIALIZATION ======
+      document.addEventListener('DOMContentLoaded', function() {
+        checkLoginStatus();
+        
+        // Check if Google Apps Script URL is configured
+        if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes('YOUR_WEB_APP_URL')) {
+          showNotification('warning', 'Konfigurasi', 'URL Google Apps Script belum dikonfigurasi. Upload gambar akan menggunakan fallback ke base64.', 10000);
+        }
       });
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Event listener untuk preview gambar saat memilih file
-  const gambarInput = document.getElementById('Gambar');
-  if (gambarInput) {
-    gambarInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        // Hapus preview sebelumnya
-        const existingPreview = document.getElementById('gambarPreview');
-        if (existingPreview) {
-          existingPreview.parentNode.removeChild(existingPreview);
-        }
-        
-        // Buat preview baru
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const preview = document.createElement('img');
-          preview.id = 'gambarPreview';
-          preview.src = e.target.result;
-          preview.style.maxWidth = '200px';
-          preview.style.maxHeight = '150px';
-          preview.style.marginTop = '8px';
-          preview.style.border = '1px solid #e5e7eb';
-          preview.style.borderRadius = '4px';
-          preview.style.display = 'block';
-          
-          // Tempatkan preview setelah input file
-          const container = document.getElementById('gambarPreviewContainer');
-          if (!container) {
-            const newContainer = document.createElement('div');
-            newContainer.id = 'gambarPreviewContainer';
-            newContainer.style.marginTop = '8px';
-            gambarInput.parentNode.insertBefore(newContainer, gambarInput.nextSibling);
-            newContainer.appendChild(preview);
-          } else {
-            container.innerHTML = '';
-            container.appendChild(preview);
-          }
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  }
-});
     </script>
   </body>
 </html>
