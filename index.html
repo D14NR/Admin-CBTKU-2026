@@ -183,21 +183,88 @@
             50% { opacity: 0.3; }
         }
         
-        /* Konten iframe */
-        iframe {
+        /* Tombol akses */
+        .access-button {
+            margin-top: 25px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .access-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        .access-button:active {
+            transform: translateY(0);
+        }
+        
+        .access-button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Opsi alternatif */
+        .alternative-options {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .alt-button {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .alt-button:hover {
+            background: #e9ecef;
+            border-color: #3498db;
+        }
+        
+        /* Mode gelap untuk akses langsung */
+        .direct-access-mode {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border: none;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            -webkit-overflow-scrolling: touch;
+            background: #2c3e50;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            text-align: center;
+            padding: 20px;
         }
         
-        .iframe-loaded {
-            opacity: 1;
+        .direct-access-mode.active {
+            display: flex;
+        }
+        
+        .direct-access-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #3498db;
         }
         
         /* Footer loading */
@@ -207,6 +274,28 @@
             color: #95a5a6;
             border-top: 1px solid #ecf0f1;
             padding-top: 15px;
+        }
+        
+        .error-message {
+            display: none;
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #c62828;
+            text-align: left;
+            font-size: 14px;
+        }
+        
+        .error-message.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         
         /* Responsif untuk mobile */
@@ -234,6 +323,16 @@
             
             .loading-subtitle {
                 font-size: 14px;
+            }
+            
+            .alternative-options {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .alt-button {
+                width: 100%;
+                max-width: 250px;
             }
         }
     </style>
@@ -272,22 +371,53 @@
                 <span>Menginisialisasi sistem...</span>
             </div>
             
+            <!-- Pesan error (tersembunyi awalnya) -->
+            <div class="error-message" id="errorMessage">
+                <strong>⚠️ Akses Terbatas:</strong> Sistem CBT tidak dapat ditampilkan secara langsung. Gunakan tombol di bawah untuk mengakses panel admin.
+            </div>
+            
+            <!-- Tombol akses -->
+            <button class="access-button" id="accessButton" onclick="accessAdminPanel()">
+                🔓 Buka Panel Admin
+            </button>
+            
+            <!-- Opsi alternatif -->
+            <div class="alternative-options">
+                <button class="alt-button" onclick="openInNewTab()">
+                    📱 Buka di Tab Baru
+                </button>
+                <button class="alt-button" onclick="showDirectAccess()">
+                    🔗 Tampilkan URL
+                </button>
+                <button class="alt-button" onclick="retryConnection()">
+                    🔄 Coba Lagi
+                </button>
+            </div>
+            
             <div class="loading-footer">
-                &copy; 2026 CBTKU Admin Portal • Loading...
+                &copy; 2026 CBTKU Admin Portal • Versi 2.0
             </div>
         </div>
     </div>
     
-    <!-- Konten iframe -->
-    <iframe 
-        id="contentFrame"
-        src="https://script.google.com/a/~/macros/s/AKfycbyRogvtu8J1dVn04FzZ2U2ukMXI8q9Nsc6h7c-xU9Qilv8lN788XRSSrPtm663NRLzl/exec"
-        allowfullscreen
-        allow="autoplay; encrypted-media; picture-in-picture"
-        loading="eager">
-    </iframe>
-    
+    <!-- Mode akses langsung -->
+    <div class="direct-access-mode" id="directAccessMode">
+        <h2 class="direct-access-title">🔗 URL Panel Admin</h2>
+        <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 20px 0; word-break: break-all;">
+            <code id="adminUrl">https://script.google.com/a/macros/s/AKfycbyRogvtu8J1dVn04FzZ2U2ukMXI8q9Nsc6h7c-xU9Qilv8lN788XRSSrPtm663NRLzl/exec</code>
+        </div>
+        <button class="access-button" onclick="copyAdminUrl()" style="margin: 10px;">
+            📋 Salin URL
+        </button>
+        <button class="alt-button" onclick="hideDirectAccess()" style="background: transparent; color: white; border-color: white;">
+            Kembali
+        </button>
+    </div>
+
     <script>
+        // URL Apps Script Admin
+        const ADMIN_URL = "https://script.google.com/a/macros/s/AKfycbyRogvtu8J1dVn04FzZ2U2ukMXI8q9Nsc6h7c-xU9Qilv8lN788XRSSrPtm663NRLzl/exec";
+        
         // Status loading yang realistis
         const loadingSteps = [
             "Menginisialisasi sistem...",
@@ -302,12 +432,21 @@
         const loadingOverlay = document.getElementById('loadingOverlay');
         const progressBar = document.getElementById('progressBar');
         const loadingStatus = document.getElementById('loadingStatus');
-        const contentFrame = document.getElementById('contentFrame');
+        const accessButton = document.getElementById('accessButton');
+        const errorMessage = document.getElementById('errorMessage');
+        const directAccessMode = document.getElementById('directAccessMode');
+        const adminUrlElement = document.getElementById('adminUrl');
         
-        // Simulasi loading dengan progress
+        // Variabel state
         let currentStep = 0;
         const totalSteps = loadingSteps.length;
+        let connectionTested = false;
+        let connectionSuccess = false;
         
+        // Update URL di mode akses langsung
+        adminUrlElement.textContent = ADMIN_URL;
+        
+        // Simulasi loading dengan progress
         function updateLoadingProgress() {
             if (currentStep < totalSteps) {
                 // Update status teks
@@ -322,50 +461,122 @@
                 // Jadwalkan langkah berikutnya
                 const delay = currentStep === totalSteps ? 800 : 500 + Math.random() * 300;
                 setTimeout(updateLoadingProgress, delay);
+            } else {
+                // Selesai loading, tes koneksi
+                testConnection();
             }
+        }
+        
+        // Fungsi untuk tes koneksi ke Apps Script
+        async function testConnection() {
+            if (connectionTested) return;
+            
+            connectionTested = true;
+            loadingStatus.innerHTML = '<span>Menguji koneksi ke server...</span>';
+            
+            try {
+                // Coba fetch untuk melihat apakah URL bisa diakses
+                const response = await fetch(ADMIN_URL, {
+                    method: 'HEAD',
+                    mode: 'no-cors', // Mode no-cors untuk menghindari CORS error
+                    cache: 'no-cache'
+                });
+                
+                // Jika sampai sini tanpa error, URL mungkin bisa diakses
+                connectionSuccess = true;
+                loadingStatus.innerHTML = '<span>✅ Koneksi berhasil! Mengalihkan...</span>';
+                
+                // Auto-redirect setelah 1 detik
+                setTimeout(() => {
+                    window.location.href = ADMIN_URL;
+                }, 1000);
+                
+            } catch (error) {
+                // Jika error, tampilkan opsi manual
+                connectionSuccess = false;
+                loadingStatus.innerHTML = '<span>⚠️ Perlu akses manual...</span>';
+                errorMessage.classList.add('show');
+                
+                // Enable tombol akses
+                accessButton.disabled = false;
+                accessButton.innerHTML = '🔓 Buka Panel Admin';
+            }
+        }
+        
+        // Fungsi untuk mengakses panel admin
+        function accessAdminPanel() {
+            // Tampilkan status
+            loadingStatus.innerHTML = '<span>Membuka panel admin...</span>';
+            accessButton.disabled = true;
+            accessButton.innerHTML = '⏳ Mengalihkan...';
+            
+            // Redirect ke URL admin
+            setTimeout(() => {
+                window.location.href = ADMIN_URL;
+            }, 500);
+        }
+        
+        // Fungsi untuk membuka di tab baru
+        function openInNewTab() {
+            window.open(ADMIN_URL, '_blank', 'noopener,noreferrer');
+            
+            // Tampilkan konfirmasi
+            loadingStatus.innerHTML = '<span>✅ Dibuka di tab baru...</span>';
+            setTimeout(() => {
+                loadingStatus.innerHTML = '<span>Siap untuk akses berikutnya</span>';
+            }, 2000);
+        }
+        
+        // Fungsi untuk menampilkan mode akses langsung
+        function showDirectAccess() {
+            loadingOverlay.style.display = 'none';
+            directAccessMode.classList.add('active');
+        }
+        
+        // Fungsi untuk menyembunyikan mode akses langsung
+        function hideDirectAccess() {
+            directAccessMode.classList.remove('active');
+            loadingOverlay.style.display = 'flex';
+        }
+        
+        // Fungsi untuk menyalin URL
+        function copyAdminUrl() {
+            navigator.clipboard.writeText(ADMIN_URL).then(() => {
+                const button = document.querySelector('.access-button');
+                const originalText = button.textContent;
+                button.textContent = '✅ URL Disalin!';
+                button.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)';
+                }, 2000);
+            });
+        }
+        
+        // Fungsi untuk mencoba koneksi ulang
+        function retryConnection() {
+            connectionTested = false;
+            connectionSuccess = false;
+            currentStep = 0;
+            progressBar.style.width = '0%';
+            errorMessage.classList.remove('show');
+            accessButton.disabled = true;
+            accessButton.innerHTML = '🔓 Buka Panel Admin';
+            
+            // Mulai ulang loading
+            updateLoadingProgress();
         }
         
         // Mulai progress loading
         setTimeout(updateLoadingProgress, 300);
         
-        // Sembunyikan loading setelah iframe dimuat
-        contentFrame.onload = function() {
-            // Tunggu sebentar untuk efek transisi
-            setTimeout(() => {
-                // Selesaikan progress bar
-                progressBar.style.width = '100%';
-                loadingStatus.innerHTML = '<span>Sistem siap! Mengalihkan...</span>';
-                
-                // Tunggu 0.5 detik sebelum menyembunyikan loading
-                setTimeout(() => {
-                    loadingOverlay.style.opacity = '0';
-                    
-                    // Setelah animasi fade out, sembunyikan elemen
-                    setTimeout(() => {
-                        loadingOverlay.style.display = 'none';
-                        contentFrame.classList.add('iframe-loaded');
-                    }, 500);
-                }, 500);
-            }, 300);
-        };
-        
-        // Fallback: sembunyikan loading setelah 8 detik
+        // Fallback: jika loading terlalu lama
         setTimeout(function() {
-            if (loadingOverlay.style.display !== 'none') {
-                loadingOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    loadingOverlay.style.display = 'none';
-                    contentFrame.classList.add('iframe-loaded');
-                }, 500);
+            if (!connectionTested) {
+                testConnection();
             }
-        }, 8000);
-        
-        // Mencegah perilaku default di mobile
-        document.addEventListener('touchmove', function(e) {
-            if (e.scale !== 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
+        }, 5000);
         
         // Deteksi perangkat mobile
         function isMobile() {
@@ -376,7 +587,7 @@
         if (isMobile()) {
             document.body.classList.add('mobile-device');
             
-            // Pesan untuk orientasi landscape (opsional)
+            // Pesan untuk orientasi landscape
             window.addEventListener("orientationchange", function() {
                 if (window.orientation === 90 || window.orientation === -90) {
                     console.log("Mode landscape - cocok untuk tampilan CBT");
@@ -384,46 +595,38 @@
             });
         }
         
-        // Tambahkan keyboard shortcut F11 untuk layar penuh (opsional)
+        // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'F11') {
+            // F1 untuk help
+            if (e.key === 'F1') {
                 e.preventDefault();
-                toggleFullscreen();
+                showDirectAccess();
+            }
+            
+            // F5 untuk retry
+            if (e.key === 'F5') {
+                e.preventDefault();
+                retryConnection();
+            }
+            
+            // Escape untuk kembali
+            if (e.key === 'Escape') {
+                hideDirectAccess();
             }
         });
         
-        // Fungsi untuk layar penuh
-        function toggleFullscreen() {
-            const iframe = document.getElementById('contentFrame');
-            
-            if (document.fullscreenElement || 
-                document.webkitFullscreenElement || 
-                document.mozFullScreenElement || 
-                document.msFullscreenElement) {
-                
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-            } else {
-                const element = iframe;
-                
-                if (element.requestFullscreen) {
-                    element.requestFullscreen();
-                } else if (element.webkitRequestFullscreen) {
-                    element.webkitRequestFullscreen();
-                } else if (element.mozRequestFullScreen) {
-                    element.mozRequestFullScreen();
-                } else if (element.msRequestFullscreen) {
-                    element.msRequestFullscreen();
-                }
+        // Deteksi jika user kembali ke halaman ini
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // Halaman di-load dari cache, reset state
+                retryConnection();
             }
-        }
+        });
+        
+        // Informasi versi di console
+        console.log('%c🔐 Portal Admin CBTKU 2026', 'color: #3498db; font-size: 16px; font-weight: bold;');
+        console.log('%cVersion: 2.0 | Secure Access Mode', 'color: #2ecc71;');
+        console.log(`%cAdmin URL: ${ADMIN_URL}`, 'color: #7f8c8d;');
     </script>
 </body>
 </html>
