@@ -3426,6 +3426,162 @@ function downloadTemplateBankSoal() {
   showNotification('success', 'Template Downloaded', 'File template berhasil diunduh');
 }
 
+      function downloadTemplatePeserta() {
+  const headers = [
+    'Nama_Peserta',
+    'Password',
+    'Jenjang_Studi',
+    'Kelas',
+    'Asal_Sekolah',
+    'No_WA_Peserta',
+    'No_WA_Ortu',
+    'ID_Agenda'
+  ];
+  
+  const exampleRow = [
+    'Budi Santoso',
+    'password123',
+    'SMA',
+    '12 IPA 1',
+    'SMA Negeri 1 Jakarta',
+    '08123456789',
+    '08129876543',
+    'agenda_id_1'
+  ];
+  
+  const csvContent = [headers.join(','), exampleRow.join(',')].join('\n');
+  
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'Template_Import_Peserta.csv';
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  
+  showNotification('success', 'Template Downloaded', 'File template peserta berhasil diunduh');
+}
+
+function importPesertaFromFile() {
+  const fileInput = document.getElementById('file_import_peserta');
+  const file = fileInput.files[0];
+  
+  if (!file) {
+    showNotification('error', 'Error', 'Pilih file CSV terlebih dahulu');
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const csvContent = e.target.result;
+      const rows = csvContent.split('\n');
+      
+      if (rows.length < 2) {
+        showNotification('error', 'Error', 'File CSV kosong atau format salah');
+        return;
+      }
+      
+      const headers = rows[0].split(',').map(h => h.trim());
+      const requiredCols = ['Nama_Peserta', 'Password', 'No_WA_Peserta', 'ID_Agenda'];
+      const missingCols = requiredCols.filter(col => !headers.includes(col));
+      
+      if (missingCols.length > 0) {
+        showNotification('error', 'Format Error', `Kolom wajib tidak ditemukan: ${missingCols.join(', ')}`);
+        return;
+      }
+      
+      showNotification('info', 'Memproses', `Mengimport ${rows.length - 1} peserta...`, 0);
+      
+      let successCount = 0;
+      let errorCount = 0;
+      let promises = [];
+      
+      for (let i = 1; i < rows.length; i++) {
+        if (!rows[i].trim()) continue;
+        
+        const cols = rows[i].split(',').map(c => c.trim());
+        if (cols.length < 4) continue;
+        
+        const rowData = {};
+        headers.forEach((header, index) => {
+          if (index < cols.length) {
+            rowData[header] = cols[index];
+          }
+        });
+        
+        // Generate NIS from phone number
+        const noWa = rowData.No_WA_Peserta || '';
+        const nis = generateNISFromNoWA(noWa);
+        
+        if (!nis) {
+          errorCount++;
+          continue;
+        }
+        
+        const pesertaData = {
+          NIS_Username: nis,
+          Nama_Peserta: rowData.Nama_Peserta || '',
+          Password: rowData.Password || '123456',
+          Jenjang_Studi: rowData.Jenjang_Studi || '',
+          Kelas: rowData.Kelas || '',
+          Asal_Sekolah: rowData.Asal_Sekolah || '',
+          No_WA_Peserta: noWa,
+          No_WA_Ortu: rowData.No_WA_Ortu || '',
+          ID_Agenda: rowData.ID_Agenda || ''
+        };
+        
+        // Check for required fields
+        if (!pesertaData.Nama_Peserta || !pesertaData.Password || !pesertaData.ID_Agenda) {
+          errorCount++;
+          continue;
+        }
+        
+        promises.push(
+          pesertaRef.push(pesertaData).then(() => {
+            successCount++;
+          }).catch(err => {
+            errorCount++;
+            console.error('Error saving peserta:', err);
+          })
+        );
+      }
+      
+      Promise.all(promises).then(() => {
+        hideAllNotifications();
+        
+        if (successCount > 0) {
+          showNotification('success', 'Import Berhasil', 
+            `${successCount} peserta berhasil diimport. ${errorCount > 0 ? `(${errorCount} gagal)` : ''}`);
+        } else {
+          showNotification('error', 'Import Gagal', 
+            `Tidak ada peserta yang berhasil diimport. ${errorCount} error.`);
+        }
+        
+        hideModal('modal-import-peserta');
+        document.getElementById('file_import_peserta').value = '';
+        
+      }).catch(err => {
+        hideAllNotifications();
+        showNotification('error', 'Import Error', 'Terjadi kesalahan saat menyimpan data: ' + err.message);
+      });
+      
+    } catch (error) {
+      hideAllNotifications();
+      showNotification('error', 'Parse Error', 'Gagal membaca file CSV: ' + error.message);
+    }
+  };
+  
+  reader.onerror = function() {
+    showNotification('error', 'File Error', 'Gagal membaca file');
+  };
+  
+  reader.readAsText(file);
+}
+
       function openBankSoalModalForCreate() {
         if (!currentAgendaForBank || !currentMapelForBank) {
           showNotification('error', 'Error', 'Pilih Agenda Ujian dan Mata Pelajaran terlebih dahulu');
